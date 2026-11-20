@@ -28,7 +28,14 @@ Kirigami.FormLayout {
         model: [
             { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Flow – soft clouds of colour"), value: "flow" },
             { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Horizon – flat hills, one clear sun"), value: "horizon" },
-            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Fogline – misty lake under mountains"), value: "fogline" }
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Fogline – misty lake under mountains"), value: "fogline" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Dune – desert, layered dunes"), value: "dune" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Aurora – polar night, a lone hut"), value: "aurora" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Tide – open sea"), value: "tide" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Neon – a city at night"), value: "neon" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Orbit – a planet in space"), value: "orbit" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Contour – topographic lines"), value: "contour" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Grid – a field of dots"), value: "grid" }
         ]
     }
     QQC2.CheckBox {

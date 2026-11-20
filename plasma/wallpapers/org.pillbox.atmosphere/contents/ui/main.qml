@@ -36,6 +36,7 @@ WallpaperItem {
         target: root.cfg
         function onFollowTimeChanged() { root.hour = root.cfg.FollowTime ? root.clockHour() : root.cfg.FixedHour }
         function onFixedHourChanged() { if (!root.cfg.FollowTime) root.hour = root.cfg.FixedHour }
+        function onPreviewChanged() { boostAnim.restart(); root.newNotification() }
     }
 
     // ---- how much the computer shows through
@@ -43,8 +44,18 @@ WallpaperItem {
     readonly property real motion: cfg.Motion === "calm" ? 0.5 : cfg.Motion === "lively" ? 1.6 : 1
     Sensors.Sensor { id: cpuSensor; sensorId: "cpu/all/usage"; updateRateLimit: 3000; enabled: root.react > 0 }
     Sensors.Sensor { id: gpuSensor; sensorId: "gpu/all/usage"; updateRateLimit: 3000; enabled: root.react > 0 }
-    readonly property real cpu: react * Math.max(0, Math.min(1, (cpuSensor.value || 0) / 100))
-    readonly property real gpu: react * Math.max(0, Math.min(1, (gpuSensor.value || 0) / 100))
+    readonly property real cpu: Math.max(boost, react * Math.max(0, Math.min(1, (cpuSensor.value || 0) / 100)))
+    readonly property real gpu: Math.max(boost, react * Math.max(0, Math.min(1, (gpuSensor.value || 0) / 100)))
+
+    // "Try it": the settings centre writes a new Preview value; the scene then shows for a
+    // few seconds how it reacts to full load and a new notification
+    property real boost: 0
+    SequentialAnimation {
+        id: boostAnim
+        NumberAnimation { target: root; property: "boost"; to: 1; duration: 1200; easing.type: Easing.InOutSine }
+        PauseAnimation { duration: 5000 }
+        NumberAnimation { target: root; property: "boost"; to: 0; duration: 2500; easing.type: Easing.InOutSine }
+    }
 
     NotificationManager.Notifications {
         id: notifications
@@ -102,8 +113,10 @@ WallpaperItem {
     Loader {
         id: scene
         anchors.fill: parent
-        source: root.cfg.Scene === "horizon" ? "HorizonScene.qml"
-              : root.cfg.Scene === "fogline" ? "FoglineScene.qml" : "FlowScene.qml"
+        readonly property var files: ({ flow: "FlowScene.qml", horizon: "HorizonScene.qml", fogline: "FoglineScene.qml",
+                                       dune: "DuneScene.qml", aurora: "AuroraScene.qml", tide: "TideScene.qml",
+                                       neon: "NeonScene.qml", orbit: "OrbitScene.qml", contour: "ContourScene.qml", grid: "GridScene.qml" })
+        source: files[root.cfg.Scene] || "FlowScene.qml"
         onLoaded: item.env = root
     }
     Component.onCompleted: coverTimer.restart()

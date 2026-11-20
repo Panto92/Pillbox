@@ -5,7 +5,7 @@ A calm, modern desktop for **KDE Plasma 6**. Instead of a dock, a glowing
 anywhere, minimise windows into it. On top: three floating "pills" with your
 system stats, the clock and the tray.
 
-> **Status:** 0.6 – Orb and three dock forms, living wallpapers, a settings centre. Feedback welcome.
+> **Status:** 0.7 – Orb and three dock forms, ten living wallpapers, a settings centre. Feedback welcome.
 
 ## Why
 
@@ -57,6 +57,17 @@ stars – and quietly shows what your computer is doing, without a single number
 | **Flow** | soft clouds of colour | drift faster | warmer tones | a soft ring of light |
 | **Horizon** | flat layered hills, one clear sun | haze drifts through | the sun grows warmer | a flock of birds |
 | **Fogline** | misty lake under mountains | denser fog | the ridges glow | rings on the water |
+| **Dune** | layered desert dunes | sand blows over the crests | heat shimmer | a shooting star |
+| **Aurora** | Norwegian fjord in polar night | the aurora dances brighter | the hut's window lights up | snowfall |
+| **Tide** | open sea | waves grow | the sea glows | rain over the water |
+| **Neon** | a city at night | more windows light up | the signs glow | rain on a wet street |
+| **Orbit** | a ringed planet | the belt turns faster | the atmosphere glows | a comet |
+| **Contour** | topographic lines | lines move more | valleys glow warm | a wave runs through |
+| **Grid** | a calm field of dots | a wave of light | the centre glows | a ping |
+
+Every scene has its own options (colours, fog, sea, rain …), a **Try it** button that
+plays its reactions for eight seconds, and a time-of-day slider: follow the clock or
+hold the wallpaper at, say, 14:30.
 
 Built to cost next to nothing (measured on a 3440×1440 + 1080×1920 setup,
 share of *one* CPU core above a plain image wallpaper):

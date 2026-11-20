@@ -16,7 +16,12 @@ Item {
     readonly property real dark: 1 - sky.light
     readonly property real warm: env ? env.gpu : 0
     // the hour picks a palette: night violet, morning peach, day blue, evening rose
-    readonly property var pal: hour < 6 || hour > 21 ? [[60, 40, 120], [20, 70, 130], [110, 50, 140]]
+    readonly property string palName: ((env && env.cfg && env.cfg.FlowPalette) || "time")
+    readonly property var fixedPal: ({ ocean: [[30, 120, 200], [40, 190, 200], [70, 90, 210]],
+                                       sunset: [[250, 120, 90], [250, 180, 100], [200, 80, 140]],
+                                       forest: [[60, 150, 100], [130, 190, 110], [40, 110, 120]],
+                                       mono: [[150, 160, 175], [110, 120, 135], [190, 195, 205]] })
+    readonly property var pal: fixedPal[palName] ? fixedPal[palName] : hour < 6 || hour > 21 ? [[60, 40, 120], [20, 70, 130], [110, 50, 140]]
                              : hour < 10 ? [[255, 160, 130], [140, 150, 220], [250, 200, 170]]
                              : hour < 17 ? [[80, 170, 220], [120, 210, 200], [150, 160, 240]]
                              : [[240, 120, 140], [250, 170, 110], [140, 100, 190]]

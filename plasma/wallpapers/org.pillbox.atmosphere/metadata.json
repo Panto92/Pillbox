@@ -11,7 +11,7 @@
         "Id": "org.pillbox.atmosphere",
         "License": "MIT",
         "Name": "Pillbox Atmosphere",
-        "Version": "0.6.1"
+        "Version": "0.7.0"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }

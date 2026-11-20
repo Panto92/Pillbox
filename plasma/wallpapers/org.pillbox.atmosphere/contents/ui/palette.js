@@ -29,3 +29,5 @@ function sun(h, horizon) {
     var day = Math.max(0, Math.min(1, (h - 6) / 14))
     return { x: 0.12 + 0.76 * day, y: horizon - 0.5 * Math.sin(Math.PI * day) + 0.05, up: h > 6 && h < 20 }
 }
+// stable pseudo-random 0..1 for (index, salt) – same layout on every start
+function rnd(i, s) { var v = Math.sin(i * 12.9898 + s * 78.233) * 43758.5453; return v - Math.floor(v) }

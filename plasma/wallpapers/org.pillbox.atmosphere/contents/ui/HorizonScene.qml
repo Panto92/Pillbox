@@ -11,7 +11,8 @@ Item {
     id: scene
     property var env
     readonly property real hour: env ? env.hour : 15
-    readonly property var sky: P.sky(hour, [150, 130, 150], 0.12)
+    readonly property string tone: ((env && env.cfg && env.cfg.HorizonTone) || "natural")
+    readonly property var sky: tone === "teal" ? P.sky(hour, [60, 150, 150], 0.28) : tone === "rose" ? P.sky(hour, [225, 120, 140], 0.28) : P.sky(hour, [150, 130, 150], 0.12)
     readonly property var sunPos: P.sun(hour, 0.62)
     readonly property real heat: env ? env.gpu : 0
     readonly property real haze: env ? env.cpu : 0

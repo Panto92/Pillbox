@@ -494,3 +494,159 @@ msgstr "Öffnen"
 
 msgid "Licence"
 msgstr "Lizenz"
+
+msgid "desert"
+msgstr "Wüste"
+
+msgid "polar night"
+msgstr "Polarnacht"
+
+msgid "open sea"
+msgstr "offenes Meer"
+
+msgid "city at night"
+msgstr "Stadt bei Nacht"
+
+msgid "planet in space"
+msgstr "Planet im All"
+
+msgid "contour lines"
+msgstr "Höhenlinien"
+
+msgid "field of dots"
+msgstr "Punktraster"
+
+msgid "Try it"
+msgstr "Ausprobieren"
+
+msgid "For eight seconds the scene shows how it reacts to full load and a new notification."
+msgstr "Acht Sekunden lang zeigt die Szene, wie sie auf volle Last und eine neue Nachricht reagiert."
+
+msgid "Play"
+msgstr "Abspielen"
+
+msgid "Time of day"
+msgstr "Uhrzeit"
+
+msgid "Slide through the day – the wallpaper follows live."
+msgstr "Schieb durch den Tag – der Hintergrund folgt live."
+
+msgid "Follows the clock. Drag to hold the wallpaper at one time."
+msgstr "Folgt der Uhr. Zieh den Regler, um den Hintergrund auf einer Uhrzeit festzuhalten."
+
+msgid "Held at %1 – it stays like this."
+msgstr "Festgehalten auf %1 – so bleibt er."
+
+msgid "Follow the clock"
+msgstr "Mit der Uhr"
+
+msgid "%1 – own settings"
+msgstr "%1 – eigene Einstellungen"
+
+msgid "Colours"
+msgstr "Farben"
+
+msgid "Ocean"
+msgstr "Ozean"
+
+msgid "Sunset"
+msgstr "Sonnenuntergang"
+
+msgid "Forest"
+msgstr "Wald"
+
+msgid "Grey"
+msgstr "Grau"
+
+msgid "Tone"
+msgstr "Farbton"
+
+msgid "Natural"
+msgstr "Natürlich"
+
+msgid "Teal"
+msgstr "Türkis"
+
+msgid "Rosé"
+msgstr "Rosé"
+
+msgid "Load makes it denser on top."
+msgstr "Last macht ihn zusätzlich dichter."
+
+msgid "Light"
+msgstr "Leicht"
+
+msgid "Dense"
+msgstr "Dicht"
+
+msgid "Sand"
+msgstr "Sand"
+
+msgid "Red"
+msgstr "Rot"
+
+msgid "Northern lights"
+msgstr "Polarlicht"
+
+msgid "Mixed"
+msgstr "Gemischt"
+
+msgid "Green"
+msgstr "Grün"
+
+msgid "Hut by the water"
+msgstr "Hütte am Wasser"
+
+msgid "Its window lights up with the graphics card."
+msgstr "Ihr Fenster leuchtet mit der Grafikkarte auf."
+
+msgid "On"
+msgstr "An"
+
+msgid "Sea"
+msgstr "See"
+
+msgid "Rough"
+msgstr "Rau"
+
+msgid "Rain"
+msgstr "Regen"
+
+msgid "Otherwise it only rains after a new notification."
+msgstr "Sonst regnet es nur nach einer neuen Nachricht."
+
+msgid "After notifications"
+msgstr "Nach Nachrichten"
+
+msgid "Always"
+msgstr "Immer"
+
+msgid "Signs"
+msgstr "Reklamen"
+
+msgid "Colourful"
+msgstr "Bunt"
+
+msgid "Pink"
+msgstr "Pink"
+
+msgid "Cyan"
+msgstr "Cyan"
+
+msgid "Planet"
+msgstr "Planet"
+
+msgid "Blue"
+msgstr "Blau"
+
+msgid "Lines"
+msgstr "Linien"
+
+msgid "Wide"
+msgstr "Weit"
+
+msgid "Fine"
+msgstr "Fein"
+
+msgid "Spacing"
+msgstr "Abstand"

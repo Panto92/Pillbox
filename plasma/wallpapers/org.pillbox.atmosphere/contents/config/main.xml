@@ -11,5 +11,20 @@
     <!-- calm | normal | lively -->
     <entry name="Motion" type="String"><default>normal</default></entry>
     <entry name="PauseWhenCovered" type="Bool"><default>true</default></entry>
+    <!-- per-scene options -->
+    <entry name="FlowPalette" type="String"><default>time</default></entry>
+    <entry name="HorizonTone" type="String"><default>natural</default></entry>
+    <entry name="FoglineFog" type="String"><default>normal</default></entry>
+    <entry name="DuneTone" type="String"><default>gold</default></entry>
+    <entry name="AuroraColor" type="String"><default>mixed</default></entry>
+    <entry name="AuroraHut" type="String"><default>on</default></entry>
+    <entry name="TideWaves" type="String"><default>normal</default></entry>
+    <entry name="NeonRain" type="String"><default>off</default></entry>
+    <entry name="NeonSigns" type="String"><default>mixed</default></entry>
+    <entry name="OrbitPlanet" type="String"><default>blue</default></entry>
+    <entry name="ContourDensity" type="String"><default>normal</default></entry>
+    <entry name="GridGap" type="String"><default>normal</default></entry>
+    <!-- changed by the settings centre to play a short demonstration -->
+    <entry name="Preview" type="String"><default></default></entry>
   </group>
 </kcfg>

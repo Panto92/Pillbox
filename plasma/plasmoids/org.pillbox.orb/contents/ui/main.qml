@@ -806,8 +806,19 @@ PlasmoidItem {
     // collected for a moment, and the plugin is only switched when it really changes
     // (switching rebuilds the whole scene).
     function applyWallpaper() { wallTimer.restart() }
+    function wallOpts() { try { return JSON.parse(cfg.wallOpts || "{}") } catch (e) { return {} } }
+    function wallOptsScript() {
+        const o = wallOpts(); let js = ""
+        for (const k in o) {
+            const key = String(k).replace(/[^A-Za-z]/g, ""), val = String(o[k]).replace(/[^a-z]/g, "")
+            if (key.length) js += " d.writeConfig(\"" + key + "\", \"" + val + "\");"
+        }
+        return js
+    }
+    property bool wallPreviewPending: false
+    function previewWallpaper() { wallPreviewPending = true; wallTimer.restart() }
     property Timer wallTimer: Timer {
-        interval: 350
+        interval: 200
         onTriggered: {
             const c = root.cfg
             let js
@@ -821,7 +832,12 @@ PlasmoidItem {
                    + " d.writeConfig(\"FollowTime\", " + (c.wallFollow ? "true" : "false") + ");"
                    + " d.writeConfig(\"Reactivity\", " + str(c.wallReact) + ");"
                    + " d.writeConfig(\"Motion\", " + str(c.wallMotion) + ");"
-                   + " d.writeConfig(\"PauseWhenCovered\", " + (c.wallPause ? "true" : "false") + "); });"
+                   + " d.writeConfig(\"PauseWhenCovered\", " + (c.wallPause ? "true" : "false") + ");"
+                   + " d.writeConfig(\"FixedHour\", " + Number(c.wallHour).toFixed(2) + ");"
+                   + root.wallOptsScript()
+                   + (root.wallPreviewPending ? " d.writeConfig(\"Preview\", \"" + Date.now() + "\");" : "")
+                   + " });"
+                root.wallPreviewPending = false
             }
             root.shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '" + js + "'")
         }

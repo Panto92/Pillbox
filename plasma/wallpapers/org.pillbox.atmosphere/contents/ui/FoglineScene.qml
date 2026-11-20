@@ -15,7 +15,7 @@ Item {
     readonly property var sunPos: P.sun(hour, 0.7)
     readonly property real water: height * 0.7
     readonly property real heat: env ? Math.max(0, (env.gpu - 0.25) / 0.7) : 0
-    readonly property real dens: env ? env.cpu : 0
+    readonly property real dens: Math.min(1, (env ? env.cpu : 0) + ({ light: 0, normal: 0.22, dense: 0.55 }[((env && env.cfg && env.cfg.FoglineFog) || "normal")] || 0))
     readonly property bool live: env && env.running
     readonly property real t: env ? env.time : 0
 

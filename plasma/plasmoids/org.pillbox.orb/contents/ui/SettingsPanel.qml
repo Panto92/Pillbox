@@ -4,14 +4,16 @@
  * SPDX-License-Identifier: MIT
  */
 import QtQuick
+import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Shapes
 import QtQuick.Controls as QQC2
 import org.kde.plasma.core as PlasmaCore
 import org.kde.kirigami as Kirigami
+import org.kde.kirigami.primitives as KirigamiPrimitives
 import org.kde.kquickcontrols as KQuickControls
 
-PlasmaCore.Dialog {
+Window {
     id: panel
 
     property var orb
@@ -21,21 +23,23 @@ PlasmaCore.Dialog {
     readonly property var cfg: orb.cfg
     readonly property bool isOrb: cfg.form === "orb"
     readonly property color accent: orb.accent
-    readonly property rect screen: orb.homeScreen()
-    readonly property int winW: Math.min(Kirigami.Units.gridUnit * 50, screen.width - Kirigami.Units.gridUnit * 4)
-    readonly property int winH: Math.min(Kirigami.Units.gridUnit * 34, screen.height - Kirigami.Units.gridUnit * 6)
+    readonly property rect home: orb.homeScreen()
+    readonly property int winW: Math.min(Kirigami.Units.gridUnit * 50, home.width - Kirigami.Units.gridUnit * 4)
+    readonly property int winH: Math.min(Kirigami.Units.gridUnit * 34, home.height - Kirigami.Units.gridUnit * 6)
     property string page: "form"
 
-    type: PlasmaCore.Dialog.PopupMenu
-    location: PlasmaCore.Types.Floating
-    backgroundHints: PlasmaCore.Dialog.NoBackground
-    flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-    hideOnWindowDeactivate: false
-    title: "Pillbox Settings"
+    // a real top-level window: KWin lets it be moved and resized (Plasma dialogs can't be)
+    flags: Qt.Window | Qt.FramelessWindowHint
+    color: "transparent"
+    title: i18n("Pillbox Settings")
+    width: winW; height: winH
+    minimumWidth: Kirigami.Units.gridUnit * 34
+    minimumHeight: Kirigami.Units.gridUnit * 22
+    x: home.x + Math.round((home.width - winW) / 2)
+    y: home.y + Math.round((home.height - winH) / 2)
     visible: open
-    x: screen.x + Math.round((screen.width - winW) / 2)
-    y: screen.y + Math.round((screen.height - winH) / 2)
     onVisibleChanged: if (visible) requestActivate()
+    onClosing: close => { close.accepted = false; panel.closeRequested() }
 
     readonly property var pages: [
         { id: "form",       name: i18n("Form"),        icon: "view-app-grid-symbolic" },
@@ -46,11 +50,38 @@ PlasmaCore.Dialog {
         { id: "alerts",     name: i18n("Alerts"),      icon: "preferences-desktop-notification-bell" },
         { id: "about",      name: i18n("About"),       icon: "help-about" }
     ]
+    // the current time (for the time-of-day slider while it follows the clock)
+    property real nowHour: { const d = new Date(); return d.getHours() + d.getMinutes() / 60 }
+    property Timer clockTimer: Timer {
+        interval: 30000; repeat: true; running: panel.visible; triggeredOnStart: true
+        onTriggered: { const d = new Date(); panel.nowHour = d.getHours() + d.getMinutes() / 60 }
+    }
+    function hhmm(h) { const m = Math.round((h % 1) * 60); return Math.floor(h) + ":" + String(m === 60 ? 0 : m).padStart(2, "0") }
+
+    // each scene's own options; values are stored in wallOpts and written to the wallpaper
+    readonly property var sceneTable: ({
+        flow:    { name: "Flow",    opts: [{ key: "FlowPalette", def: "time", label: i18n("Colours"), choices: [["time", i18n("Time of day")], ["ocean", i18n("Ocean")], ["sunset", i18n("Sunset")], ["forest", i18n("Forest")], ["mono", i18n("Grey")]] }] },
+        horizon: { name: "Horizon", opts: [{ key: "HorizonTone", def: "natural", label: i18n("Tone"), choices: [["natural", i18n("Natural")], ["teal", i18n("Teal")], ["rose", i18n("Rosé")]] }] },
+        fogline: { name: "Fogline", opts: [{ key: "FoglineFog", def: "normal", label: i18n("Fog"), hint: i18n("Load makes it denser on top."), choices: [["light", i18n("Light")], ["normal", i18n("Normal")], ["dense", i18n("Dense")]] }] },
+        dune:    { name: "Dune",    opts: [{ key: "DuneTone", def: "gold", label: i18n("Sand"), choices: [["gold", i18n("Gold")], ["red", i18n("Red")], ["white", i18n("White")]] }] },
+        aurora:  { name: "Aurora",  opts: [{ key: "AuroraColor", def: "mixed", label: i18n("Northern lights"), choices: [["mixed", i18n("Mixed")], ["green", i18n("Green")], ["violet", i18n("Violet")]] },
+                                           { key: "AuroraHut", def: "on", label: i18n("Hut by the water"), hint: i18n("Its window lights up with the graphics card."), choices: [["on", i18n("On")], ["off", i18n("Off")]] }] },
+        tide:    { name: "Tide",    opts: [{ key: "TideWaves", def: "normal", label: i18n("Sea"), choices: [["calm", i18n("Calm")], ["normal", i18n("Normal")], ["rough", i18n("Rough")]] }] },
+        neon:    { name: "Neon",    opts: [{ key: "NeonRain", def: "off", label: i18n("Rain"), hint: i18n("Otherwise it only rains after a new notification."), choices: [["off", i18n("After notifications")], ["on", i18n("Always")]] },
+                                           { key: "NeonSigns", def: "mixed", label: i18n("Signs"), choices: [["mixed", i18n("Colourful")], ["pink", i18n("Pink")], ["cyan", i18n("Cyan")]] }] },
+        orbit:   { name: "Orbit",   opts: [{ key: "OrbitPlanet", def: "blue", label: i18n("Planet"), choices: [["blue", i18n("Blue")], ["red", i18n("Red")], ["gold", i18n("Gold")]] }] },
+        contour: { name: "Contour", opts: [{ key: "ContourDensity", def: "normal", label: i18n("Lines"), choices: [["wide", i18n("Wide")], ["normal", i18n("Normal")], ["fine", i18n("Fine")]] }] },
+        grid:    { name: "Grid",    opts: [{ key: "GridGap", def: "normal", label: i18n("Spacing"), choices: [["wide", i18n("Wide")], ["normal", i18n("Normal")], ["fine", i18n("Fine")]] }] }
+    })
+    readonly property var sceneOptions: sceneTable[cfg.wallScene] ? sceneTable[cfg.wallScene].opts : []
+    readonly property string sceneName: sceneTable[cfg.wallScene] ? sceneTable[cfg.wallScene].name : ""
+    function optValue(o) { const all = orb.wallOpts(); return all[o.key] !== undefined ? all[o.key] : o.def }
+    function setOpt(o, v) { const all = orb.wallOpts(); all[o.key] = v; cfg.wallOpts = JSON.stringify(all); orb.applyWallpaper() }
+
     readonly property var presets: ["#8fb0c2", "#e0bd6e", "#ff8a4c", "#e88fa6", "#b49cf0", "#7fd3f0", "#7fdcb0", "#eef2f5"]
 
-    mainItem: Item {
-        width: panel.winW
-        height: panel.winH
+    Item {
+        anchors.fill: parent
         focus: true
         Keys.onEscapePressed: panel.closeRequested()
 
@@ -60,6 +91,13 @@ PlasmaCore.Dialog {
             color: Qt.rgba(0.06, 0.075, 0.095, 0.97)
             border.width: 1
             border.color: Qt.rgba(panel.accent.r, panel.accent.g, panel.accent.b, 0.3)
+        }
+        // grab any empty spot to move the window (controls on top keep their own clicks)
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton
+            cursorShape: pressed ? Qt.ClosedHandCursor : Qt.ArrowCursor
+            onPressed: panel.startSystemMove()
         }
 
         RowLayout {
@@ -144,6 +182,30 @@ PlasmaCore.Dialog {
                 }
             }
         }
+        // edges and corners: drag to resize
+        Repeater {
+            model: [
+                { e: Qt.LeftEdge, c: Qt.SizeHorCursor }, { e: Qt.RightEdge, c: Qt.SizeHorCursor },
+                { e: Qt.TopEdge, c: Qt.SizeVerCursor }, { e: Qt.BottomEdge, c: Qt.SizeVerCursor },
+                { e: Qt.TopEdge | Qt.LeftEdge, c: Qt.SizeFDiagCursor }, { e: Qt.BottomEdge | Qt.RightEdge, c: Qt.SizeFDiagCursor },
+                { e: Qt.TopEdge | Qt.RightEdge, c: Qt.SizeBDiagCursor }, { e: Qt.BottomEdge | Qt.LeftEdge, c: Qt.SizeBDiagCursor }
+            ]
+            delegate: MouseArea {
+                required property var modelData
+                readonly property int grip: 8
+                readonly property bool l: modelData.e & Qt.LeftEdge
+                readonly property bool r: modelData.e & Qt.RightEdge
+                readonly property bool t: modelData.e & Qt.TopEdge
+                readonly property bool b: modelData.e & Qt.BottomEdge
+                x: r ? parent.width - grip : 0
+                y: b ? parent.height - grip : 0
+                width: (l || r) ? grip : parent.width
+                height: (t || b) ? grip : parent.height
+                z: (l || r) && (t || b) ? 11 : 10
+                cursorShape: modelData.c
+                onPressed: panel.startSystemResize(modelData.e)
+            }
+        }
     }
 
     // ================================================================ building blocks
@@ -181,35 +243,104 @@ PlasmaCore.Dialog {
             width: childrenRect.width; height: childrenRect.height
         }
     }
+    // one segment of a segmented control: a pill that sits exactly inside the track
+    component SegButton: Item {
+        id: sb
+        property string text
+        property bool on: false
+        signal activated()
+        implicitWidth: sbLabel.implicitWidth + Kirigami.Units.gridUnit * 1.3
+        implicitHeight: Math.round(sbLabel.implicitHeight + Kirigami.Units.smallSpacing * 2.4)
+        Rectangle {
+            anchors.fill: parent
+            radius: height / 2
+            color: sb.on ? panel.accent : sbMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+            Behavior on color { ColorAnimation { duration: Kirigami.Units.shortDuration } }
+        }
+        Text {
+            id: sbLabel
+            anchors.centerIn: parent
+            text: sb.text
+            font.pixelSize: Kirigami.Theme.defaultFont.pixelSize
+            font.weight: sb.on ? Font.DemiBold : Font.Normal
+            color: sb.on ? "#0b0e12" : Kirigami.Theme.textColor
+            renderType: Text.NativeRendering
+        }
+        MouseArea {
+            id: sbMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: sb.activated()
+        }
+    }
+    // the track around the segments: same padding on every side
+    component SegTrack: Rectangle {
+        default property alias buttons: segInner.data
+        readonly property int pad: 3
+        implicitWidth: segInner.implicitWidth + pad * 2
+        implicitHeight: segInner.implicitHeight + pad * 2
+        radius: height / 2
+        color: Qt.rgba(1, 1, 1, 0.06)
+        border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.06)
+        Row { id: segInner; x: parent.pad; y: parent.pad; spacing: 2 }
+    }
     // segmented choice bound to one config key
-    component Segments: Rectangle {
+    component Segments: SegTrack {
+        id: segs
         property string key
         property var options: []             // [[value, label], ...]
         property var target: panel.cfg
         signal picked()
-        implicitWidth: segRow.implicitWidth + 6
-        implicitHeight: segRow.implicitHeight + 6
-        radius: height / 2
-        color: Qt.rgba(1, 1, 1, 0.06)
-        Row {
-            id: segRow
-            anchors.centerIn: parent
-            spacing: 2
-            Repeater {
-                model: options
-                delegate: QQC2.AbstractButton {
-                    required property var modelData
-                    readonly property bool on: target[key] === modelData[0]
-                    implicitWidth: lbl.implicitWidth + Kirigami.Units.gridUnit * 1.2
-                    implicitHeight: lbl.implicitHeight + Kirigami.Units.smallSpacing * 2.5
-                    onClicked: { target[key] = modelData[0]; picked() }
-                    background: Rectangle { radius: height / 2; color: parent.on ? panel.accent : parent.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent" }
-                    contentItem: QQC2.Label { id: lbl; text: modelData[1]; horizontalAlignment: Text.AlignHCenter; color: parent.on ? "#0b0e12" : Kirigami.Theme.textColor; font.weight: parent.on ? Font.DemiBold : Font.Normal }
-                }
+        Repeater {
+            model: segs.options
+            delegate: SegButton {
+                required property var modelData
+                text: modelData[1]
+                on: segs.target[segs.key] === modelData[0]
+                onActivated: { segs.target[segs.key] = modelData[0]; segs.picked() }
             }
         }
     }
-    component Toggle: QQC2.Switch {
+    // segmented choice for one scene option (stored in wallOpts)
+    component OptChoice: SegTrack {
+        id: oc
+        property var opt
+        readonly property string current: { panel.cfg.wallOpts; return panel.optValue(opt) }
+        Repeater {
+            model: oc.opt ? oc.opt.choices : []
+            delegate: SegButton {
+                required property var modelData
+                text: modelData[1]
+                on: oc.current === modelData[0]
+                onActivated: panel.setOpt(oc.opt, modelData[0])
+            }
+        }
+    }
+    // a switch that is clearly on (accent colour) or off (grey)
+    component PillSwitch: QQC2.AbstractButton {
+        id: sw
+        checkable: true
+        hoverEnabled: true
+        implicitWidth: Kirigami.Units.gridUnit * 2.4
+        implicitHeight: Kirigami.Units.gridUnit * 1.3
+        background: Rectangle {
+            radius: height / 2
+            color: sw.checked ? panel.accent : sw.hovered ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.16)
+            border.width: sw.visualFocus ? 2 : 0; border.color: Kirigami.Theme.focusColor
+            Behavior on color { ColorAnimation { duration: Kirigami.Units.shortDuration } }
+            Rectangle {
+                readonly property real pad: 3
+                width: parent.height - pad * 2; height: width; radius: width / 2
+                y: pad
+                x: sw.checked ? parent.width - width - pad : pad
+                color: sw.checked ? "#0b0e12" : "#e8ecf0"
+                Behavior on x { NumberAnimation { duration: Kirigami.Units.shortDuration; easing.type: Easing.OutCubic } }
+            }
+        }
+        contentItem: Item {}
+    }
+    component Toggle: PillSwitch {
         property string key
         property var target: panel.cfg
         signal picked()
@@ -325,7 +456,7 @@ PlasmaCore.Dialog {
                         }
                     } }
                 SettingRow { label: i18n("Use the color scheme's accent"); hint: i18n("Follows System Settings → Colors.")
-                    QQC2.Switch { checked: panel.cfg.colorMode === "system"; onToggled: panel.cfg.colorMode = checked ? "system" : "custom" } }
+                    PillSwitch { checked: panel.cfg.colorMode === "system"; onToggled: panel.cfg.colorMode = checked ? "system" : "custom" } }
             }
             Group {
                 title: i18n("Apps")
@@ -340,36 +471,106 @@ PlasmaCore.Dialog {
             spacing: Kirigami.Units.gridUnit
             Group {
                 title: i18n("Atmosphere")
-                GridLayout {
-                    columns: 4; columnSpacing: Kirigami.Units.smallSpacing; rowSpacing: Kirigami.Units.smallSpacing
+                Item {
+                    id: tilesBox
                     Layout.fillWidth: true
                     Layout.topMargin: Kirigami.Units.smallSpacing
-                    Repeater {
-                        model: [
-                            { v: "flow", n: "Flow", h: i18n("clouds of colour") },
-                            { v: "horizon", n: "Horizon", h: i18n("flat hills, one sun") },
-                            { v: "fogline", n: "Fogline", h: i18n("misty lake") },
-                            { v: "keep", n: i18n("Own image"), h: i18n("Plasma's wallpaper") }
-                        ]
-                        delegate: QQC2.AbstractButton {
-                            required property var modelData
-                            readonly property bool chosen: panel.cfg.wallScene === modelData.v
-                            Layout.fillWidth: true
-                            implicitHeight: Kirigami.Units.gridUnit * 6.5
-                            onClicked: { panel.cfg.wallScene = modelData.v; panel.orb.applyWallpaper() }
-                            background: Rectangle {
-                                radius: Kirigami.Units.gridUnit * 0.6; clip: true
-                                color: Qt.rgba(1, 1, 1, 0.03)
-                                border.width: parent.chosen ? 2 : 1
-                                border.color: parent.chosen ? panel.accent : Qt.rgba(1, 1, 1, 0.08)
-                                WallArt { anchors.fill: parent; anchors.margins: 2; scene: modelData.v }
-                            }
-                            contentItem: ColumnLayout {
-                                Item { Layout.fillHeight: true }
-                                QQC2.Label { text: modelData.n; font.weight: Font.DemiBold; color: "white"; style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5) }
-                                QQC2.Label { text: modelData.h; font: Kirigami.Theme.smallFont; color: Qt.rgba(1, 1, 1, 0.8); style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5) }
+                    readonly property int cols: width > Kirigami.Units.gridUnit * 40 ? 4 : 3
+                    readonly property real gap: Kirigami.Units.gridUnit
+                    readonly property real tileW: Math.floor((width - gap * (cols - 1)) / cols)
+                    readonly property real rad: Kirigami.Units.gridUnit * 0.6
+                    implicitHeight: tileGrid.implicitHeight
+                    Grid {
+                        id: tileGrid
+                        columns: tilesBox.cols
+                        columnSpacing: tilesBox.gap
+                        rowSpacing: Kirigami.Units.gridUnit * 0.8
+                        Repeater {
+                            model: [
+                                { v: "flow", n: "Flow", h: i18n("clouds of colour") },
+                                { v: "horizon", n: "Horizon", h: i18n("flat hills, one sun") },
+                                { v: "fogline", n: "Fogline", h: i18n("misty lake") },
+                                { v: "dune", n: "Dune", h: i18n("desert") },
+                                { v: "aurora", n: "Aurora", h: i18n("polar night") },
+                                { v: "tide", n: "Tide", h: i18n("open sea") },
+                                { v: "neon", n: "Neon", h: i18n("city at night") },
+                                { v: "orbit", n: "Orbit", h: i18n("planet in space") },
+                                { v: "contour", n: "Contour", h: i18n("contour lines") },
+                                { v: "grid", n: "Grid", h: i18n("field of dots") },
+                                { v: "keep", n: i18n("Own image"), h: i18n("Plasma's wallpaper") }
+                            ]
+                            delegate: QQC2.AbstractButton {
+                                id: tile
+                                required property var modelData
+                                readonly property bool chosen: panel.cfg.wallScene === modelData.v
+                                width: tilesBox.tileW
+                                hoverEnabled: true
+                                padding: 0
+                                onClicked: { panel.cfg.wallScene = modelData.v; panel.orb.applyWallpaper() }
+                                background: null
+                                contentItem: Column {
+                                    spacing: Kirigami.Units.smallSpacing
+                                    Item {
+                                        id: thumb
+                                        width: tile.width; height: Math.round(width * 0.58)
+                                        scale: tile.pressed ? 0.98 : tile.hovered ? 1.02 : 1
+                                        Behavior on scale { NumberAnimation { duration: Kirigami.Units.shortDuration; easing.type: Easing.OutCubic } }
+                                        Rectangle {                      // selection ring
+                                            anchors.fill: parent; anchors.margins: -4
+                                            radius: tilesBox.rad + 4
+                                            color: "transparent"
+                                            border.width: 2; border.color: panel.accent
+                                            visible: tile.chosen
+                                        }
+                                        KirigamiPrimitives.ShadowedImage {
+                                            anchors.fill: parent
+                                            visible: tile.modelData.v !== "keep"
+                                            source: visible ? Qt.resolvedUrl("../images/wall-" + tile.modelData.v + ".jpg") : ""
+                                            fillMode: Image.PreserveAspectCrop
+                                            asynchronous: true
+                                            radius: tilesBox.rad
+                                            color: Qt.rgba(1, 1, 1, 0.04)
+                                            border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.08)
+                                        }
+                                        Rectangle {                      // "own image"
+                                            anchors.fill: parent
+                                            visible: tile.modelData.v === "keep"
+                                            radius: tilesBox.rad
+                                            color: Qt.rgba(1, 1, 1, 0.04)
+                                            border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.1)
+                                            Kirigami.Icon { anchors.centerIn: parent; source: "preferences-desktop-wallpaper"; width: parent.height * 0.36; height: width; opacity: 0.7 }
+                                        }
+                                        Rectangle {                      // check badge
+                                            visible: tile.chosen
+                                            anchors { top: parent.top; right: parent.right; margins: Kirigami.Units.smallSpacing * 1.5 }
+                                            width: Kirigami.Units.gridUnit * 1.2; height: width; radius: width / 2
+                                            color: panel.accent
+                                            Kirigami.Icon { anchors.centerIn: parent; source: "checkmark"; width: parent.width * 0.65; height: width; color: "#0b0e12"; isMask: true }
+                                        }
+                                    }
+                                    Column {
+                                        width: tile.width
+                                        topPadding: 2
+                                        QQC2.Label { width: parent.width; text: tile.modelData.n; font.weight: Font.DemiBold; elide: Text.ElideRight; color: tile.chosen ? panel.accent : Kirigami.Theme.textColor }
+                                        QQC2.Label { width: parent.width; text: tile.modelData.h; font: Kirigami.Theme.smallFont; opacity: 0.6; elide: Text.ElideRight }
+                                    }
+                                }
                             }
                         }
+                    }
+                }
+            }
+            Group {
+                title: panel.sceneOptions.length ? i18n("%1 – own settings", panel.sceneName) : ""
+                visible: panel.sceneOptions.length > 0
+                Repeater {
+                    model: panel.sceneOptions
+                    delegate: SettingRow {
+                        id: optRow
+                        required property var modelData
+                        label: modelData.label
+                        hint: modelData.hint || ""
+                        OptChoice { opt: optRow.modelData }
                     }
                 }
             }
@@ -377,8 +578,33 @@ PlasmaCore.Dialog {
                 title: i18n("Behavior")
                 enabled: panel.cfg.wallScene !== "keep"
                 opacity: enabled ? 1 : 0.45
-                SettingRow { label: i18n("Follows the time of day"); hint: i18n("Light, stars and colours move with the clock.")
-                    Toggle { key: "wallFollow"; onPicked: panel.orb.applyWallpaper() } }
+                SettingRow { label: i18n("Try it"); hint: i18n("For eight seconds the scene shows how it reacts to full load and a new notification.")
+                    QQC2.Button { text: i18n("Play"); icon.name: "media-playback-start"; onClicked: panel.orb.previewWallpaper() } }
+                SettingRow {
+                    label: i18n("Time of day")
+                    hint: panel.cfg.wallFollow ? i18n("Follows the clock. Drag to hold the wallpaper at one time.")
+                                               : i18n("Held at %1 – it stays like this.", panel.hhmm(panel.cfg.wallHour))
+                    RowLayout {
+                        spacing: Kirigami.Units.smallSpacing
+                        QQC2.Slider {
+                            Layout.preferredWidth: Kirigami.Units.gridUnit * 11
+                            from: 0; to: 23.75; stepSize: 0.25
+                            value: panel.cfg.wallFollow ? panel.nowHour : panel.cfg.wallHour
+                            onMoved: { panel.cfg.wallHour = value; panel.cfg.wallFollow = false; panel.orb.applyWallpaper() }
+                        }
+                        QQC2.Label {
+                            Layout.minimumWidth: Kirigami.Units.gridUnit * 2.6
+                            text: panel.hhmm(panel.cfg.wallFollow ? panel.nowHour : panel.cfg.wallHour)
+                            font.features: { "tnum": 1 }
+                            color: panel.cfg.wallFollow ? Kirigami.Theme.textColor : panel.accent
+                        }
+                        QQC2.Button {
+                            text: i18n("Follow the clock")
+                            icon.name: "chronometer"
+                            enabled: !panel.cfg.wallFollow
+                            onClicked: { panel.cfg.wallFollow = true; panel.orb.applyWallpaper() }
+                        }
+                    } }
                 SettingRow { label: i18n("Reacts to your computer"); hint: i18n("Load, graphics card and unread notifications change the scene.")
                     Segments { key: "wallReact"; options: [["off", i18n("Off")], ["subtle", i18n("Subtle")], ["strong", i18n("Strong")]]; onPicked: panel.orb.applyWallpaper() } }
                 SettingRow { label: i18n("Motion"); hint: i18n("Calm redraws 8 times a second, lively 20.")
