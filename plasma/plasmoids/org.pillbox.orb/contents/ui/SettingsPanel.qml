@@ -477,9 +477,12 @@ Window {
                         id: picker
                         spacing: Kirigami.Units.smallSpacing
                         readonly property color current: panel.cfg.customColor
-                        property real h: Math.max(0, current.hslHue)
-                        property real sat: current.hslSaturation
-                        property real lig: current.hslLightness
+                        // hue and saturation are kept while the colour is black, white or grey (they'd read as 0 there)
+                        onCurrentChanged: { if (current.hslSaturation > 0.01 && current.hslHue >= 0) { h = current.hslHue; sat = current.hslSaturation } lig = current.hslLightness }
+                        property real h: 0
+                        property real sat: 0
+                        property real lig: 0.5
+                        Component.onCompleted: { h = Math.max(0, current.hslHue); sat = current.hslSaturation; lig = current.hslLightness }
                         function push() { panel.cfg.customColor = Qt.hsla(h, sat, lig, 1) }
                         component Track: Item {
                             id: tr
@@ -524,9 +527,9 @@ Window {
                             onMoved: v => { picker.sat = v; picker.push() }
                         }
                         Track {
-                            stops: [Qt.hsla(picker.h, picker.sat, 0.15, 1), Qt.hsla(picker.h, picker.sat, 0.5, 1), Qt.hsla(picker.h, picker.sat, 0.9, 1)]
-                            value: (picker.lig - 0.15) / 0.75
-                            onMoved: v => { picker.lig = 0.15 + v * 0.75; picker.push() }
+                            stops: [Qt.hsla(picker.h, picker.sat, 0, 1), Qt.hsla(picker.h, picker.sat, 0.5, 1), Qt.hsla(picker.h, picker.sat, 1, 1)]
+                            value: picker.lig
+                            onMoved: v => { picker.lig = v; picker.push() }
                         }
                         RowLayout {
                             Rectangle { width: Kirigami.Units.gridUnit * 1.6; height: width; radius: width / 2; color: picker.current }
@@ -534,7 +537,9 @@ Window {
                                 Layout.preferredWidth: Kirigami.Units.gridUnit * 7
                                 text: String(picker.current)
                                 validator: RegularExpressionValidator { regularExpression: /#?[0-9a-fA-F]{6}/ }
-                                onEditingFinished: panel.cfg.customColor = text.charAt(0) === "#" ? text : "#" + text
+                                // applies as soon as six hex digits are there – no Enter needed
+                                onTextEdited: { const t = text.replace("#", ""); if (/^[0-9a-fA-F]{6}$/.test(t)) panel.cfg.customColor = "#" + t }
+                                onEditingFinished: { const t = text.replace("#", ""); if (/^[0-9a-fA-F]{6}$/.test(t)) panel.cfg.customColor = "#" + t }
                             }
                         }
                     }
