@@ -41,7 +41,8 @@ PlasmaCore.Dialog {
     readonly property int restH: hideMode === "autohide" ? 6 : hideMode === "compact" ? Math.round(fullH * 0.58) : fullH
 
     // ---- hiding: the window really shrinks at rest, so it never blocks clicks above it
-    readonly property string hideMode: orb.cfg.dockHide              // never | compact | autohide
+    // never | compact | autohide | smart (= autohide only while a window covers the dock)
+    readonly property string hideMode: orb.cfg.dockHide === "smart" ? (orb.dockCovered ? "autohide" : "never") : orb.cfg.dockHide
     readonly property bool open: hoverAny || dock.holdOpen.running || orb.previewVisible
     property bool hoverAny: false
     property bool tall: true

@@ -160,6 +160,7 @@ PlasmoidItem {
     // covered:        any window lies under the orb -> "ghost" (faint until hovered)
     property bool fullscreenHere: false
     property bool covered: false
+    property bool dockCovered: false      // a window lies over the strip where the dock sits ("smart" hiding)
     readonly property bool hidden: fullscreenHere && cfg.hideInFullscreen && !dragging
     readonly property bool ghost: covered && cfg.ghostOverWindows && !orbHover && !ringOpen && !dragging
 
@@ -180,6 +181,22 @@ PlasmoidItem {
         }
         covered = cov
         fullscreenHere = full
+        // the dock strip along the chosen edge of every dock screen
+        let dc = false
+        const band = Math.round(90 * Math.max(1, cfg.dockScale / 100))
+        for (const sc of dockScreens) {
+            const e = cfg.dockEdge
+            const b = e === "left" ? Qt.rect(sc.x, sc.y, band, sc.height)
+                    : e === "right" ? Qt.rect(sc.x + sc.width - band, sc.y, band, sc.height)
+                    : Qt.rect(sc.x, sc.y + sc.height - band, sc.width, band)
+            for (let i = 0; i < winModel.count && !dc; ++i) {
+                const idx = winModel.makeModelIndex(i)
+                if (winModel.data(idx, TaskManager.AbstractTasksModel.IsMinimized) === true) continue
+                const g = winModel.data(idx, TaskManager.AbstractTasksModel.Geometry)
+                if (g && g.width > 0 && g.x < b.x + b.width && g.x + g.width > b.x && g.y < b.y + b.height && g.y + g.height > b.y) dc = true
+            }
+        }
+        dockCovered = dc
         if (full) closeRing()
     }
     Timer { id: envTimer; interval: 120; onTriggered: root.updateEnvironment() }

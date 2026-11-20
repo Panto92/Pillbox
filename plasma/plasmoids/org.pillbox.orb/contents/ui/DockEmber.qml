@@ -41,7 +41,7 @@ PlasmaCore.Dialog {
 
     // ---- hiding: the window really shrinks at rest, so it never blocks clicks above it
     // Ember always folds to its seam; "autohide" also hides the seam behind a thin line
-    readonly property string hideMode: orb.cfg.dockHide === "autohide" ? "autohide" : "compact"
+    readonly property string hideMode: orb.cfg.dockHide === "autohide" || (orb.cfg.dockHide === "smart" && orb.dockCovered) ? "autohide" : "compact"
     readonly property bool open: hoverAny || dock.holdOpen.running || orb.previewVisible
     property bool hoverAny: false
     property bool tall: true

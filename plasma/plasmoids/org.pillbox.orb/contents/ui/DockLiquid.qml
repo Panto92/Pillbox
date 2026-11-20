@@ -39,7 +39,7 @@ PlasmaCore.Dialog {
     onTargetScreenChanged: { rebuilding = true; rebuildTimer.restart() }
 
     // ---- hiding
-    readonly property string hideMode: orb.cfg.dockHide
+    readonly property string hideMode: orb.cfg.dockHide === "smart" ? (orb.dockCovered ? "autohide" : "never") : orb.cfg.dockHide
     readonly property bool open: hoverAny || dock.holdOpen.running || orb.previewVisible
     property bool hoverAny: false
     property bool tall: true

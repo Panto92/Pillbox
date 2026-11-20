@@ -120,9 +120,11 @@ Window {
                         Layout.margins: Kirigami.Units.smallSpacing
                         Layout.bottomMargin: Kirigami.Units.largeSpacing * 2
                         spacing: Kirigami.Units.smallSpacing * 2
-                        Rectangle {
-                            width: 14; height: 14; radius: 7
-                            gradient: Gradient { GradientStop { position: 0; color: "white" } GradientStop { position: 1; color: panel.accent } }
+                        Image {
+                            source: Qt.resolvedUrl("../images/logo.svg")
+                            sourceSize: Qt.size(Kirigami.Units.gridUnit * 2, Kirigami.Units.gridUnit * 2)
+                            Layout.preferredWidth: Kirigami.Units.gridUnit * 1.6
+                            Layout.preferredHeight: Kirigami.Units.gridUnit * 1.6
                         }
                         Kirigami.Heading { level: 3; text: "Pillbox" }
                     }
@@ -418,8 +420,8 @@ Window {
                         currentIndex: Math.max(0, indexOfValue(panel.cfg.dockScreen))
                         onActivated: panel.cfg.dockScreen = currentValue
                     } }
-                SettingRow { visible: !panel.isOrb; label: i18n("At rest"); hint: i18n("Smaller or hidden docks free the space above them.")
-                    Segments { key: "dockHide"; options: [["never", i18n("Visible")], ["compact", i18n("Small")], ["autohide", i18n("Hidden")]] } }
+                SettingRow { visible: !panel.isOrb; label: i18n("At rest"); hint: i18n("Smart: visible until a window reaches the dock, then it slides away. Small or hidden free the space above.")
+                    Segments { key: "dockHide"; options: [["never", i18n("Visible")], ["smart", i18n("Smart")], ["compact", i18n("Small")], ["autohide", i18n("Hidden")]] } }
                 SettingRow { visible: !panel.isOrb; label: i18n("Dock size")
                     Slider { key: "dockScale"; from: 60; to: 160; step: 5; unit: "%" } }
                 SettingRow { visible: panel.cfg.form === "shelf"; label: i18n("Reflection on hover")
