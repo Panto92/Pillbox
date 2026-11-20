@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0">
+  <kcfgfile name=""/>
+  <group name="General">
+    <!-- flow | horizon | fogline -->
+    <entry name="Scene" type="String"><default>flow</default></entry>
+    <entry name="FollowTime" type="Bool"><default>true</default></entry>
+    <entry name="FixedHour" type="Double"><default>17.5</default></entry>
+    <!-- off | subtle | strong -->
+    <entry name="Reactivity" type="String"><default>subtle</default></entry>
+    <!-- calm | normal | lively -->
+    <entry name="Motion" type="String"><default>normal</default></entry>
+    <entry name="PauseWhenCovered" type="Bool"><default>true</default></entry>
+  </group>
+</kcfg>

@@ -22,12 +22,17 @@ function pill(alignment, widgets) {
 // Desktop: keep the default folder view, use the image wallpaper plugin,
 // and put the Orb on the primary screen's desktop
 var desktops = desktopsForActivity(currentActivity());
+// living wallpaper (Flow) on every monitor; falls back to Plasma's image wallpaper if missing
 desktops.forEach(function (d) {
-    d.wallpaperPlugin = "org.kde.image";
+    d.wallpaperPlugin = "org.pillbox.atmosphere";
+    d.currentConfigGroup = ["Wallpaper", "org.pillbox.atmosphere", "General"];
+    d.writeConfig("Scene", "flow");
 });
 var primary = desktops.filter(function (d) { return d.screen === 0; })[0] || desktops[0];
 if (primary && knownWidgetTypes.indexOf("org.pillbox.orb") >= 0) {
-    primary.addWidget("org.pillbox.orb");
+    var orb = primary.addWidget("org.pillbox.orb");
+    orb.currentConfigGroup = ["Appearance"];
+    orb.writeConfig("wallScene", "flow");          // the settings centre shows the same choice
 }
 
 pill("left",   ["org.kde.plasma.kickoff", "org.pillbox.stats"]);

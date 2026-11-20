@@ -1,0 +1,704 @@
+<title>Pillbox Atmosphären</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one big living wallpaper on top with its controls, a picker of six atmospheres, then the settings-centre draft */
+:root {
+  color-scheme: dark;
+  --ink: #0b0e12;
+  --slate: #141a20;
+  --line: rgba(205, 213, 219, 0.1);
+  --mist: #7d8a94;
+  --paper: #cdd5db;
+  --frost: #e9eef2;
+  --steel: #8fb0c2;
+  --f-display: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { background: var(--ink); color: var(--paper); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap {
+  max-width: 1200px; margin: 0 auto;
+  padding-block: 48px 112px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 72px;
+}
+.eyebrow { font: 500 12px var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--steel); margin: 0 0 12px; }
+h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(44px, 7.5vw, 96px); line-height: 0.92; letter-spacing: -0.035em; margin: 0; color: var(--frost); text-wrap: balance; }
+h2 { font-family: var(--f-display); font-weight: 600; font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -0.02em; line-height: 1.05; margin: 0; color: var(--frost); text-wrap: balance; }
+.lead { margin: 18px 0 0; max-width: 62ch; color: var(--mist); font-size: 17px; }
+.lead b { color: var(--paper); font-weight: 600; }
+.head { display: flex; flex-direction: column; gap: 6px; }
+.head p { margin: 0; color: var(--mist); max-width: 66ch; }
+
+/* stage */
+.stagebox { display: flex; flex-direction: column; gap: 14px; }
+.stage { position: relative; width: 100%; max-width: 100%; aspect-ratio: 21 / 9; min-height: 300px; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #05070a; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tag {
+  position: absolute; left: 16px; bottom: 14px; display: flex; gap: 10px; align-items: baseline;
+  background: rgba(8, 10, 13, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(233, 238, 242, 0.1); border-radius: 12px; padding: 7px 13px;
+}
+.tag b { font: 600 15px var(--f-display); color: var(--frost); }
+.tag span { font: 12px var(--f-mono); color: var(--paper); font-variant-numeric: tabular-nums; }
+.controls { display: grid; grid-template-columns: auto repeat(4, minmax(0, 1fr)); gap: 12px 22px; align-items: end; padding: 14px 18px; background: var(--slate); border: 1px solid var(--line); border-radius: 14px; }
+.ctl label { display: flex; justify-content: space-between; gap: 8px; font: 500 12px var(--f-mono); color: var(--mist); margin-bottom: 8px; }
+.ctl output { color: var(--paper); font-variant-numeric: tabular-nums; }
+.ctl input { width: 100%; accent-color: var(--steel); }
+.play { font: 600 13px var(--f-body); color: var(--ink); background: var(--steel); border: 0; border-radius: 999px; padding: 10px 16px; cursor: pointer; white-space: nowrap; display: inline-flex; gap: 8px; align-items: center; }
+.play svg { width: 12px; height: 12px; fill: currentColor; }
+.play[aria-pressed="true"] { background: var(--frost); }
+.play:focus-visible, .ctl input:focus-visible, .scene:focus-visible, .nav button:focus-visible, .opt:focus-visible { outline: 2px solid var(--steel); outline-offset: 3px; }
+
+/* picker */
+.scenes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.scene .mini { align-self: flex-start; font: 500 10px var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); background: var(--steel); border-radius: 999px; padding: 1px 7px; }
+.scene { text-align: left; background: var(--slate); border: 1px solid var(--line); border-radius: 14px; padding: 0; cursor: pointer; color: inherit; font: inherit; overflow: hidden; display: flex; flex-direction: column; transition: border-color 0.2s, transform 0.2s; }
+.scene:hover { border-color: rgba(205, 213, 219, 0.3); transform: translateY(-2px); }
+.scene[aria-pressed="true"] { border-color: var(--steel); box-shadow: 0 0 0 1px var(--steel); }
+.scene canvas { width: 100%; aspect-ratio: 21 / 9; display: block; }
+.scene .txt { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; }
+.scene .txt b { font: 600 17px var(--f-display); color: var(--frost); }
+.scene .react { font-size: 12px; }
+.scene .txt span { font-size: 13.5px; color: var(--mist); }
+.react { list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 12.5px; }
+.react dt { font: 500 11px var(--f-mono); color: var(--steel); text-transform: uppercase; letter-spacing: 0.06em; padding-top: 2px; }
+.react dd { margin: 0; color: var(--paper); }
+
+/* settings centre draft */
+.centre { display: grid; grid-template-columns: 210px minmax(0, 1fr); min-height: 520px; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: #0f1418; }
+.nav { background: #0b0f13; border-right: 1px solid var(--line); padding: 18px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nav .brand { display: flex; gap: 10px; align-items: center; padding: 4px 10px 16px; font: 600 15px var(--f-display); color: var(--frost); }
+.nav .brand i { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--steel) 45%, rgba(143, 176, 194, 0.2)); box-shadow: 0 0 12px var(--steel); }
+.nav button { all: unset; display: flex; gap: 10px; align-items: center; padding: 9px 12px; border-radius: 10px; color: var(--paper); cursor: pointer; font-size: 14px; }
+.nav button:hover { background: rgba(205, 213, 219, 0.06); }
+.nav button[aria-current="true"] { background: rgba(143, 176, 194, 0.16); color: var(--frost); }
+.nav button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
+.pane { padding: 26px 28px; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.pane h3 { margin: 0; font: 600 22px var(--f-display); color: var(--frost); }
+.pane .sub { margin: -14px 0 0; color: var(--mist); font-size: 14px; }
+.group { display: flex; flex-direction: column; gap: 10px; }
+.group > .gl { font: 500 11px var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--mist); }
+.wallgrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.wallgrid button { all: unset; cursor: pointer; border-radius: 10px; overflow: hidden; border: 1.5px solid transparent; position: relative; }
+.wallgrid button[aria-pressed="true"] { border-color: var(--steel); }
+.wallgrid canvas { width: 100%; aspect-ratio: 16 / 9; display: block; }
+.wallgrid span { position: absolute; left: 8px; bottom: 6px; font: 600 12px var(--f-body); color: var(--frost); text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 0; border-top: 1px solid var(--line); }
+.row:first-of-type { border-top: 0; }
+.row .l b { display: block; font-weight: 600; color: var(--frost); font-size: 14px; }
+.row .l span { font-size: 13px; color: var(--mist); }
+.seg { display: inline-flex; background: rgba(205, 213, 219, 0.06); border-radius: 999px; padding: 3px; flex: none; }
+.opt { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; font-size: 13px; color: var(--paper); white-space: nowrap; }
+.opt[aria-pressed="true"] { background: var(--steel); color: var(--ink); font-weight: 600; }
+.switch { width: 40px; height: 22px; border-radius: 999px; background: rgba(205, 213, 219, 0.18); position: relative; flex: none; cursor: pointer; border: 0; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--paper); transition: transform 0.2s; }
+.switch[aria-checked="true"] { background: var(--steel); }
+.switch[aria-checked="true"]::after { transform: translateX(18px); background: var(--ink); }
+.cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.card { border: 1px solid var(--line); border-radius: 12px; padding: 14px 10px; text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center; font-size: 13px; color: var(--mist); }
+.card b { color: var(--frost); font: 600 15px var(--f-display); }
+.card.on { border-color: var(--steel); background: rgba(143, 176, 194, 0.1); }
+.card .glyph { width: 40px; height: 22px; display: grid; place-items: center; }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.swatches i { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; }
+.swatches i.on { border-color: var(--frost); }
+.note { font-size: 13.5px; color: var(--mist); max-width: 70ch; margin: 0; }
+.note b { color: var(--paper); }
+
+@media (max-width: 900px) {
+  .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .controls .play { grid-column: 1 / -1; justify-self: start; }
+  .scenes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wallgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .centre { grid-template-columns: minmax(0, 1fr); }
+  .nav { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--line); }
+  .nav .brand { width: 100%; padding-bottom: 8px; }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .scenes, .wallgrid { grid-template-columns: minmax(0, 1fr); }
+  .stage { aspect-ratio: 4 / 3; }
+  .row { flex-direction: column; align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene { transition: none; }
+}
+</style>
+
+<main class="wrap">
+  <header>
+    <p class="eyebrow">Pillbox Lab · Hintergründe</p>
+    <h1>Atmosphären</h1>
+    <p class="lead">Zehn lebende Hintergründe, sechs Landschaften und vier minimalistische. Jeder zeigt, wie es deinem Rechner geht, ohne eine einzige Zahl: <b>Last wird zu Nebel, Wind oder Wellen, die Grafikkarte zu Glut, Ungelesenes zu Regen</b>. Und alle folgen der Tageszeit, von der blauen Stunde bis zur Nacht.</p>
+  </header>
+
+  <section class="stagebox" aria-label="Vorschau">
+    <div class="stage" id="stage">
+      <canvas id="main" aria-label="Lebende Hintergrund-Vorschau"></canvas>
+      <div class="tag"><b id="tagName">Fogline</b><span id="tagTime">15:20</span></div>
+    </div>
+    <div class="controls">
+      <button class="play" id="play" type="button" aria-pressed="false"><svg viewBox="0 0 12 12" id="playIcon"><path d="M2 1l9 5-9 5z"/></svg><span id="playText">Zeitraffer</span></button>
+      <div class="ctl"><label for="s-time">Uhrzeit <output id="o-time">15:20</output></label><input id="s-time" type="range" min="0" max="23.9" step="0.05" value="15.33"></div>
+      <div class="ctl"><label for="s-cpu">CPU <output id="o-cpu">25 %</output></label><input id="s-cpu" type="range" min="0" max="100" value="25"></div>
+      <div class="ctl"><label for="s-gpu">GPU <output id="o-gpu">10 %</output></label><input id="s-gpu" type="range" min="0" max="100" value="10"></div>
+      <div class="ctl"><label for="s-notes">Ungelesen <output id="o-notes">0</output></label><input id="s-notes" type="range" min="0" max="9" value="0"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="pick-h" style="display:flex;flex-direction:column;gap:20px">
+    <div class="head"><h2 id="pick-h">Zehn Atmosphären</h2><p>Klick eine an, dann läuft sie oben groß. Die kleinen Bilder zeigen dieselbe Uhrzeit und Last wie die Vorschau.</p></div>
+    <div class="scenes" id="scenes"></div>
+  </section>
+
+  <section aria-labelledby="centre-h" style="display:flex;flex-direction:column;gap:20px">
+    <div class="head"><h2 id="centre-h">Entwurf: Pillbox-Einstellungen</h2><p>Statt eines kleinen Panels ein richtiges Fenster mit Seitenleiste. Jede Änderung wirkt sofort auf dem Desktop. Klick dich durch die Bereiche.</p></div>
+    <div class="centre">
+      <nav class="nav" aria-label="Bereiche" id="nav">
+        <div class="brand"><i></i>Pillbox</div>
+      </nav>
+      <div class="pane" id="pane"></div>
+    </div>
+    <p class="note"><b>Umsetzung:</b> Die Atmosphären werden ein Hintergrund-Plugin für Plasma in QML. Plasmas Canvas zeichnet mit derselben Programmierschnittstelle wie diese Seite, die Szenen lassen sich also fast eins zu eins übertragen. Die Werte für CPU, GPU und Ungelesenes kommen aus denselben Quellen wie bei Orb und Stats-Pille.</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = s => document.querySelector(s);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const mix = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+  const rgba = (c, a) => 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a + ')';
+  const hhmm = h => String(Math.floor(h)).padStart(2, '0') + ':' + String(Math.floor((h % 1) * 60)).padStart(2, '0');
+
+  // ---------- time of day
+  const KEYS = [
+    [0, [5, 8, 14], [18, 24, 34], 0.22, 1], [5.5, [16, 20, 32], [52, 56, 72], 0.35, 0.6],
+    [7, [58, 66, 90], [200, 150, 128], 0.72, 0.1], [10, [86, 118, 142], [178, 196, 206], 1, 0],
+    [17, [80, 104, 126], [170, 178, 186], 0.95, 0], [19.6, [56, 50, 76], [214, 132, 98], 0.62, 0.15],
+    [21.5, [11, 14, 24], [32, 36, 52], 0.28, 0.85], [24, [5, 8, 14], [18, 24, 34], 0.22, 1]
+  ];
+  function skyAt(h, tint, k) {
+    for (let i = 0; i < KEYS.length - 1; i++) {
+      const a = KEYS[i], b = KEYS[i + 1];
+      if (h >= a[0] && h <= b[0]) {
+        const f = (h - a[0]) / (b[0] - a[0]), e = f * f * (3 - 2 * f);
+        return { top: mix(mix(a[1], b[1], e), tint, k), bot: mix(mix(a[2], b[2], e), tint, k * 1.2), light: lerp(a[3], b[3], e), star: lerp(a[4], b[4], e) };
+      }
+    }
+  }
+  const sunPos = (h, W, H, horizon) => {
+    const day = clamp((h - 6) / 14, 0, 1);
+    return { x: W * (0.12 + 0.76 * day), y: horizon - H * 0.5 * Math.sin(Math.PI * day) + H * 0.05, up: h > 6 && h < 20 };
+  };
+  function rng(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+
+  // ---------- shared painters
+  function sky(c, W, H, sk, toY) {
+    const g = c.createLinearGradient(0, 0, 0, toY);
+    g.addColorStop(0, rgba(sk.top, 1)); g.addColorStop(1, rgba(sk.bot, 1));
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+  }
+  function stars(c, st, amount, t) {
+    if (amount < 0.02) return;
+    for (const p of st) {
+      const a = amount * (0.45 + 0.55 * Math.sin(t * p.tw + p.ph));
+      c.fillStyle = 'rgba(233,238,242,' + a.toFixed(3) + ')';
+      c.beginPath(); c.arc(p.x, p.y, p.r, 0, 6.283); c.fill();
+    }
+  }
+  function glow(c, x, y, r, col, a) {
+    const g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0));
+    c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  function ridge(W, base, amp, seed, rough) {
+    const pts = [], step = Math.max(4, W / 220);
+    for (let x = -step; x <= W + step; x += step) {
+      const u = x / W;
+      const y = Math.sin(u * 6.1 + seed) * 0.5 + Math.sin(u * 13.7 + seed * 2.3) * 0.25 + Math.sin(u * 29.3 + seed * 4.1) * 0.12 * rough + Math.sin(u * 61 + seed * 7) * 0.05 * rough;
+      pts.push([x, base - (y * 0.5 + 0.5) * amp]);
+    }
+    return pts;
+  }
+  function fillPath(c, pts, bottom, style) {
+    c.beginPath(); c.moveTo(pts[0][0], pts[0][1]);
+    for (const p of pts) c.lineTo(p[0], p[1]);
+    c.lineTo(pts[pts.length - 1][0], bottom); c.lineTo(pts[0][0], bottom); c.closePath();
+    c.fillStyle = style; c.fill();
+  }
+  function rain(c, list, n, W, H, dt, col, slant) {
+    while (list.length < n) list.push({ x: Math.random() * (W + 40), y: Math.random() * H - H, l: 8 + Math.random() * 10, v: 420 + Math.random() * 260 });
+    if (list.length > n) list.length = n;
+    c.strokeStyle = col; c.lineWidth = 1; c.beginPath();
+    for (const d of list) {
+      d.y += d.v * dt; d.x -= d.v * dt * slant;
+      if (d.y > H) { d.y = -d.l - Math.random() * 60; d.x = Math.random() * (W + 40); }
+      c.moveTo(d.x, d.y); c.lineTo(d.x - d.l * slant, d.y + d.l);
+    }
+    c.stroke();
+  }
+
+  // ---------- scenes
+  const SCENES = [
+    { id: 'fogline', name: 'Fogline', sub: 'Nebelsee', tint: [110, 140, 165], k: 0.14,
+      react: [['CPU', 'Nebel wird dichter und zieht schneller'], ['GPU', 'Bergkämme glühen von innen'], ['Ungelesen', 'Tropfen auf dem See'], ['Nacht', 'Sterne spiegeln sich']],
+      init(W, H) { const r = rng(3); return { st: Array.from({ length: 140 }, () => ({ x: r() * W, y: r() * H * 0.55, r: 0.4 + r() * 1.1, ph: r() * 6.3, tw: 0.6 + r() * 1.8 })),
+        r1: ridge(W, H * 0.6, H * 0.22, 1.3, 1), r2: ridge(W, H * 0.69, H * 0.16, 4.2, 1.3),
+        fog: Array.from({ length: 12 }, () => ({ x: r() * W, y: H * (0.55 + r() * 0.2), r: H * (0.14 + r() * 0.2), sp: 0.3 + r() * 0.7 })), drops: [] }; },
+      draw(c, W, H, s, z, dt) {
+        const water = H * 0.7, sk = skyAt(s.h, this.tint, this.k);
+        sky(c, W, H, sk, water); stars(c, z.st, sk.star, s.t);
+        const sp = sunPos(s.h, W, H, water);
+        glow(c, sp.x, sp.y, H * 0.5, s.h > 16 || s.h < 9 ? [255, 168, 120] : [255, 244, 225], 0.42 * sk.light);
+        const heat = clamp((s.gpu - 25) / 70, 0, 1);
+        [[z.r1, 0.3], [z.r2, 0.62]].forEach(([r, d]) => {
+          fillPath(c, r, water, rgba(mix(sk.bot, [8, 10, 13], 0.35 + d * 0.5), 1));
+          if (heat > 0.01) { c.beginPath(); c.moveTo(r[0][0], r[0][1]); for (const p of r) c.lineTo(p[0], p[1]); c.strokeStyle = rgba([255, 160, 90], 0.6 * heat * d); c.lineWidth = 1.5; c.stroke(); }
+        });
+        // lake: darker mirror of the sky, mirrored hills, glints
+        const g = c.createLinearGradient(0, water, 0, H);
+        g.addColorStop(0, rgba(mix(sk.bot, [10, 12, 16], 0.35), 1)); g.addColorStop(1, rgba(mix(sk.top, [4, 6, 8], 0.6), 1));
+        c.fillStyle = g; c.fillRect(0, water, W, H - water);
+        c.save(); c.globalAlpha = 0.28; c.translate(0, water * 2); c.scale(1, -1);
+        fillPath(c, z.r2, water, rgba(mix(sk.bot, [8, 10, 13], 0.7), 1)); c.restore();
+        c.strokeStyle = rgba(mix(sk.bot, [255, 255, 255], 0.5), 0.12 + 0.2 * sk.light); c.lineWidth = 1;
+        for (let i = 0; i < 26; i++) { const y = water + 4 + (i * 13.7) % (H - water - 6), x = (i * 97 + s.t * 18 * (1 + (i % 3))) % (W + 120) - 60; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 40 + (i % 5) * 12, y); c.stroke(); }
+        if (sp.up) { c.fillStyle = rgba([255, 230, 200], 0.18 * sk.light); for (let i = 0; i < 18; i++) { const y = water + 6 + i * (H - water) / 18; c.fillRect(sp.x - 18 - (i % 3) * 8 + Math.sin(s.t * 2 + i) * 6, y, 36 + (i % 4) * 10, 2); } }
+        // fog over the water line
+        const dens = s.cpu / 100, fogCol = mix(sk.bot, [235, 240, 244], 0.45);
+        for (const b of z.fog) {
+          b.x += b.sp * (8 + dens * 60) * dt; if (b.x - b.r * 2 > W) b.x = -b.r * 2;
+          glow(c, b.x, b.y, b.r * (1 + dens * 0.6), fogCol, (0.05 + 0.32 * dens) * (0.5 + 0.5 * sk.light));
+        }
+        // rain rings
+        if (s.notes > 0) { if (!z.rings) z.rings = []; if (Math.random() < s.notes * 0.04) z.rings.push({ x: Math.random() * W, y: water + 10 + Math.random() * (H - water - 14), a: 0 });
+          z.rings = z.rings.filter(rr => (rr.a += dt * 0.8) < 1); c.strokeStyle = 'rgba(220,232,240,0.5)';
+          for (const rr of z.rings) { c.globalAlpha = 1 - rr.a; c.beginPath(); c.ellipse(rr.x, rr.y, 3 + rr.a * 26, (3 + rr.a * 26) * 0.3, 0, 0, 6.283); c.stroke(); } c.globalAlpha = 1;
+          rain(c, z.drops, s.notes * 14, W, water, dt, 'rgba(210,222,232,0.2)', 0.05); }
+      } },
+
+    { id: 'dune', name: 'Dune', sub: 'Wüste', tint: [205, 150, 105], k: 0.2,
+      react: [['CPU', 'Sand weht über die Kämme'], ['GPU', 'Hitzeflimmern am Horizont'], ['Ungelesen', 'Sternschnuppen'], ['Nacht', 'Dünen im Mondlicht']],
+      init(W, H) { const r = rng(9); return { st: Array.from({ length: 170 }, () => ({ x: r() * W, y: r() * H * 0.6, r: 0.4 + r() * 1.2, ph: r() * 6.3, tw: 0.5 + r() * 2 })), sand: [], streaks: [] }; },
+      draw(c, W, H, s, z, dt) {
+        const hor = H * 0.62, sk = skyAt(s.h, this.tint, this.k);
+        sky(c, W, H, sk, hor); stars(c, z.st, sk.star, s.t);
+        const sp = sunPos(s.h, W, H, hor);
+        if (sp.up) glow(c, sp.x, sp.y, H * 0.65, [255, 190, 130], 0.55 * sk.light);
+        // heat shimmer
+        const heat = clamp(s.gpu / 100, 0, 1);
+        for (let i = 0; i < 7; i++) { const y = hor - 4 - i * 6; c.strokeStyle = rgba([255, 210, 170], 0.05 * heat * (1 - i / 7)); c.lineWidth = 3; c.beginPath();
+          for (let x = 0; x <= W; x += 12) c.lineTo(x, y + Math.sin(x * 0.03 + s.t * 3 + i) * (1.5 + heat * 3)); c.stroke(); }
+        // dunes: sharp crests, lit side and shadow side
+        const layers = [[hor, H * 0.1, 0.7, 2.1], [H * 0.72, H * 0.13, 1.1, 5.3], [H * 0.86, H * 0.16, 1.6, 8.7]];
+        layers.forEach(([base, amp, f, seed], i) => {
+          const d = (i + 1) / layers.length, pts = [];
+          for (let x = -10; x <= W + 10; x += 6) { const u = x / W; const v = Math.abs(Math.sin(u * Math.PI * (1.5 + f) + seed)); pts.push([x, base - Math.pow(v, 0.55) * amp]); }
+          const lit = mix(mix([214, 170, 120], sk.bot, 0.4), [20, 16, 18], 0.15 + (1 - sk.light) * 0.75);
+          const g = c.createLinearGradient(0, base - amp, 0, base + H * 0.12);
+          g.addColorStop(0, rgba(mix(lit, [255, 220, 180], 0.15 * sk.light), 1)); g.addColorStop(1, rgba(mix(lit, [10, 8, 10], 0.25 + d * 0.3), 1));
+          fillPath(c, pts, H, g);
+        });
+        // wind-blown sand
+        const wind = s.cpu / 100, want = Math.round(wind * 160);
+        while (z.sand.length < want) z.sand.push({ x: Math.random() * W, y: hor + Math.random() * (H - hor), v: 60 + Math.random() * 120 });
+        if (z.sand.length > want) z.sand.length = want;
+        c.fillStyle = rgba([240, 210, 170], 0.35 * (0.4 + sk.light * 0.6));
+        for (const p of z.sand) { p.x += p.v * (0.4 + wind * 2.4) * dt; p.y += Math.sin(s.t * 4 + p.x * 0.05) * 0.2; if (p.x > W) { p.x = -4; p.y = hor + Math.random() * (H - hor); } c.fillRect(p.x, p.y, 2.2, 1); }
+        // shooting stars
+        if (s.notes > 0 && Math.random() < s.notes * 0.012) z.streaks.push({ x: Math.random() * W * 0.8 + W * 0.2, y: Math.random() * hor * 0.5, a: 0 });
+        z.streaks = z.streaks.filter(q => (q.a += dt * 1.4) < 1);
+        for (const q of z.streaks) { const x = q.x - q.a * 220, y = q.y + q.a * 90; const g = c.createLinearGradient(x, y, x + 70, y - 28);
+          g.addColorStop(0, 'rgba(255,248,235,' + (0.9 * (1 - q.a)) + ')'); g.addColorStop(1, 'rgba(255,248,235,0)'); c.strokeStyle = g; c.lineWidth = 1.6; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 70, y - 28); c.stroke(); }
+      } },
+
+    { id: 'aurora', name: 'Aurora', sub: 'Polarnacht', tint: [80, 150, 140], k: 0.18,
+      react: [['CPU', 'Das Polarlicht tanzt heller und schneller'], ['GPU', 'Fenster der Hütte leuchten auf'], ['Ungelesen', 'Es beginnt zu schneien'], ['Nacht', 'Mondlicht auf dem Schnee']],
+      init(W, H) { const r = rng(21); return { st: Array.from({ length: 190 }, () => ({ x: r() * W, y: r() * H * 0.62, r: 0.4 + r() * 1.1, ph: r() * 6.3, tw: 0.6 + r() * 1.8 })),
+        h1: ridge(W, H * 0.74, H * 0.2, 2.2, 0.6), h2: ridge(W, H * 0.9, H * 0.16, 6.1, 0.5), snow: [] }; },
+      draw(c, W, H, s, z, dt) {
+        const sk0 = skyAt(s.h, this.tint, this.k), night = clamp(1 - sk0.light * 1.1, 0, 1);
+        const sk = { top: mix(sk0.top, [4, 10, 18], 0.35), bot: mix(sk0.bot, [18, 30, 40], 0.3), light: sk0.light, star: Math.max(sk0.star, 0.35) };
+        sky(c, W, H, sk, H * 0.8); stars(c, z.st, sk.star, s.t);
+        // aurora curtains
+        const power = (0.18 + 0.82 * s.cpu / 100) * (0.25 + 0.75 * night), speed = 0.3 + s.cpu / 100 * 1.4;
+        const bands = [[H * 0.22, [90, 255, 180], 0], [H * 0.3, [120, 200, 255], 2.1], [H * 0.18, [200, 120, 255], 4.2]];
+        c.globalCompositeOperation = 'lighter';
+        bands.forEach(([base, col, ph], bi) => {
+          for (let x = 0; x < W; x += 3) {
+            const u = x / W, y = base + Math.sin(u * 7 + s.t * speed + ph) * H * 0.05 + Math.sin(u * 17 - s.t * speed * 0.7 + ph) * H * 0.02;
+            const len = H * (0.12 + 0.1 * (0.5 + 0.5 * Math.sin(u * 11 + s.t * speed * 1.3 + ph)));
+            const a = power * (bi === 2 ? 0.35 : 0.6) * (0.5 + 0.5 * Math.sin(u * 5 + ph + s.t * 0.4));
+            const g = c.createLinearGradient(0, y, 0, y + len);
+            g.addColorStop(0, rgba(col, 0)); g.addColorStop(0.25, rgba(col, a * 0.5)); g.addColorStop(1, rgba(col, 0));
+            c.fillStyle = g; c.fillRect(x, y, 3, len);
+          }
+        });
+        c.globalCompositeOperation = 'source-over';
+        // snowy hills lit by the moon
+        const snowLit = mix([200, 215, 230], sk.bot, 0.35 + night * 0.35);
+        fillPath(c, z.h1, H, rgba(mix(snowLit, [10, 16, 26], 0.45), 1));
+        // cabin
+        const cx = W * 0.64, cy = H * 0.84; c.fillStyle = rgba([18, 22, 30], 1); c.fillRect(cx - 26, cy - 22, 52, 26);
+        c.beginPath(); c.moveTo(cx - 32, cy - 22); c.lineTo(cx, cy - 44); c.lineTo(cx + 32, cy - 22); c.closePath(); c.fill();
+        const lamp = clamp(0.15 + s.gpu / 100 * 0.85, 0, 1) * (0.4 + night * 0.6);
+        glow(c, cx, cy - 10, 70, [255, 180, 90], 0.35 * lamp);
+        c.fillStyle = rgba([255, 200, 110], lamp); c.fillRect(cx - 17, cy - 15, 9, 9); c.fillRect(cx + 8, cy - 15, 9, 9);
+        fillPath(c, z.h2, H, rgba(mix(snowLit, [8, 12, 20], 0.25), 1));
+        // snow
+        const want = s.notes * 30;
+        while (z.snow.length < want) z.snow.push({ x: Math.random() * W, y: Math.random() * H - H, r: 0.8 + Math.random() * 1.8, v: 18 + Math.random() * 30, ph: Math.random() * 6 });
+        if (z.snow.length > want) z.snow.length = want;
+        c.fillStyle = 'rgba(240,246,252,0.85)';
+        for (const f of z.snow) { f.y += f.v * dt; f.x += Math.sin(s.t + f.ph) * 0.3; if (f.y > H) { f.y = -4; f.x = Math.random() * W; } c.beginPath(); c.arc(f.x, f.y, f.r, 0, 6.283); c.fill(); }
+      } },
+
+    { id: 'tide', name: 'Tide', sub: 'Offenes Meer', tint: [90, 140, 175], k: 0.14,
+      react: [['CPU', 'Die Wellen werden höher'], ['GPU', 'Das Meer beginnt zu leuchten'], ['Ungelesen', 'Regen zieht übers Wasser'], ['Nacht', 'Mondsteg auf dem Meer']],
+      init(W, H) { const r = rng(33); return { st: Array.from({ length: 150 }, () => ({ x: r() * W, y: r() * H * 0.5, r: 0.4 + r() * 1.1, ph: r() * 6.3, tw: 0.6 + r() * 1.8 })), drops: [] }; },
+      draw(c, W, H, s, z, dt) {
+        const hor = H * 0.56, sk = skyAt(s.h, this.tint, this.k);
+        sky(c, W, H, sk, hor); stars(c, z.st, sk.star, s.t);
+        const sp = sunPos(s.h, W, H, hor);
+        glow(c, sp.x, Math.min(sp.y, hor - 8), H * 0.45, sp.up ? [255, 214, 170] : [200, 215, 235], (sp.up ? 0.5 * sk.light : 0.25 * sk.star));
+        const sea = c.createLinearGradient(0, hor, 0, H);
+        sea.addColorStop(0, rgba(mix(sk.bot, [20, 40, 60], 0.45), 1)); sea.addColorStop(1, rgba(mix(sk.top, [3, 10, 18], 0.7), 1));
+        c.fillStyle = sea; c.fillRect(0, hor, W, H - hor);
+        // light path on the water
+        const px = sp.up ? sp.x : W * 0.68, pathCol = sp.up ? [255, 226, 190] : [210, 225, 245], pathA = sp.up ? 0.3 * sk.light : 0.22 * sk.star;
+        for (let i = 0; i < 26; i++) { const y = hor + 3 + Math.pow(i / 26, 1.6) * (H - hor); const w = 10 + i * 4; c.fillStyle = rgba(pathCol, pathA * (1 - i / 30)); c.fillRect(px - w / 2 + Math.sin(s.t * 1.5 + i * 1.7) * (4 + i), y, w, 1.6 + i * 0.08); }
+        // waves: perspective rows, higher with load
+        const amp = 1.5 + s.cpu / 100 * 9, glowA = clamp(s.gpu / 100, 0, 1) * (0.3 + 0.7 * (1 - sk.light));
+        for (let row = 0; row < 16; row++) {
+          const p = row / 16, y = hor + Math.pow(p, 1.7) * (H - hor) + 4, a = amp * (0.25 + p);
+          c.beginPath();
+          for (let x = 0; x <= W; x += 8) c.lineTo(x, y + Math.sin(x * (0.012 + (1 - p) * 0.02) + s.t * (1 + s.cpu / 120) + row) * a);
+          c.strokeStyle = rgba(mix(sk.bot, [230, 240, 248], 0.4), 0.06 + 0.12 * p * (0.5 + 0.5 * sk.light)); c.lineWidth = 1 + p; c.stroke();
+          if (glowA > 0.02) { c.strokeStyle = rgba([60, 230, 220], glowA * 0.35 * p); c.lineWidth = 2 + p * 3; c.stroke(); }
+        }
+        if (s.notes > 0) rain(c, z.drops, s.notes * 18, W, H, dt, 'rgba(210,225,236,0.22)', 0.12);
+      } },
+
+    { id: 'neon', name: 'Neon', sub: 'Stadt bei Nacht', tint: [140, 90, 180], k: 0.18,
+      react: [['CPU', 'Mehr Fenster gehen an'], ['GPU', 'Leuchtreklamen glühen'], ['Ungelesen', 'Regen auf nasser Straße'], ['Abend', 'Der Himmel färbt sich violett']],
+      init(W, H) { const r = rng(57); const b = []; let x = -10;
+        while (x < W + 10) { const w = 30 + r() * 70, h = H * (0.2 + r() * 0.45); b.push({ x, w, h, layer: r() < 0.45 ? 0 : 1, seed: r() * 1000, sign: r() < 0.3 ? { c: [[255, 70, 160], [80, 220, 255], [255, 170, 60], [150, 110, 255]][Math.floor(r() * 4)], y: r() * 0.4 + 0.15 } : null }); x += w + 2 + r() * 8; }
+        return { b, drops: [], st: Array.from({ length: 70 }, () => ({ x: r() * W, y: r() * H * 0.35, r: 0.4 + r() * 0.9, ph: r() * 6.3, tw: 0.6 + r() * 1.8 })) }; },
+      draw(c, W, H, s, z, dt) {
+        const street = H * 0.8, sk = skyAt(s.h, this.tint, this.k);
+        sky(c, W, H, sk, street); stars(c, z.st, sk.star * 0.6, s.t);
+        glow(c, W * 0.5, street, H * 0.9, [255, 120, 170], 0.12 + 0.14 * (1 - sk.light));
+        const lit = 0.08 + 0.75 * s.cpu / 100, dark = 1 - sk.light * 0.85, neon = clamp(0.15 + s.gpu / 100, 0, 1) * (0.4 + dark * 0.6);
+        [0, 1].forEach(layer => {
+          for (const B of z.b) {
+            if (B.layer !== layer) continue;
+            const top = street - B.h * (layer ? 1 : 0.8);
+            c.fillStyle = rgba(mix(sk.top, [8, 8, 16], layer ? 0.85 : 0.65), 1); c.fillRect(B.x, top, B.w, street - top);
+            const cols = Math.max(2, Math.floor(B.w / 9)), rows = Math.floor((street - top) / 11);
+            for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+              const k = Math.sin(B.seed + i * 12.9898 + j * 78.233) * 43758.5453, v = k - Math.floor(k);
+              const flick = Math.sin(s.t * 0.4 + v * 40) > 0.97 ? 0 : 1;
+              if (v < lit * dark * flick) { c.fillStyle = v < 0.05 ? 'rgba(160,210,255,0.8)' : 'rgba(255,214,150,' + (0.55 + v * 0.4) + ')'; c.fillRect(B.x + 3 + i * (B.w - 4) / cols, top + 5 + j * 11, 3, 4); }
+            }
+            if (B.sign && layer) { const sy = top + (street - top) * B.sign.y; glow(c, B.x + B.w / 2, sy, 50, B.sign.c, 0.5 * neon); c.fillStyle = rgba(B.sign.c, 0.9 * neon); c.fillRect(B.x + 6, sy - 3, B.w - 12, 6); }
+          }
+        });
+        // wet street mirrors the lights
+        const g = c.createLinearGradient(0, street, 0, H);
+        g.addColorStop(0, rgba(mix(sk.top, [6, 6, 12], 0.6), 1)); g.addColorStop(1, 'rgba(4,4,8,1)');
+        c.fillStyle = g; c.fillRect(0, street, W, H - street);
+        const wet = 0.25 + s.notes / 9 * 0.6;
+        for (const B of z.b) if (B.sign) { const c2 = B.sign.c; c.fillStyle = rgba(c2, 0.22 * neon * wet); for (let i = 0; i < 8; i++) c.fillRect(B.x + 6 + Math.sin(s.t * 3 + i) * 3, street + 4 + i * 6, B.w - 12, 2); }
+        if (s.notes > 0) rain(c, z.drops, s.notes * 24, W, H, dt, 'rgba(200,190,255,0.25)', 0.18);
+      } },
+
+    { id: 'orbit', name: 'Orbit', sub: 'Planet im All', tint: [110, 110, 190], k: 0.1,
+      react: [['CPU', 'Der Asteroidengürtel dreht schneller'], ['GPU', 'Glut auf dem Planeten'], ['Ungelesen', 'Kometen ziehen vorbei'], ['Uhrzeit', 'Tag- und Nachtseite wandern']],
+      init(W, H) { const r = rng(77); return { st: Array.from({ length: 260 }, () => ({ x: r() * W, y: r() * H, r: 0.3 + r() * 1.2, ph: r() * 6.3, tw: 0.4 + r() * 2 })),
+        belt: Array.from({ length: 220 }, () => ({ a: r() * 6.283, d: 0.9 + r() * 0.35, s: 0.5 + r() })), comets: [] }; },
+      draw(c, W, H, s, z, dt) {
+        c.fillStyle = '#04050b'; c.fillRect(0, 0, W, H);
+        glow(c, W * 0.2, H * 0.25, H * 0.8, [80, 70, 160], 0.18); glow(c, W * 0.85, H * 0.15, H * 0.6, [40, 100, 160], 0.12);
+        stars(c, z.st, 0.9, s.t);
+        // planet: lit side turns with the time of day
+        const R = H * 0.95, cx = W * 0.5, cy = H * 1.62;
+        const ang = (s.h / 24) * Math.PI * 2 - Math.PI / 2, lx = cx + Math.cos(ang) * R * 0.9, ly = cy - R * 0.8;
+        glow(c, cx, cy, R * 1.12, [110, 170, 255], 0.35);
+        const g = c.createRadialGradient(lx, ly, R * 0.05, cx, cy, R);
+        g.addColorStop(0, '#5b7fa8'); g.addColorStop(0.45, '#22344d'); g.addColorStop(1, '#070b14');
+        c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R, 0, 6.283); c.fill();
+        const heat = clamp((s.gpu - 20) / 75, 0, 1);
+        if (heat > 0.01) { c.save(); c.beginPath(); c.arc(cx, cy, R, 0, 6.283); c.clip();
+          for (let i = 0; i < 9; i++) { const a = -Math.PI / 2 + (i - 4) * 0.13 + Math.sin(i * 7) * 0.05; glow(c, cx + Math.cos(a) * R * 0.97, cy + Math.sin(a) * R * 0.97, R * 0.12, [255, 120, 50], 0.5 * heat); }
+          c.restore(); }
+        // belt
+        const speed = 0.04 + s.cpu / 100 * 0.5;
+        c.fillStyle = 'rgba(214,224,240,0.7)';
+        for (const p of z.belt) { p.a += speed * p.s * dt; const x = cx + Math.cos(p.a) * R * 1.32 * p.d, y = cy + Math.sin(p.a) * R * 0.32 * p.d - R * 0.06;
+          if (y < cy - R * 0.98 || Math.sin(p.a) < 0) c.fillRect(x, y, 1.6, 1.6); }
+        // comets
+        if (s.notes > 0 && Math.random() < s.notes * 0.01) z.comets.push({ x: W + 20, y: Math.random() * H * 0.5, a: 0, v: 0.4 + Math.random() * 0.4 });
+        z.comets = z.comets.filter(q => (q.a += dt * q.v) < 1.2);
+        for (const q of z.comets) { const x = q.x - q.a * W * 0.9, y = q.y + q.a * H * 0.25; const gg = c.createLinearGradient(x, y, x + 90, y - 25);
+          gg.addColorStop(0, 'rgba(220,240,255,0.95)'); gg.addColorStop(1, 'rgba(160,200,255,0)'); c.strokeStyle = gg; c.lineWidth = 2; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 90, y - 25); c.stroke(); glow(c, x, y, 8, [220, 240, 255], 0.9); }
+      } },
+    // ===== minimal set =====
+    { id: 'flow', name: 'Flow', sub: 'Farbwolken', minimal: true, tint: [120, 110, 170], k: 0.1,
+      react: [['CPU', 'Die Wolken fließen schneller'], ['GPU', 'Die Farben werden wärmer'], ['Ungelesen', 'Ein sanfter Puls breitet sich aus'], ['Uhrzeit', 'Morgenpfirsich, Mittagsblau, Abendrosa, Nachtviolett']],
+      init(W, H) { const r = rng(91); return { blobs: Array.from({ length: 6 }, (_, i) => ({ px: r() * 6.3, py: r() * 6.3, sx: 0.07 + r() * 0.08, sy: 0.05 + r() * 0.07, r: 0.35 + r() * 0.3, hue: i })), pulses: [] }; },
+      draw(c, W, H, s, z, dt) {
+        const sk = skyAt(s.h, this.tint, this.k), dark = 1 - sk.light;
+        // time-of-day palette: two anchor colours the blobs alternate between
+        const pal = s.h < 6 || s.h > 21 ? [[60, 40, 120], [20, 70, 130], [110, 50, 140]]
+                  : s.h < 10 ? [[255, 160, 130], [140, 150, 220], [250, 200, 170]]
+                  : s.h < 17 ? [[80, 170, 220], [120, 210, 200], [150, 160, 240]]
+                  : [[240, 120, 140], [250, 170, 110], [140, 100, 190]];
+        const warm = clamp(s.gpu / 100, 0, 1);
+        c.fillStyle = rgba(mix(sk.top, [6, 8, 14], 0.55 + dark * 0.3), 1); c.fillRect(0, 0, W, H);
+        c.globalCompositeOperation = 'lighter';
+        const sp = 0.25 + s.cpu / 100 * 1.8;
+        z.blobs.forEach((b, i) => {
+          b.px += b.sx * sp * dt; b.py += b.sy * sp * dt;
+          const x = W * (0.5 + 0.42 * Math.sin(b.px)), y = H * (0.5 + 0.38 * Math.cos(b.py));
+          const col = mix(pal[i % 3], [255, 140, 70], warm * 0.45);
+          glow(c, x, y, Math.max(W, H) * b.r, col, 0.32 - dark * 0.12);
+        });
+        c.globalCompositeOperation = 'source-over';
+        // fine grain keeps the gradient from banding
+        c.fillStyle = 'rgba(255,255,255,0.025)';
+        for (let i = 0; i < 400; i++) c.fillRect((i * 97.3 + s.t * 11) % W, (i * 61.7) % H, 1, 1);
+        if (s.notes > 0 && Math.random() < s.notes * 0.012) z.pulses.push({ a: 0 });
+        z.pulses = z.pulses.filter(q => (q.a += dt * 0.35) < 1);
+        for (const q of z.pulses) { c.strokeStyle = 'rgba(255,255,255,' + (0.35 * (1 - q.a)) + ')'; c.lineWidth = 1.5; c.beginPath(); c.arc(W / 2, H / 2, q.a * Math.max(W, H) * 0.6, 0, 6.283); c.stroke(); }
+      } },
+
+    { id: 'contour', name: 'Contour', sub: 'Höhenlinien', minimal: true, tint: [110, 140, 160], k: 0.12,
+      react: [['CPU', 'Die Linien bewegen sich stärker'], ['GPU', 'Die Täler glühen warm'], ['Ungelesen', 'Eine Welle läuft durch die Linien'], ['Uhrzeit', 'Hell am Tag, Linien leuchten nachts']],
+      init() { return { waves: [] }; },
+      draw(c, W, H, s, z, dt) {
+        const sk = skyAt(s.h, this.tint, this.k), dark = 1 - sk.light;
+        const bg = mix(mix(sk.top, sk.bot, 0.3), [10, 13, 17], 0.55 + dark * 0.35);
+        c.fillStyle = rgba(bg, 1); c.fillRect(0, 0, W, H);
+        const lineCol = mix(sk.bot, [235, 240, 244], 0.55), heat = clamp((s.gpu - 20) / 75, 0, 1), m = 0.15 + s.cpu / 100 * 0.9;
+        if (s.notes > 0 && Math.random() < s.notes * 0.01) z.waves.push({ x: Math.random() * W, a: 0 });
+        z.waves = z.waves.filter(q => (q.a += dt * 0.5) < 1);
+        const N = 42;
+        for (let i = 0; i < N; i++) {
+          const base = (i + 0.5) / N * H * 1.1 - H * 0.05;
+          c.beginPath();
+          for (let x = 0; x <= W; x += 8) {
+            const u = x / W;
+            let y = base + Math.sin(u * 3.1 + i * 0.21 + s.t * 0.12 * m) * H * 0.07 + Math.sin(u * 7.3 - i * 0.13 + s.t * 0.2 * m) * H * 0.025 + Math.sin(u * 1.4 + 2 + s.t * 0.05) * H * 0.09;
+            for (const q of z.waves) { const d = Math.abs(x - q.x) - q.a * W * 0.6; y += Math.exp(-d * d / 900) * 10 * (1 - q.a); }
+            x === 0 ? c.moveTo(x, y) : c.lineTo(x, y);
+          }
+          const valley = Math.sin(i / N * Math.PI);
+          c.strokeStyle = heat > 0.01 && valley > 0.75 ? rgba(mix(lineCol, [255, 150, 80], heat * (valley - 0.75) * 4), 0.55) : rgba(lineCol, (i % 5 === 0 ? 0.32 : 0.14) * (0.7 + dark * 0.5));
+          c.lineWidth = i % 5 === 0 ? 1.4 : 0.9; c.stroke();
+        }
+      } },
+
+    { id: 'grid', name: 'Grid', sub: 'Punktraster', minimal: true, tint: [120, 150, 170], k: 0.1,
+      react: [['CPU', 'Die Welle im Raster wird stärker'], ['GPU', 'Punkte in der Mitte glühen'], ['Ungelesen', 'Pings breiten sich aus'], ['Uhrzeit', 'Tagesfarbe im Hintergrund']],
+      init() { return { pings: [] }; },
+      draw(c, W, H, s, z, dt) {
+        const sk = skyAt(s.h, this.tint, this.k), dark = 1 - sk.light;
+        const g = c.createLinearGradient(0, 0, 0, H);
+        g.addColorStop(0, rgba(mix(sk.top, [8, 10, 15], 0.6 + dark * 0.3), 1)); g.addColorStop(1, rgba(mix(sk.bot, [8, 10, 15], 0.7 + dark * 0.2), 1));
+        c.fillStyle = g; c.fillRect(0, 0, W, H);
+        if (s.notes > 0 && Math.random() < s.notes * 0.012) z.pings.push({ x: Math.random() * W, y: Math.random() * H, a: 0 });
+        z.pings = z.pings.filter(q => (q.a += dt * 0.6) < 1);
+        const step = Math.max(14, Math.round(W / 70)), amp = 0.2 + s.cpu / 100 * 1.6, heat = clamp(s.gpu / 100, 0, 1);
+        const dotCol = mix(sk.bot, [230, 238, 244], 0.6);
+        for (let y = step / 2; y < H; y += step) for (let x = step / 2; x < W; x += step) {
+          const w = Math.sin(x * 0.012 + s.t * 0.7 * amp) + Math.sin(y * 0.018 - s.t * 0.5 * amp) + Math.sin((x + y) * 0.008 + s.t * 0.3);
+          let v = (w / 3 + 1) / 2;
+          for (const q of z.pings) { const d = Math.hypot(x - q.x, y - q.y) - q.a * Math.max(W, H) * 0.5; v += Math.exp(-d * d / 400) * (1 - q.a) * 1.2; }
+          const centre = Math.exp(-((x - W / 2) ** 2 / (W * W * 0.06) + (y - H * 0.55) ** 2 / (H * H * 0.08)));
+          const col = mix(dotCol, [255, 150, 80], heat * centre);
+          c.fillStyle = rgba(col, 0.08 + v * 0.42);
+          const r = 0.6 + v * 1.6 * (step / 18);
+          c.beginPath(); c.arc(x, y, r, 0, 6.283); c.fill();
+        }
+      } },
+
+    { id: 'horizon', name: 'Horizon', sub: 'Flache Landschaft', minimal: true, tint: [150, 130, 150], k: 0.12,
+      react: [['CPU', 'Dunstschleier ziehen durchs Tal'], ['GPU', 'Die Sonne wird größer und wärmer'], ['Ungelesen', 'Ein Vogelschwarm zieht vorbei'], ['Uhrzeit', 'Sonne und Mond wandern']],
+      init(W, H) { const r = rng(13); return { birds: [], st: Array.from({ length: 90 }, () => ({ x: r() * W, y: r() * H * 0.5, r: 0.4 + r() * 0.9, ph: r() * 6.3, tw: 0.6 + r() * 1.6 })) }; },
+      draw(c, W, H, s, z, dt) {
+        const sk = skyAt(s.h, this.tint, this.k);
+        sky(c, W, H, sk, H * 0.75); stars(c, z.st, sk.star * 0.7, s.t);
+        const sp = sunPos(s.h, W, H, H * 0.62), heat = clamp(s.gpu / 100, 0, 1);
+        const sunR = H * (0.07 + heat * 0.05), sunCol = sp.up ? mix([255, 236, 210], [255, 140, 80], heat * 0.7 + (s.h > 17 ? 0.3 : 0)) : [235, 240, 248];
+        if (sp.up || sk.star > 0.3) { glow(c, sp.up ? sp.x : W * 0.72, sp.up ? sp.y : H * 0.22, sunR * 4, sunCol, 0.12 + heat * 0.12);
+          c.fillStyle = rgba(sunCol, sp.up ? 0.95 : 0.85); c.beginPath(); c.arc(sp.up ? sp.x : W * 0.72, sp.up ? sp.y : H * 0.22, sp.up ? sunR : sunR * 0.6, 0, 6.283); c.fill(); }
+        // flat layered hills, each a step darker
+        const layers = 5;
+        for (let i = 0; i < layers; i++) {
+          const d = i / (layers - 1), base = H * (0.55 + d * 0.33), amp = H * (0.08 + d * 0.05), pts = [];
+          for (let x = -10; x <= W + 10; x += 10) { const u = x / W; pts.push([x, base - (Math.sin(u * (2 + i * 0.7) + i * 1.7) * 0.5 + 0.5) * amp]); }
+          fillPath(c, pts, H, rgba(mix(mix(sk.bot, sk.top, 0.4), [12, 14, 20], 0.25 + d * 0.65), 1));
+          // haze strip between layers
+          if (i < layers - 1 && s.cpu > 5) { const hz = c.createLinearGradient(0, base - amp * 0.2, 0, base + amp * 0.8);
+            hz.addColorStop(0, rgba(mix(sk.bot, [255, 255, 255], 0.35), 0)); hz.addColorStop(0.5, rgba(mix(sk.bot, [255, 255, 255], 0.35), 0.12 * s.cpu / 100 * (0.6 + 0.4 * Math.sin(s.t * 0.3 + i)))); hz.addColorStop(1, rgba(sk.bot, 0));
+            c.fillStyle = hz; c.fillRect(0, base - amp * 0.2, W, amp); }
+        }
+        // birds
+        if (s.notes > 0 && z.birds.length === 0 && Math.random() < s.notes * 0.008) {
+          const y0 = H * (0.2 + Math.random() * 0.2), n = 5 + Math.floor(Math.random() * 5);
+          for (let i = 0; i < n; i++) z.birds.push({ x: -20 - i * 14 - Math.random() * 20, y: y0 + (i % 2 ? 1 : -1) * i * 4 + Math.random() * 6, ph: Math.random() * 6 });
+        }
+        c.strokeStyle = rgba(mix(sk.top, [20, 20, 28], 0.6), 0.85); c.lineWidth = 1.4;
+        for (const b of z.birds) { b.x += 60 * dt; const f = Math.sin(s.t * 9 + b.ph) * 3;
+          c.beginPath(); c.moveTo(b.x - 6, b.y - f); c.lineTo(b.x, b.y); c.lineTo(b.x + 6, b.y - f); c.stroke(); }
+        z.birds = z.birds.filter(b => b.x < W + 30);
+      } }
+  ];
+
+  // ---------- state + main canvas
+  const S = { h: 15.33, cpu: 25, gpu: 10, notes: 0, t: 0 };
+  let current = SCENES[0], playing = false;
+  const main = $('#main'), mctx = main.getContext('2d');
+  let MW = 0, MH = 0, mz = null;
+  function sizeCanvas(cv, ctx) {
+    const r = cv.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); return [r.width, r.height];
+  }
+  function resizeMain() { [MW, MH] = sizeCanvas(main, mctx); mz = current.init(MW, MH); drawMain(0); }
+  function drawMain(dt) { if (MW) current.draw(mctx, MW, MH, S, mz, dt); }
+
+  // thumbnails (picker + settings centre), redrawn when inputs change
+  const thumbs = [];
+  function buildPicker() {
+    const box = $('#scenes');
+    SCENES.forEach(sc => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'scene'; b.setAttribute('aria-pressed', sc === current ? 'true' : 'false'); b.dataset.id = sc.id;
+      b.innerHTML = '<canvas aria-hidden="true"></canvas><div class="txt">' + (sc.minimal ? '<span class="mini">Minimal</span>' : '') + '<b>' + sc.name + '</b><span>' + sc.sub + '</span><dl class="react">' +
+        sc.react.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('') + '</dl></div>';
+      b.addEventListener('click', () => choose(sc.id));
+      box.appendChild(b);
+      thumbs.push({ cv: b.querySelector('canvas'), sc });
+    });
+  }
+  function drawThumbs() {
+    for (const th of thumbs) {
+      const ctx = th.cv.getContext('2d'); const [w, h] = sizeCanvas(th.cv, ctx);
+      if (!w) continue; const z = th.sc.init(w, h);
+      for (let i = 0; i < 3; i++) th.sc.draw(ctx, w, h, S, z, 0.016);
+    }
+  }
+  let thumbTimer = 0;
+  const refreshThumbs = () => { clearTimeout(thumbTimer); thumbTimer = setTimeout(drawThumbs, 120); };
+  function choose(id) {
+    current = SCENES.find(s => s.id === id) || SCENES[0];
+    document.querySelectorAll('.scene').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === id ? 'true' : 'false'));
+    document.querySelectorAll('.wallgrid button').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === id ? 'true' : 'false'));
+    $('#tagName').textContent = current.name;
+    mz = current.init(MW, MH); drawMain(0);
+  }
+
+  // ---------- controls
+  const bind = (id, key, fmt) => {
+    const inp = $('#s-' + id), out = $('#o-' + id);
+    inp.addEventListener('input', () => { S[key] = parseFloat(inp.value); out.textContent = fmt(S[key]); if (key === 'h') $('#tagTime').textContent = hhmm(S.h); if (reduce) drawMain(0); refreshThumbs(); });
+  };
+  bind('time', 'h', hhmm); bind('cpu', 'cpu', v => v + ' %'); bind('gpu', 'gpu', v => v + ' %'); bind('notes', 'notes', v => String(v));
+  $('#play').addEventListener('click', () => {
+    playing = !playing;
+    $('#play').setAttribute('aria-pressed', String(playing));
+    $('#playText').textContent = playing ? 'Anhalten' : 'Zeitraffer';
+    $('#playIcon').innerHTML = playing ? '<path d="M2 1h3v10H2zM7 1h3v10H7z"/>' : '<path d="M2 1l9 5-9 5z"/>';
+  });
+
+  // ---------- loop
+  let last = performance.now(), visible = true, thumbClock = 0;
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe($('#stage'));
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (playing) {
+      S.h = (S.h + dt * 0.8) % 24;
+      $('#s-time').value = S.h; $('#o-time').textContent = hhmm(S.h); $('#tagTime').textContent = hhmm(S.h);
+      thumbClock += dt; if (thumbClock > 0.8) { thumbClock = 0; drawThumbs(); }
+    }
+    if (visible && !reduce) { S.t += dt; drawMain(dt); }
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- settings centre draft
+  const NAV = [
+    ['form', 'Form', '<circle cx="8" cy="8" r="5"/>'],
+    ['farbe', 'Farbe', '<path d="M8 2.5a5.5 5.5 0 1 0 0 11c1 0 1.2-.8.8-1.5-.5-.9 0-1.8 1-1.8h1.5A2.2 2.2 0 0 0 13.5 8 5.5 5.5 0 0 0 8 2.5z"/>'],
+    ['hintergrund', 'Hintergrund', '<rect x="2" y="3.5" width="12" height="9" rx="1.5"/><path d="M2.5 11l3.5-3 2.5 2 2-1.5 3 2.5"/>'],
+    ['leiste', 'Obere Leiste', '<rect x="2" y="3" width="12" height="3" rx="1.5"/><path d="M2 10h12"/>'],
+    ['verhalten', 'Verhalten', '<path d="M3 4h10M3 8h10M3 12h6"/>'],
+    ['hinweise', 'Hinweise', '<path d="M4.5 11V7.5a3.5 3.5 0 0 1 7 0V11l1 1.5h-9z"/><path d="M7 14h2"/>']
+  ];
+  let pane = 'hintergrund';
+  const wallState = { follow: true, react: 'dezent', motion: 'normal' };
+  function renderNav() {
+    const nav = $('#nav'); nav.querySelectorAll('button').forEach(b => b.remove());
+    NAV.forEach(([id, label, ic]) => {
+      const b = document.createElement('button'); b.type = 'button';
+      b.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true">' + ic + '</svg>' + label;
+      b.setAttribute('aria-current', id === pane ? 'true' : 'false');
+      b.addEventListener('click', () => { pane = id; renderNav(); renderPane(); });
+      nav.appendChild(b);
+    });
+  }
+  const seg = (key, opts) => '<div class="seg" role="group">' + opts.map(([v, l]) => '<button type="button" class="opt" data-k="' + key + '" data-v="' + v + '" aria-pressed="' + (wallState[key] === v) + '">' + l + '</button>').join('') + '</div>';
+  function renderPane() {
+    const p = $('#pane');
+    if (pane === 'hintergrund') {
+      p.innerHTML = '<h3>Hintergrund</h3><p class="sub">Eine lebende Atmosphäre oder ein eigenes Bild.</p>' +
+        '<div class="group"><span class="gl">Atmosphäre</span><div class="wallgrid">' +
+        SCENES.map(sc => '<button type="button" data-id="' + sc.id + '" aria-pressed="' + (sc === current) + '"><canvas aria-hidden="true"></canvas><span>' + sc.name + '</span></button>').join('') + '</div></div>' +
+        '<div class="group"><span class="gl">Verhalten</span>' +
+        '<div class="row"><div class="l"><b>Folgt der Tageszeit</b><span>Licht, Sterne und Farben wandern mit der Uhr.</span></div><button class="switch" type="button" role="switch" aria-checked="' + wallState.follow + '" aria-label="Folgt der Tageszeit" id="sw-follow"></button></div>' +
+        '<div class="row"><div class="l"><b>Reagiert auf den Rechner</b><span>Last, Grafikkarte und Ungelesenes verändern die Szene.</span></div>' + seg('react', [['aus', 'Aus'], ['dezent', 'Dezent'], ['deutlich', 'Deutlich']]) + '</div>' +
+        '<div class="row"><div class="l"><b>Bewegung</b><span>Weniger Bewegung spart Akku und beruhigt.</span></div>' + seg('motion', [['ruhig', 'Ruhig'], ['normal', 'Normal'], ['lebhaft', 'Lebhaft']]) + '</div></div>';
+      p.querySelectorAll('.wallgrid button').forEach(b => b.addEventListener('click', () => choose(b.dataset.id)));
+      p.querySelector('#sw-follow').addEventListener('click', e => { wallState.follow = !wallState.follow; e.currentTarget.setAttribute('aria-checked', String(wallState.follow)); });
+      p.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => { wallState[b.dataset.k] = b.dataset.v; renderPane(); }));
+      requestAnimationFrame(() => p.querySelectorAll('.wallgrid button').forEach(b => {
+        const sc = SCENES.find(s => s.id === b.dataset.id), cv = b.querySelector('canvas'), ctx = cv.getContext('2d'); const [w, h] = sizeCanvas(cv, ctx);
+        if (w) { const z = sc.init(w, h); for (let i = 0; i < 3; i++) sc.draw(ctx, w, h, S, z, 0.016); }
+      }));
+    } else if (pane === 'form') {
+      p.innerHTML = '<h3>Form</h3><p class="sub">Wie deine Programme erscheinen. Darunter stehen nur die Einstellungen der gewählten Form.</p>' +
+        '<div class="cards">' + [['Orb', 'schwebende Kugel', 1], ['Ember', 'Glutnaht', 0], ['Shelf', 'Glaskante', 0], ['Liquid', 'flüssiges Glas', 0]]
+          .map(([n, h, on]) => '<div class="card' + (on ? ' on' : '') + '"><div class="glyph"><svg viewBox="0 0 40 22" width="40" height="22" aria-hidden="true">' +
+            (n === 'Orb' ? '<circle cx="20" cy="11" r="7" fill="#8fb0c2"/>' : n === 'Ember' ? '<rect x="4" y="15" width="32" height="5" rx="2.5" fill="#26313a"/><circle cx="12" cy="17.5" r="1.5" fill="#ff8a4c"/><circle cx="18" cy="17.5" r="1.5" fill="#8fb0c2"/><circle cx="24" cy="17.5" r="1.5" fill="#cdd5db"/>' : n === 'Shelf' ? '<rect x="3" y="16" width="34" height="3" rx="1" fill="#5d6c78"/><rect x="8" y="7" width="7" height="8" rx="2" fill="#8fb0c2"/><rect x="18" y="5" width="7" height="8" rx="2" fill="#e0bd6e"/><rect x="28" y="7" width="7" height="8" rx="2" fill="#7fdcb0"/>' : '<path d="M3 16a3 3 0 0 1 3-3h10a5 5 0 1 1 8 0h10a3 3 0 0 1 0 6H6a3 3 0 0 1-3-3z" fill="#26313a"/>') +
+            '</svg></div><b>' + n + '</b>' + h + '</div>').join('') + '</div>' +
+        '<div class="group"><span class="gl">Orb</span><div class="row"><div class="l"><b>Kugelgröße</b><span>Wird überall gleich groß gezeichnet, auch bei 4K.</span></div>' + seg('motion', [['ruhig', '80 %'], ['normal', '100 %'], ['lebhaft', '140 %']]) + '</div>' +
+        '<div class="row"><div class="l"><b>Effekt</b><span>Aura, Puls, Ruhig oder Schlicht.</span></div>' + seg('react', [['aus', 'Schlicht'], ['dezent', 'Aura'], ['deutlich', 'Puls']]) + '</div></div>';
+      p.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => { wallState[b.dataset.k] = b.dataset.v; renderPane(); }));
+    } else if (pane === 'farbe') {
+      p.innerHTML = '<h3>Farbe</h3><p class="sub">Eine Farbe für Orb, Docks und Leiste, oder jede App in ihrer eigenen.</p>' +
+        '<div class="group"><span class="gl">Akzent</span><div class="swatches">' + ['#8fb0c2', '#e0bd6e', '#ff8a4c', '#e88fa6', '#b49cf0', '#7fd3f0', '#7fdcb0', '#eef2f5'].map((c, i) => '<i style="background:' + c + '" class="' + (i ? '' : 'on') + '"></i>').join('') + '</div></div>' +
+        '<div class="group"><div class="row"><div class="l"><b>Farbe aus dem Hintergrund</b><span>Pillbox nimmt den Ton der gewählten Atmosphäre an.</span></div><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Farbe aus dem Hintergrund"></button></div>' +
+        '<div class="row"><div class="l"><b>Programme in ihrer Symbolfarbe</b><span>Discord blau, Zen orange, Bitwarden blau.</span></div><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Programme in Symbolfarbe"></button></div></div>';
+      p.querySelectorAll('.switch').forEach(s => s.addEventListener('click', () => s.setAttribute('aria-checked', String(s.getAttribute('aria-checked') !== 'true'))));
+    } else {
+      const titles = { leiste: ['Obere Leiste', 'Was in den drei Pillen steht: Systemwerte, Uhr, Medien, Kontrollzentrum.'], verhalten: ['Verhalten', 'Vollbild, Geist-Modus über Fenstern, Position, Monitore.'], hinweise: ['Hinweise', 'Zahlen für Ungelesenes, Lichtwellen, „Nicht stören“.'] }[pane];
+      p.innerHTML = '<h3>' + titles[0] + '</h3><p class="sub">' + titles[1] + '</p><p class="note">In diesem Entwurf nur angedeutet. Die Bereiche übernehmen die Einstellungen, die es im Panel schon gibt, und bekommen dieselbe Ordnung wie „Hintergrund“: Gruppen mit klaren Überschriften, eine Zeile pro Einstellung, rechts der Schalter.</p>';
+    }
+  }
+
+  // ---------- start
+  buildPicker(); renderNav(); renderPane();
+  new ResizeObserver(() => { resizeMain(); refreshThumbs(); }).observe($('#stage'));
+  resizeMain(); drawThumbs();
+  if (!reduce) requestAnimationFrame(frame);
+})();
+</script>

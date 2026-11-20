@@ -21,6 +21,12 @@
     <entry name="dockScreen" type="String"><default>primary</default></entry>
     <entry name="dockScale" type="Int"><default>100</default><min>60</min><max>160</max></entry>
     <entry name="shelfReflection" type="Bool"><default>true</default></entry>
+    <!-- wallpaper, set from the settings centre: keep | flow | horizon | fogline -->
+    <entry name="wallScene" type="String"><default>keep</default></entry>
+    <entry name="wallFollow" type="Bool"><default>true</default></entry>
+    <entry name="wallReact" type="String"><default>subtle</default></entry>
+    <entry name="wallMotion" type="String"><default>normal</default></entry>
+    <entry name="wallPause" type="Bool"><default>true</default></entry>
     <entry name="ballScale" type="Int"><default>100</default><min>60</min><max>200</max></entry>
     <!-- "custom": use customColor, "system": the colour scheme's accent -->
     <entry name="colorMode" type="String"><default>custom</default></entry>

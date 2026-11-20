@@ -37,7 +37,12 @@ if (( RESTORE )) && [[ -n "$ORIG" && -e "$ORIG" ]]; then
     fi
     qdbus6 org.kde.KWin /KWin reconfigure >/dev/null 2>&1 || true
     say "Panels, theme and colours are back to how they were before Pillbox"
-elif [[ "$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage 2>/dev/null)" == "org.pillbox.desktop" ]]; then
+else
+    # keep the panels, but give every desktop that uses the living wallpaper Plasma's image back
+    qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \
+        "desktops().forEach(function(d){ if (d.wallpaperPlugin === 'org.pillbox.atmosphere') d.wallpaperPlugin = 'org.kde.image'; });" >/dev/null 2>&1 || true
+fi
+if (( ! RESTORE )) && [[ "$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage 2>/dev/null)" == "org.pillbox.desktop" ]]; then
     plasma-apply-lookandfeel -a org.kde.breezedark.desktop
     say "Switched global theme back to Breeze Dark (panels kept)"
 fi
@@ -45,6 +50,7 @@ fi
 "$(dirname "$0")/kwin/browser-rule.sh" remove && say "Removed the browser window rule" || true
 kpackagetool6 -t Plasma/LookAndFeel -r org.pillbox.desktop >/dev/null 2>&1 && say "Removed global theme" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.orb     >/dev/null 2>&1 && say "Removed the Orb" || true
+kpackagetool6 -t Plasma/Wallpaper   -r org.pillbox.atmosphere >/dev/null 2>&1 && say "Removed the living wallpaper" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.stats   >/dev/null 2>&1 && say "Removed widget: Pillbox Stats" || true
 rm -rf "$DATA/plasma/desktoptheme/Pillbox"
 rm -f  "$DATA/color-schemes/Pillbox.colors"

@@ -287,3 +287,210 @@ msgstr "flüssiges Glas"
 
 msgid "Liquid – a dock of liquid glass with a drop that follows you"
 msgstr "Liquid – ein Dock aus flüssigem Glas, dessen Tropfen dir folgt"
+
+msgid "Wallpaper"
+msgstr "Hintergrund"
+
+msgid "Top bar"
+msgstr "Obere Leiste"
+
+msgid "About"
+msgstr "Über"
+
+msgid "Accent"
+msgstr "Akzent"
+
+msgid "Apps"
+msgstr "Programme"
+
+msgid "Dock"
+msgstr "Dock"
+
+msgid "Ball size"
+msgstr "Kugelgröße"
+
+msgid "Drawn the same size on every screen, 4K included."
+msgstr "Wird überall gleich groß gezeichnet, auch bei 4K."
+
+msgid "Effect"
+msgstr "Effekt"
+
+msgid "Aura"
+msgstr "Aura"
+
+msgid "Pulse"
+msgstr "Puls"
+
+msgid "Calm"
+msgstr "Ruhig"
+
+msgid "Plain"
+msgstr "Schlicht"
+
+msgid "Speed"
+msgstr "Tempo"
+
+msgid "Ring size"
+msgstr "Ringgröße"
+
+msgid "The circle of apps around the ball."
+msgstr "Der Kreis aus Programmen um die Kugel."
+
+msgid "Position"
+msgstr "Position"
+
+msgid "Monitor"
+msgstr "Monitor"
+
+msgid "At rest"
+msgstr "In Ruhe"
+
+msgid "Smaller or hidden docks free the space above them."
+msgstr "Kleine oder ausgeblendete Docks geben den Platz darüber frei."
+
+msgid "Visible"
+msgstr "Sichtbar"
+
+msgid "Small"
+msgstr "Klein"
+
+msgid "Hidden"
+msgstr "Ausgeblendet"
+
+msgid "Dock size"
+msgstr "Dockgröße"
+
+msgid "For the orb, the docks and highlights."
+msgstr "Für Orb, Docks und Hervorhebungen."
+
+msgid "Use the color scheme's accent"
+msgstr "Akzentfarbe des Farbschemas verwenden"
+
+msgid "Follows System Settings → Colors."
+msgstr "Folgt Systemeinstellungen → Farben."
+
+msgid "Discord blue, Zen orange – in the ring and the docks."
+msgstr "Discord blau, Zen orange – im Ring und in den Docks."
+
+msgid "Atmosphere"
+msgstr "Atmosphäre"
+
+msgid "clouds of colour"
+msgstr "Farbwolken"
+
+msgid "flat hills, one sun"
+msgstr "flache Hügel, eine Sonne"
+
+msgid "misty lake"
+msgstr "Nebelsee"
+
+msgid "Own image"
+msgstr "Eigenes Bild"
+
+msgid "Plasma's wallpaper"
+msgstr "Plasmas Hintergrundbild"
+
+msgid "Follows the time of day"
+msgstr "Folgt der Tageszeit"
+
+msgid "Light, stars and colours move with the clock."
+msgstr "Licht, Sterne und Farben wandern mit der Uhr."
+
+msgid "Reacts to your computer"
+msgstr "Reagiert auf den Rechner"
+
+msgid "Load, graphics card and unread notifications change the scene."
+msgstr "Last, Grafikkarte und Ungelesenes verändern die Szene."
+
+msgid "Off"
+msgstr "Aus"
+
+msgid "Subtle"
+msgstr "Dezent"
+
+msgid "Strong"
+msgstr "Deutlich"
+
+msgid "Motion"
+msgstr "Bewegung"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Lively"
+msgstr "Lebhaft"
+
+msgid "Calm redraws 8 times a second, lively 20."
+msgstr "Ruhig zeichnet 8-mal pro Sekunde neu, lebhaft 20-mal."
+
+msgid "Pause when covered"
+msgstr "Pausieren, wenn verdeckt"
+
+msgid "No cost at all while a maximised or fullscreen window fills the screen."
+msgstr "Kostet nichts, solange ein maximiertes oder Vollbild-Fenster den Bildschirm füllt."
+
+msgid "Coming next"
+msgstr "Als Nächstes"
+
+msgid "Islands"
+msgstr "Islands"
+
+msgid "The three pills will unfold into panels: graphs, calendar, a control centre. Choose what each pill shows here."
+msgstr "Die drei Pillen entfalten sich zu Panels: Kurven, Kalender, ein Kontrollzentrum. Hier wählst du, was jede Pille zeigt."
+
+msgid "soon"
+msgstr "bald"
+
+msgid "Hide in fullscreen"
+msgstr "Im Vollbild ausblenden"
+
+msgid "Games and videos get the whole screen."
+msgstr "Spiele und Videos bekommen den ganzen Bildschirm."
+
+msgid "Fade over windows"
+msgstr "Über Fenstern verblassen"
+
+msgid "Faint while a window lies underneath, full again on hover."
+msgstr "Blass, solange ein Fenster darunter liegt, beim Drüberfahren wieder voll."
+
+msgid "Satellites"
+msgstr "Satelliten"
+
+msgid "Open windows orbit the ball."
+msgstr "Offene Fenster kreisen um die Kugel."
+
+msgid "The ball can no longer be dragged by accident."
+msgstr "Die Kugel lässt sich nicht mehr versehentlich verschieben."
+
+msgid "Back to the bottom centre of the main monitor."
+msgstr "Zurück unten in die Mitte des Hauptbildschirms."
+
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+msgid "Unread counts"
+msgstr "Anzahl Ungelesener"
+
+msgid "On the orb and on each app; clears when you look at the app."
+msgstr "Am Orb und an jedem Programm; verschwindet, wenn du das Programm ansiehst."
+
+msgid "Wave of light"
+msgstr "Lichtwelle"
+
+msgid "In the app's colour for each new notification. Never in Do Not Disturb or fullscreen."
+msgstr "In der Farbe des Programms bei jeder neuen Benachrichtigung. Nie bei „Nicht stören“ oder im Vollbild."
+
+msgid "A calm, modern desktop for KDE Plasma 6 – only official Plasma interfaces, nothing compiled, measured to cost next to nothing."
+msgstr "Ein ruhiger, moderner Desktop für KDE Plasma 6 – nur offizielle Plasma-Schnittstellen, nichts kompiliert, gemessen fast ohne Kosten."
+
+msgid "Project"
+msgstr "Projekt"
+
+msgid "Source code and issues"
+msgstr "Quellcode und Fehlermeldungen"
+
+msgid "Open"
+msgstr "Öffnen"
+
+msgid "Licence"
+msgstr "Lizenz"

@@ -5,7 +5,7 @@ A calm, modern desktop for **KDE Plasma 6**. Instead of a dock, a glowing
 anywhere, minimise windows into it. On top: three floating "pills" with your
 system stats, the clock and the tray.
 
-> **Status:** 0.5 – Orb plus three dock forms (Ember, Shelf, Liquid), live settings panel. Feedback welcome.
+> **Status:** 0.6 – Orb and three dock forms, living wallpapers, a settings centre. Feedback welcome.
 
 ## Why
 
@@ -47,11 +47,38 @@ Docks can sit at the **bottom, left or right**, on the main monitor, on **all
 monitors** or on one you choose, and can rest **always visible**, **small until
 the pointer comes** or **hidden behind a thin line**.
 
+## Living wallpapers
+
+**Pillbox Atmosphere** follows the time of day – blue hour, noon, evening glow,
+stars – and quietly shows what your computer is doing, without a single number:
+
+| | | CPU load | GPU load | Unread |
+|---|---|---|---|---|
+| **Flow** | soft clouds of colour | drift faster | warmer tones | a soft ring of light |
+| **Horizon** | flat layered hills, one clear sun | haze drifts through | the sun grows warmer | a flock of birds |
+| **Fogline** | misty lake under mountains | denser fog | the ridges glow | rings on the water |
+
+Built to cost next to nothing (measured on a 3440×1440 + 1080×1920 setup,
+share of *one* CPU core above a plain image wallpaper):
+
+| | Plasma | KWin |
+|---|---|---|
+| Fogline | +0.1 % | +1.7 % |
+| Horizon | +0.1 % | +2.6 % |
+| Flow | +1.5 % | +4.5 % |
+| any scene, with a maximised or fullscreen window | 0 | 0 |
+
+How: everything is built from GPU-drawn shapes and gradients; colours change once
+a minute; all motion shares one slow clock (8 / 12 / 20 fps for calm / normal /
+lively) because for a wallpaper the cost is how often the whole screen must be
+redrawn; a maximised or fullscreen window pauses the scene entirely.
+
 ## Settings
 
-Right-click the Orb or a dock → **Customize…** opens the Pillbox panel on your
-desktop. Every change applies **live** – the real orb or dock is the preview.
-Only the options of the chosen form are shown.
+Right-click the Orb or a dock → **Customize…** opens the Pillbox settings centre:
+a glass window with a sidebar – Form, Color, Wallpaper, Top bar, Behavior, Alerts,
+About. Every change applies **live**; the real orb, dock and wallpaper are the
+preview. Only the options of the chosen form are shown.
 Full behaviour spec: [docs/orb.md](docs/orb.md).
 
 ## What's inside
@@ -59,6 +86,7 @@ Full behaviour spec: [docs/orb.md](docs/orb.md).
 | Component | Description |
 |---|---|
 | Widget `Pillbox Orb` | The dock replacement described above |
+| Wallpaper `Pillbox Atmosphere` | Flow, Horizon, Fogline – follow the clock, react to load, pause when covered |
 | Widget `Pillbox Stats` | `CPU 12%  GPU 4%  RAM 31%  45°C` from Plasma's own sensors (NVIDIA, AMD, Intel) |
 | Global theme `Pillbox` | Colours, Plasma style, Breeze Dark icons, Breeze cursor |
 | Layout | Top: menu + stats · clock · media/tray/power pills. The Orb replaces the dock |

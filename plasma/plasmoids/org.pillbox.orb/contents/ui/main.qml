@@ -799,6 +799,25 @@ PlasmoidItem {
         PlasmaExtras.MenuItem { text: i18n("Customize…"); icon: "configure"; onClicked: root.settingsOpen = true }
     }
 
+    // wallpaper on every desktop, driven from the settings centre via Plasma's own scripting
+    function applyWallpaper() {
+        const c = cfg
+        let js
+        if (c.wallScene === "keep") {
+            js = "desktops().forEach(function(d){ if (d.wallpaperPlugin === 'org.pillbox.atmosphere') d.wallpaperPlugin = 'org.kde.image'; });"
+        } else {
+            js = "desktops().forEach(function(d){ d.wallpaperPlugin = 'org.pillbox.atmosphere';"
+               + " d.currentConfigGroup = ['Wallpaper', 'org.pillbox.atmosphere', 'General'];"
+               + " d.writeConfig('Scene', '" + c.wallScene + "');"
+               + " d.writeConfig('FollowTime', " + (c.wallFollow ? "true" : "false") + ");"
+               + " d.writeConfig('Reactivity', '" + c.wallReact + "');"
+               + " d.writeConfig('Motion', '" + c.wallMotion + "');"
+               + " d.writeConfig('PauseWhenCovered', " + (c.wallPause ? "true" : "false") + "); });"
+        }
+        DBus.SessionBus.asyncCall({ service: "org.kde.plasmashell", path: "/PlasmaShell", iface: "org.kde.PlasmaShell",
+                                    member: "evaluateScript", arguments: [new DBus.string(js)] })
+    }
+
     property bool settingsOpen: false
     SettingsPanel {
         orb: root

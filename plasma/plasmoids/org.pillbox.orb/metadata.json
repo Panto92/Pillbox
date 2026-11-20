@@ -12,7 +12,7 @@
         "Id": "org.pillbox.orb",
         "License": "MIT",
         "Name": "Pillbox Orb",
-        "Version": "0.5.0"
+        "Version": "0.6.0"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }

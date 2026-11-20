@@ -82,6 +82,7 @@ say "Installed Plasma style: Pillbox"
 # 3. Widgets and global theme
 install_pkg Plasma/Applet      "$SRC/plasma/plasmoids/org.pillbox.stats"
 install_pkg Plasma/Applet      "$SRC/plasma/plasmoids/org.pillbox.orb"
+install_pkg Plasma/Wallpaper   "$SRC/plasma/wallpapers/org.pillbox.atmosphere"
 # translations (also shipped inside the package; this copy is what KDE's i18n looks up first)
 for mo in "$SRC"/plasma/plasmoids/*/contents/locale/*/LC_MESSAGES/*.mo; do
     [[ -e "$mo" ]] || continue
