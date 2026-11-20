@@ -591,7 +591,7 @@ PlasmoidItem {
         readonly property int outerCount: slots - innerCount
         readonly property real step: tile + 18
         // near a screen edge the ring opens as an arc facing away from it:
-        // one edge → half circle (200°), a corner → quarter arc (110°)
+        // one edge → a flat arc of 150°, a corner → 80°
         readonly property var arc: {
             const s = root.screenAt(root.orbCenter.x, root.orbCenter.y)
             // would a full ring stick out of the screen here?
@@ -601,7 +601,8 @@ PlasmoidItem {
             let dx = (near.l ? 1 : 0) - (near.r ? 1 : 0), dy = (near.t ? 1 : 0) - (near.b ? 1 : 0)
             if (dx === 0 && dy === 0) return { full: true, start: -90, sweep: 360 }
             const dir = Math.atan2(dy, dx) * 180 / Math.PI
-            const sweep = dx !== 0 && dy !== 0 ? 110 : 200
+            // keep both ends of the arc clearly inside the screen: an edge gets 150°, a corner 80°
+            const sweep = dx !== 0 && dy !== 0 ? 80 : 150
             return { full: false, start: dir - sweep / 2, sweep: sweep }
         }
         readonly property real arcFrac: arc.sweep / 360
