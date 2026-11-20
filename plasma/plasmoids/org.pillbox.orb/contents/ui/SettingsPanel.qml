@@ -492,9 +492,10 @@ Window {
                             function at(pos) {
                                 const n = stops.length
                                 if (n === 0) return "black"
-                                if (n === 1) return stops[0]
+                                if (n === 1) return typeof stops[0] === "string" ? Qt.lighter(stops[0], 1.0) : stops[0]
                                 const f = pos * (n - 1), i = Math.min(n - 2, Math.floor(f)), k = f - i
-                                const a = stops[i], b = stops[i + 1]
+                                const col = v => typeof v === "string" ? Qt.lighter(v, 1.0) : v      // "#ff0000" → colour
+                                const a = col(stops[i]), b = col(stops[i + 1])
                                 return Qt.rgba(a.r + (b.r - a.r) * k, a.g + (b.g - a.g) * k, a.b + (b.b - a.b) * k, 1)
                             }
                             signal moved(real v)
