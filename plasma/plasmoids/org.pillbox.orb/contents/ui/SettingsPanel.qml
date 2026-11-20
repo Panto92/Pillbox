@@ -609,6 +609,8 @@ Window {
                     Rectangle { width: Kirigami.Units.gridUnit * 1.5; height: width; radius: width / 2; color: panel.accent } }
                 SettingRow { label: i18n("Preview"); hint: i18n("Opens the login screen in a window. Close it with Alt+F4.")
                     QQC2.Button { text: i18n("Show"); icon.name: "view-preview"; onClicked: panel.orb.previewLogin() } }
+                SettingRow { label: i18n("Update"); hint: i18n("Brings the newest Pillbox version to the login screen. Asks for your password; your choices stay.")
+                    QQC2.Button { text: i18n("Update…"); icon.name: "view-refresh"; onClicked: panel.orb.setupLogin() } }
                 SettingRow { label: i18n("Remove"); hint: i18n("Back to your previous login screen. Asks for your password.")
                     QQC2.Button { text: i18n("Remove…"); icon.name: "edit-delete"; onClicked: panel.orb.removeLogin() } }
             }

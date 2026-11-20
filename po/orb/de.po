@@ -713,3 +713,12 @@ msgstr "Entfernen …"
 
 msgid "This system uses a different login manager than SDDM, so the Pillbox login screen can't be used here."
 msgstr "Dieses System nutzt einen anderen Anmeldemanager als SDDM, deshalb lässt sich der Pillbox-Anmeldebildschirm hier nicht verwenden."
+
+msgid "Update"
+msgstr "Aktualisieren"
+
+msgid "Brings the newest Pillbox version to the login screen. Asks for your password; your choices stay."
+msgstr "Bringt die neueste Pillbox-Version auf den Anmeldebildschirm. Fragt nach deinem Passwort; deine Auswahl bleibt."
+
+msgid "Update…"
+msgstr "Aktualisieren …"

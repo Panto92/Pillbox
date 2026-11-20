@@ -176,7 +176,18 @@ Item {
                     function role(r) { return userModel.data(userModel.index(userIndex, 0), r) }
                     readonly property string userName: role(Qt.UserRole + 1) || userModel.lastUser || ""
                     readonly property string realName: role(Qt.UserRole + 2) || userName
-                    readonly property string iconPath: role(Qt.UserRole + 4) || ""
+                    // the picture from Plasma's user settings (AccountsService) first – it is what the
+                    // desktop shows – then whatever SDDM offers (often an old ~/.face.icon)
+                    readonly property var faces: {
+                        const list = []
+                        if (userName) list.push("file:///var/lib/AccountsService/icons/" + userName)
+                        const r = role(Qt.UserRole + 4) || ""
+                        if (r) list.push(r.indexOf("file:") === 0 ? r : "file://" + r)
+                        return list
+                    }
+                    property int faceIndex: 0
+                    onUserNameChanged: faceIndex = 0
+                    readonly property string iconPath: faceIndex < faces.length ? faces[faceIndex] : ""
                     Layout.alignment: Qt.AlignHCenter
                     implicitWidth: 92; implicitHeight: 92
                     Rectangle {
@@ -190,7 +201,8 @@ Item {
                             id: face
                             anchors.fill: parent; anchors.margins: 3
                             radius: width / 2
-                            source: !login.iconPath ? "" : login.iconPath.indexOf("file:") === 0 ? login.iconPath : "file://" + login.iconPath
+                            source: login.iconPath
+                            onStatusChanged: if (status === Image.Error) login.faceIndex++
                             fillMode: Image.PreserveAspectCrop
                             visible: status === Image.Ready
                             color: "transparent"
