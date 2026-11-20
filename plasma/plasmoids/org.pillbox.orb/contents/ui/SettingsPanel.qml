@@ -451,13 +451,94 @@ Window {
                                 contentItem: Rectangle { radius: width / 2; color: modelData; border.width: Qt.colorEqual(panel.cfg.customColor, modelData) ? 3 : 0; border.color: Kirigami.Theme.textColor }
                             }
                         }
-                        KQuickControls.ColorButton {
-                            implicitHeight: Kirigami.Units.gridUnit * 1.5
-                            color: panel.cfg.customColor; showAlphaChannel: false
-                            dialogTitle: i18n("Orb color")
-                            onAccepted: c => panel.cfg.customColor = c
+                        // own colour: opens the picker below
+                        QQC2.AbstractButton {
+                            id: ownBtn
+                            implicitWidth: Kirigami.Units.gridUnit * 1.5; implicitHeight: implicitWidth
+                            checkable: true
+                            contentItem: Rectangle {
+                                radius: width / 2
+                                gradient: Gradient {
+                                    orientation: Gradient.Horizontal
+                                    GradientStop { position: 0; color: "#ff6b6b" } GradientStop { position: 0.33; color: "#ffd36b" }
+                                    GradientStop { position: 0.66; color: "#6bd3ff" } GradientStop { position: 1; color: "#c06bff" }
+                                }
+                                border.width: ownBtn.checked ? 3 : 0; border.color: Kirigami.Theme.textColor
+                            }
+                            QQC2.ToolTip.text: i18n("Own colour"); QQC2.ToolTip.visible: hovered
                         }
                     } }
+                // the picker: hue, saturation and lightness, plus a hex field – right in the window
+                SettingRow {
+                    visible: ownBtn.checked && panel.cfg.colorMode !== "system"
+                    label: i18n("Own colour")
+                    hint: i18n("Slide to mix any colour; it applies right away.")
+                    ColumnLayout {
+                        id: picker
+                        spacing: Kirigami.Units.smallSpacing
+                        readonly property color current: panel.cfg.customColor
+                        property real h: Math.max(0, current.hslHue)
+                        property real sat: current.hslSaturation
+                        property real lig: current.hslLightness
+                        function push() { panel.cfg.customColor = Qt.hsla(h, sat, lig, 1) }
+                        component Track: Item {
+                            id: tr
+                            property var stops: []
+                            property real value: 0
+                            signal moved(real v)
+                            implicitWidth: Kirigami.Units.gridUnit * 14; implicitHeight: Kirigami.Units.gridUnit * 1.1
+                            Rectangle {
+                                anchors.fill: parent; radius: height / 2
+                                gradient: Gradient {
+                                    orientation: Gradient.Horizontal
+                                    GradientStop { position: 0; color: tr.stops[0] || "black" }
+                                    GradientStop { position: 0.17; color: tr.stops[1] || tr.stops[0] || "black" }
+                                    GradientStop { position: 0.33; color: tr.stops[2] || tr.stops[1] || "black" }
+                                    GradientStop { position: 0.5; color: tr.stops[3] || tr.stops[2] || "black" }
+                                    GradientStop { position: 0.67; color: tr.stops[4] || tr.stops[3] || "black" }
+                                    GradientStop { position: 0.83; color: tr.stops[5] || tr.stops[4] || "black" }
+                                    GradientStop { position: 1; color: tr.stops[6] || tr.stops[5] || "black" }
+                                }
+                                border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.12)
+                            }
+                            Rectangle {
+                                x: tr.value * (tr.width - width); anchors.verticalCenter: parent.verticalCenter
+                                width: parent.height + 4; height: width; radius: width / 2
+                                color: "transparent"; border.width: 3; border.color: "white"
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                function set(mx) { tr.moved(Math.max(0, Math.min(1, mx / width))) }
+                                onPressed: m => set(m.x)
+                                onPositionChanged: m => { if (pressed) set(m.x) }
+                            }
+                        }
+                        Track {
+                            stops: ["#ff0000", "#ffff00", "#00ff00", "#00ffff", "#0000ff", "#ff00ff", "#ff0000"]
+                            value: picker.h
+                            onMoved: v => { picker.h = v; picker.push() }
+                        }
+                        Track {
+                            stops: [Qt.hsla(picker.h, 0, picker.lig, 1), Qt.hsla(picker.h, 1, picker.lig, 1)]
+                            value: picker.sat
+                            onMoved: v => { picker.sat = v; picker.push() }
+                        }
+                        Track {
+                            stops: [Qt.hsla(picker.h, picker.sat, 0.15, 1), Qt.hsla(picker.h, picker.sat, 0.5, 1), Qt.hsla(picker.h, picker.sat, 0.9, 1)]
+                            value: (picker.lig - 0.15) / 0.75
+                            onMoved: v => { picker.lig = 0.15 + v * 0.75; picker.push() }
+                        }
+                        RowLayout {
+                            Rectangle { width: Kirigami.Units.gridUnit * 1.6; height: width; radius: width / 2; color: picker.current }
+                            QQC2.TextField {
+                                Layout.preferredWidth: Kirigami.Units.gridUnit * 7
+                                text: String(picker.current)
+                                validator: RegularExpressionValidator { regularExpression: /#?[0-9a-fA-F]{6}/ }
+                                onEditingFinished: panel.cfg.customColor = text.charAt(0) === "#" ? text : "#" + text
+                            }
+                        }
+                    }
+                }
                 SettingRow { label: i18n("Use the color scheme's accent"); hint: i18n("Follows System Settings → Colors.")
                     PillSwitch { checked: panel.cfg.colorMode === "system"; onToggled: panel.cfg.colorMode = checked ? "system" : "custom" } }
             }
