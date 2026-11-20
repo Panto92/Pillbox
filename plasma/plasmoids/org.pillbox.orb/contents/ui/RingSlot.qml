@@ -22,6 +22,7 @@ Item {
     property bool minimized: false   // all its windows are minimised
     property bool highlighted: false
     property bool addSlot: false
+    property int moreCount: 0             // > 0: the "+N more" slot
     property real angleOffset: 0          // degrees; the outer ring sits between the inner slots
     property int tile: 60
     property bool useAppColor: true
@@ -81,7 +82,16 @@ Item {
         Behavior on color { ColorAnimation { duration: 150 } }
     }
 
+    Text {
+        anchors.centerIn: parent
+        visible: slot.moreCount > 0
+        text: "+" + slot.moreCount
+        color: "#e9eef2"
+        font.pixelSize: Math.round(slot.tile * 0.3)
+        font.weight: Font.DemiBold
+    }
     Kirigami.Icon {
+        visible: slot.moreCount === 0
         anchors.centerIn: parent
         width: Math.round(slot.tile * (slot.addSlot ? 0.4 : 0.64)); height: width
         source: slot.iconSource

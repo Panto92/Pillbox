@@ -583,35 +583,59 @@ PlasmoidItem {
         visible: root.ringOpen
 
         // up to 14 slots: one ring. More: 10 inside, the rest (max 20) on an outer ring
-        readonly property int maxApps: 29
         readonly property real rs: root.cfg.ringScale / 100                         // ring scale
         readonly property int tile: Math.round(root.cfg.ringIconSize * rs)
-        readonly property int slots: Math.min(appsModel.count, maxApps) + 1           // + the "add" slot
-        readonly property int innerCount: slots > 14 ? 10 : slots
-        readonly property int outerCount: slots - innerCount
         readonly property real step: tile + 18
+        readonly property real gapR: tile + 20
         // near a screen edge the ring opens as an arc facing away from it:
         // one edge → a flat arc of 150°, a corner → 80°
         readonly property var arc: {
             const s = root.screenAt(root.orbCenter.x, root.orbCenter.y)
-            // would a full ring stick out of the screen here?
-            const need = Math.max(tile * 1.9, innerCount * step / (2 * Math.PI)) + tile * 0.75
+            const fullR = Math.max(tile * 1.9, Math.min(appsModel.count + 1, 14) * step / (2 * Math.PI))
+            const need = fullR + tile * 0.75                     // would a full ring stick out here?
             const near = { l: root.orbCenter.x - s.x < need, r: s.x + s.width - root.orbCenter.x < need,
                            t: root.orbCenter.y - s.y < need, b: s.y + s.height - root.orbCenter.y < need }
             let dx = (near.l ? 1 : 0) - (near.r ? 1 : 0), dy = (near.t ? 1 : 0) - (near.b ? 1 : 0)
             if (dx === 0 && dy === 0) return { full: true, start: -90, sweep: 360 }
             const dir = Math.atan2(dy, dx) * 180 / Math.PI
-            // keep both ends of the arc clearly inside the screen: an edge gets 150°, a corner 80°
-            const sweep = dx !== 0 && dy !== 0 ? 80 : 150
+            const sweep = dx !== 0 && dy !== 0 ? 80 : 150      // both ends stay inside the screen
             return { full: false, start: dir - sweep / 2, sweep: sweep }
         }
-        readonly property real arcFrac: arc.sweep / 360
-        readonly property real r1: Math.max(tile * 1.9, innerCount * step / (2 * Math.PI * arcFrac))
-        readonly property real r2: outerCount > 0 ? Math.max(r1 + tile + 20, outerCount * step / (2 * Math.PI * arcFrac)) : r1
-        readonly property real radius: r2                                               // outermost ring
-        readonly property int boxSize: Math.ceil(r2 * 2 + tile * 2 + 60)
+        // the layout: which ring each position sits on, how many apps fit, how many are left over.
+        // Full ring: one ring up to 14, then 10 inside + up to 20 outside.
+        // Arc: up to three narrow arcs; each takes what fits with spacing before the next starts.
+        // Positions: apps …, then "+N" (only if something doesn't fit), then the "add" slot last.
+        readonly property var lay: {
+            const apps = appsModel.count
+            let rings = []
+            if (arc.full) {
+                const want = apps + 1
+                if (want <= 14) rings = [{ cap: 14, r: Math.max(tile * 1.9, want * step / (2 * Math.PI)) }]
+                else {
+                    const r1 = Math.max(tile * 1.9, 10 * step / (2 * Math.PI))
+                    rings = [{ cap: 10, r: r1 }, { cap: 20, r: Math.max(r1 + gapR, Math.min(want - 10, 20) * step / (2 * Math.PI)) }]
+                }
+            } else {
+                const rad = arc.sweep * Math.PI / 180
+                let r = tile * 1.9
+                for (let k = 0; k < 3; ++k) { rings.push({ cap: Math.max(2, Math.floor(r * rad / step) + 1), r: r }); r += gapR }
+            }
+            const capacity = rings.reduce((n, g) => n + g.cap, 0)
+            const more = apps + 1 > capacity ? apps - (capacity - 2) : 0
+            const total = more > 0 ? capacity : apps + 1
+            // fill rings in order and keep only the rings in use
+            let left = total, used = []
+            for (const g of rings) { if (left <= 0) break; const n = Math.min(g.cap, left); used.push({ n: n, r: g.r }); left -= n }
+            return { rings: used, total: total, appsShown: more > 0 ? capacity - 2 : apps, more: more }
+        }
+        function place(p) {
+            let k = 0, idx = p
+            while (k < lay.rings.length - 1 && idx >= lay.rings[k].n) { idx -= lay.rings[k].n; ++k }
+            return { ring: k, idx: idx, n: lay.rings[k] ? lay.rings[k].n : 1, r: lay.rings[k] ? lay.rings[k].r : tile * 2 }
+        }
+        readonly property real radius: lay.rings.length ? lay.rings[lay.rings.length - 1].r : tile * 2
+        readonly property int boxSize: Math.ceil(radius * 2 + tile * 2 + 60)
         readonly property point pos: root.clampBox(root.orbCenter.x - boxSize / 2, root.orbCenter.y - boxSize / 2, boxSize, boxSize)
-        function ringOf(i) { return i < innerCount ? 0 : 1 }
         x: pos.x
         y: pos.y
 
@@ -672,11 +696,12 @@ PlasmoidItem {
                     id: slotDelegate
                     required property int index
                     required property var model
-                    visible: index < ringWin.maxApps
-                    slotIndex: ringWin.ringOf(index) === 0 ? index : index - ringWin.innerCount
-                    slotCount: ringWin.ringOf(index) === 0 ? ringWin.innerCount : ringWin.outerCount
-                    ringRadius: ringWin.ringOf(index) === 0 ? ringWin.r1 : ringWin.r2
-                    angleOffset: ringWin.ringOf(index) === 0 ? 0 : 180 / Math.max(1, ringWin.outerCount)
+                    readonly property var at: ringWin.place(index)
+                    visible: index < ringWin.lay.appsShown
+                    slotIndex: at.idx
+                    slotCount: at.n
+                    ringRadius: at.r
+                    angleOffset: ringWin.arc.full && at.ring > 0 ? 180 / Math.max(1, at.n) : 0
                     arc: ringWin.arc
                     tile: ringWin.tile
                     useAppColor: root.cfg.appColors
@@ -703,11 +728,32 @@ PlasmoidItem {
             }
 
             RingSlot {
+                id: moreSlotItem
+                readonly property var at: ringWin.place(ringWin.lay.total - 2)
+                visible: ringWin.lay.more > 0
+                slotIndex: at.idx
+                slotCount: at.n
+                ringRadius: at.r
+                angleOffset: ringWin.arc.full && at.ring > 0 ? 180 / Math.max(1, at.n) : 0
+                arc: ringWin.arc
+                tile: ringWin.tile
+                centre: ringItem.centre
+                open: root.ringOpen
+                accent: root.accent
+                addSlot: true
+                moreCount: ringWin.lay.more
+                highlighted: ringItem.hovered === 9998
+                onEntered: { ringItem.hovered = 9998; ringItem.hoveredName = i18np("%1 more app", "%1 more apps", ringWin.lay.more); ringItem.hoveredInfo = i18n("show all") }
+                onExited: if (ringItem.hovered === 9998) ringItem.hovered = -1
+                onClicked: root.openLauncher(moreSlotItem)
+            }
+            RingSlot {
                 id: addSlotItem
-                slotIndex: ringWin.outerCount > 0 ? ringWin.outerCount - 1 : ringWin.slots - 1
-                slotCount: ringWin.outerCount > 0 ? ringWin.outerCount : ringWin.innerCount
-                ringRadius: ringWin.outerCount > 0 ? ringWin.r2 : ringWin.r1
-                angleOffset: ringWin.outerCount > 0 ? 180 / Math.max(1, ringWin.outerCount) : 0
+                readonly property var at: ringWin.place(ringWin.lay.total - 1)
+                slotIndex: at.idx
+                slotCount: at.n
+                ringRadius: at.r
+                angleOffset: ringWin.arc.full && at.ring > 0 ? 180 / Math.max(1, at.n) : 0
                 arc: ringWin.arc
                 tile: ringWin.tile
                 centre: ringItem.centre

@@ -779,3 +779,11 @@ msgstr "Linie"
 
 msgid "Duotone"
 msgstr "Duoton"
+
+msgid "%1 more app"
+msgid_plural "%1 more apps"
+msgstr[0] "%1 weitere App"
+msgstr[1] "%1 weitere Apps"
+
+msgid "show all"
+msgstr "alle zeigen"
