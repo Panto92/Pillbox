@@ -5,7 +5,7 @@ A calm, modern desktop for **KDE Plasma 6**. Instead of a dock, a glowing
 anywhere, minimise windows into it. On top: three floating "pills" with your
 system stats, the clock and the tray.
 
-> **Status:** 0.3 – the Orb works, incl. notifications. Feedback welcome.
+> **Status:** 0.4 – Orb plus two dock forms (Ember, Shelf), live settings panel. Feedback welcome.
 
 ## Why
 
@@ -32,8 +32,26 @@ parts. Pillbox gets there with **plain Plasma**:
 | **All applications** | full-screen launcher with search and categories |
 | **Satellites** | your open windows orbit the ball; minimised windows fly into it |
 
-Size, colour (or each app's own icon colour), effect (aura, pulse, calm, plain),
-ring size and more: right-click the Orb → *Customize orb…*.
+## Forms
+
+Don't want a floating ball? Pick another **form** – same apps, same behaviour:
+
+| Form | |
+|---|---|
+| **Orb** | the floating ball described above |
+| **Ember** | a thin seam of glowing dots that unfolds into a dock on hover |
+| **Shelf** | icons standing on a glass ledge; the hovered one lifts, tilts towards you and reflects |
+| **Liquid** | *coming next* |
+
+Docks can sit at the **bottom, left or right**, on the main monitor, on **all
+monitors** or on one you choose, and can rest **always visible**, **small until
+the pointer comes** or **hidden behind a thin line**.
+
+## Settings
+
+Right-click the Orb or a dock → **Customize…** opens the Pillbox panel on your
+desktop. Every change applies **live** – the real orb or dock is the preview.
+Only the options of the chosen form are shown.
 Full behaviour spec: [docs/orb.md](docs/orb.md).
 
 ## What's inside

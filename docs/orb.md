@@ -1,4 +1,4 @@
-# Pillbox Orb – behaviour spec (v0.2)
+# Pillbox Orb – behaviour spec (v0.4)
 
 The Orb replaces the dock. It is a small glowing ball that floats above all
 windows and can live anywhere on any monitor.
@@ -90,3 +90,22 @@ The Orb's widget shortcut (default suggestion `Meta+Space`) opens the ring.
 `./install.sh --layout` adds the Orb and removes the bottom dock. The app
 launcher moves into the left top pill, so there is always a visible menu
 button, and the Orb can open it too.
+
+## Dock forms (Ember, Shelf)
+
+The widget has a **form** setting; every form shares the logic above (apps, click
+rules, previews, badges, fullscreen/ghost behaviour, launcher).
+
+| | Ember | Shelf |
+|---|---|---|
+| At rest | seam of dots (bright = running, dim = pinned) | icons on a glass ledge |
+| Hover | unfolds from the centre, staggered | icon lifts and tilts towards the pointer; reflection appears |
+| Right click on the dock | All applications · Window overview · Customize… | same |
+
+- **Edge:** bottom, left, right. The dock is laid out as a bottom dock and turned
+  as a whole; icons turn back so they stay upright; previews open inwards.
+- **Monitor:** main, all (one dock per monitor), or one by name.
+- **At rest:** always visible · small until hovered · hidden behind a thin line.
+  The dock window really shrinks, so it never blocks clicks above it.
+- Positions are computed from the window's *actual* size, so a dock always hugs
+  its edge and never spills onto a neighbouring monitor.

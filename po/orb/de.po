@@ -170,3 +170,114 @@ msgstr "Anzahl ungelesener am Orb und im Ring zeigen"
 
 msgid "Wave of light for new notifications (not in Do Not Disturb)"
 msgstr "Lichtwelle bei neuen Benachrichtigungen (nicht bei „Nicht stören“)"
+
+msgid "Form:"
+msgstr "Form:"
+
+msgid "Orb – floating ball you can place anywhere"
+msgstr "Orb – schwebende Kugel, frei platzierbar"
+
+msgid "Ember – glowing seam that unfolds into a dock"
+msgstr "Ember – Glutnaht, die sich zum Dock entfaltet"
+
+msgid "Shelf – icons on a glass ledge that tilt towards you"
+msgstr "Shelf – Symbole auf einer Glaskante, die sich zu dir neigen"
+
+msgid "Dock at rest:"
+msgstr "Dock in Ruhe:"
+
+msgid "Always visible"
+msgstr "Immer sichtbar"
+
+msgid "Small until the pointer comes"
+msgstr "Klein, bis die Maus kommt"
+
+msgid "Hidden – a thin line stays at the edge"
+msgstr "Ausgeblendet – eine feine Linie bleibt am Rand"
+
+msgid "Customize dock…"
+msgstr "Dock anpassen …"
+
+msgid "hover me"
+msgstr "Maus drüber"
+
+msgid "Customize…"
+msgstr "Anpassen …"
+
+msgid "Customize Pillbox"
+msgstr "Pillbox anpassen"
+
+msgid "Form"
+msgstr "Form"
+
+msgid "Color"
+msgstr "Farbe"
+
+msgid "Behavior"
+msgstr "Verhalten"
+
+msgid "Alerts"
+msgstr "Hinweise"
+
+msgid "Orb"
+msgstr "Orb"
+
+msgid "Shelf"
+msgstr "Shelf"
+
+msgid "Liquid"
+msgstr "Liquid"
+
+msgid "floating ball"
+msgstr "schwebende Kugel"
+
+msgid "seam that unfolds"
+msgstr "Naht, die sich entfaltet"
+
+msgid "glass ledge"
+msgstr "Glaskante"
+
+msgid "coming soon"
+msgstr "kommt bald"
+
+msgid "Ball size:"
+msgstr "Kugelgröße:"
+
+msgid "Dock size:"
+msgstr "Dockgröße:"
+
+msgid "Icon size:"
+msgstr "Symbolgröße:"
+
+msgid "Reflection on hover"
+msgstr "Spiegelung beim Drüberfahren"
+
+msgid "Windows:"
+msgstr "Fenster:"
+
+msgid "Orb:"
+msgstr "Orb:"
+
+msgid "Changes apply right away."
+msgstr "Änderungen wirken sofort."
+
+msgid "Position:"
+msgstr "Position:"
+
+msgid "Bottom"
+msgstr "Unten"
+
+msgid "Left"
+msgstr "Links"
+
+msgid "Right"
+msgstr "Rechts"
+
+msgid "Monitor:"
+msgstr "Monitor:"
+
+msgid "Main monitor"
+msgstr "Hauptbildschirm"
+
+msgid "All monitors"
+msgstr "Alle Monitore"

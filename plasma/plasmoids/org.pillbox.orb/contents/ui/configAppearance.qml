@@ -17,6 +17,10 @@ KCM.SimpleKCM {
     property string cfg_colorMode
     property color cfg_customColor
     property string cfg_effect
+    property string cfg_form
+    property string cfg_dockHide
+    property string cfg_dockHideDefault
+    property string cfg_formDefault
     property alias cfg_effectSpeed: speedSlider.value
     property alias cfg_showSatellites: satBox.checked
     property alias cfg_ringIconSize: iconSlider.value
@@ -66,24 +70,147 @@ KCM.SimpleKCM {
 
     Kirigami.FormLayout {
 
-        // live preview
+        QQC2.ComboBox {
+            id: formBox
+            Kirigami.FormData.label: i18n("Form:")
+            textRole: "text"
+            valueRole: "value"
+            model: [
+                { text: i18n("Orb – floating ball you can place anywhere"), value: "orb" },
+                { text: i18n("Ember – glowing seam that unfolds into a dock"), value: "ember" },
+                { text: i18n("Shelf – icons on a glass ledge that tilt towards you"), value: "shelf" }
+            ]
+            Component.onCompleted: currentIndex = Math.max(0, indexOfValue(page.cfg_form))
+            onActivated: page.cfg_form = currentValue
+        }
+
+        QQC2.ComboBox {
+            id: hideBox
+            Kirigami.FormData.label: i18n("Dock at rest:")
+            enabled: page.cfg_form !== "orb"
+            textRole: "text"
+            valueRole: "value"
+            model: [
+                { text: i18n("Always visible"), value: "never" },
+                { text: i18n("Small until the pointer comes"), value: "compact" },
+                { text: i18n("Hidden – a thin line stays at the edge"), value: "autohide" }
+            ]
+            Component.onCompleted: currentIndex = Math.max(0, indexOfValue(page.cfg_dockHide))
+            onActivated: page.cfg_dockHide = currentValue
+        }
+
+        Item { Kirigami.FormData.isSection: true }
+
+        // live preview of the chosen form
         Rectangle {
+            id: previewBox
             Kirigami.FormData.label: i18n("Preview:")
-            implicitWidth: Kirigami.Units.gridUnit * 12
+            implicitWidth: Kirigami.Units.gridUnit * (page.cfg_form === "orb" ? 12 : 20)
             implicitHeight: Kirigami.Units.gridUnit * 8
             radius: Kirigami.Units.cornerRadius
+            clip: true
             gradient: Gradient {
                 GradientStop { position: 0; color: "#3a4752" }
                 GradientStop { position: 1; color: "#12171c" }
             }
+            HoverHandler { id: previewHover }
+            readonly property bool hot: previewHover.hovered
+            readonly property var sampleIcons: ["utilities-terminal", "system-file-manager", "internet-web-browser", "applications-graphics", "preferences-system"]
+            readonly property int tile: Math.round(iconSlider.value * 0.55)
+
             OrbBall {
+                visible: page.cfg_form === "orb"
                 anchors.centerIn: parent
                 ballSize: Math.round(30 * sizeSlider.value / 100)
                 accent: page.previewColor
                 effect: page.cfg_effect
                 speed: speedSlider.value
-                hot: previewHover.hovered
-                HoverHandler { id: previewHover }
+                hot: previewBox.hot
+            }
+
+            // Ember: a seam of embers that unfolds on hover
+            Item {
+                visible: page.cfg_form === "ember"
+                anchors.fill: parent
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom; anchors.bottomMargin: Kirigami.Units.gridUnit
+                    width: previewBox.hot ? previewBox.sampleIcons.length * (previewBox.tile + 8) + 24 : previewBox.sampleIcons.length * 12 + 26
+                    height: previewBox.hot ? previewBox.tile + 16 : 14
+                    radius: height / 2
+                    color: Qt.rgba(0.05, 0.06, 0.08, 0.8)
+                    border.color: Qt.rgba(page.previewColor.r, page.previewColor.g, page.previewColor.b, 0.3)
+                    Behavior on width { NumberAnimation { duration: 380; easing.type: Easing.OutCubic } }
+                    Behavior on height { NumberAnimation { duration: 380; easing.type: Easing.OutCubic } }
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: previewBox.hot ? 8 : 6
+                        Repeater {
+                            model: previewBox.sampleIcons
+                            Item {
+                                required property string modelData
+                                required property int index
+                                width: previewBox.hot ? previewBox.tile : 6; height: width
+                                Behavior on width { SequentialAnimation { PauseAnimation { duration: previewBox.hot ? Math.abs(index - 2) * 30 : 0 } NumberAnimation { duration: 320; easing.type: Easing.OutBack } } }
+                                Rectangle { anchors.fill: parent; radius: width / 2; color: index < 3 ? page.previewColor : Qt.rgba(1, 1, 1, 0.35); visible: !previewBox.hot }
+                                Kirigami.Icon { anchors.fill: parent; source: parent.modelData; visible: previewBox.hot }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Shelf: icons on a glass ledge; the hovered one lifts and reflects
+            Item {
+                visible: page.cfg_form === "shelf"
+                anchors.fill: parent
+                readonly property real baseY: height - Kirigami.Units.gridUnit * 1.6
+                Rectangle {
+                    x: parent.width * 0.08; width: parent.width * 0.84; y: parent.baseY; height: Kirigami.Units.gridUnit * 0.9
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: Qt.rgba(0.9, 0.93, 0.95, 0.22) }
+                        GradientStop { position: 1; color: Qt.rgba(0.05, 0.06, 0.08, 0.55) }
+                    }
+                    Rectangle { width: parent.width; height: 1.5; color: Qt.rgba(1, 1, 1, 0.5) }
+                }
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    y: parent.baseY - previewBox.tile
+                    spacing: Math.round(previewBox.tile * 0.35)
+                    Repeater {
+                        model: previewBox.sampleIcons
+                        Item {
+                            required property string modelData
+                            required property int index
+                            width: previewBox.tile; height: width
+                            readonly property bool up: shelfHover.hovered
+                            HoverHandler { id: shelfHover }
+                            Kirigami.Icon {
+                                id: shelfIcon
+                                width: parent.width; height: width
+                                y: parent.up ? -previewBox.tile * 0.28 : 0
+                                source: parent.modelData
+                                Behavior on y { NumberAnimation { duration: 240; easing.type: Easing.OutBack } }
+                            }
+                            Kirigami.Icon {
+                                width: parent.width; height: width
+                                y: parent.height + 2 + (parent.up ? previewBox.tile * 0.28 : 0)
+                                source: parent.modelData
+                                opacity: parent.up ? 0.3 : 0
+                                transform: Scale { yScale: -0.5 }
+                                Behavior on opacity { NumberAnimation { duration: 200 } }
+                            }
+                        }
+                    }
+                }
+            }
+
+            QQC2.Label {
+                anchors { right: parent.right; bottom: parent.bottom; margins: Kirigami.Units.smallSpacing }
+                visible: page.cfg_form !== "orb" && !previewBox.hot
+                text: i18n("hover me")
+                opacity: 0.5
+                font: Kirigami.Theme.smallFont
             }
         }
 

@@ -11,6 +11,16 @@
     </entry>
   </group>
   <group name="Appearance">
+    <!-- orb | ember | shelf  (liquid to come) -->
+    <entry name="form" type="String"><default>orb</default></entry>
+    <!-- docks: never | compact (small until hovered) | autohide (slides away, a line stays) -->
+    <entry name="dockHide" type="String"><default>never</default></entry>
+    <!-- bottom | left | right -->
+    <entry name="dockEdge" type="String"><default>bottom</default></entry>
+    <!-- primary | all | <screen name> -->
+    <entry name="dockScreen" type="String"><default>primary</default></entry>
+    <entry name="dockScale" type="Int"><default>100</default><min>60</min><max>160</max></entry>
+    <entry name="shelfReflection" type="Bool"><default>true</default></entry>
     <entry name="ballScale" type="Int"><default>100</default><min>60</min><max>200</max></entry>
     <!-- "custom": use customColor, "system": the colour scheme's accent -->
     <entry name="colorMode" type="String"><default>custom</default></entry>

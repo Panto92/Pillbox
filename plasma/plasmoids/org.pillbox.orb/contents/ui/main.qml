@@ -49,6 +49,10 @@ PlasmoidItem {
     // So remember which app was in front *before* opening and decide clicks by that.
     property string frontAppId: ""
 
+    readonly property var apps: appsModel                          // for the dock forms
+    readonly property bool previewVisible: preview.visible
+    readonly property bool orbForm: cfg.form !== "ember" && cfg.form !== "shelf"
+
     readonly property point orbPos: clampPos(Plasmoid.configuration.orbX, Plasmoid.configuration.orbY)
     readonly property point orbCenter: Qt.point(orbPos.x + orbSize / 2, orbPos.y + orbSize / 2)
 
@@ -250,7 +254,7 @@ PlasmoidItem {
         ringOpen = true
     }
     function closeRing() {
-        previewShow.stop(); preview.visible = false
+        previewShow.stop(); preview.close()
         if (!ringOpen) return
         ringOpen = false
         ringClosedAt = Date.now()
@@ -302,7 +306,7 @@ PlasmoidItem {
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus
         hideOnWindowDeactivate: false
         title: "Pillbox Orb"
-        visible: !root.hidden
+        visible: !root.hidden && root.orbForm
         x: root.orbPos.x
         y: root.orbPos.y
 
@@ -399,9 +403,9 @@ PlasmoidItem {
             onClicked: Plasmoid.configuration.locked = !Plasmoid.configuration.locked
         }
         PlasmaExtras.MenuItem {
-            text: i18n("Customize orb…")
+            text: i18n("Customize…")
             icon: "configure"
-            onClicked: Plasmoid.internalAction("configure").trigger()
+            onClicked: root.settingsOpen = true
         }
     }
 
@@ -414,7 +418,7 @@ PlasmoidItem {
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus | Qt.WindowTransparentForInput
         hideOnWindowDeactivate: false
         title: "Pillbox Orb Satellites"
-        visible: !root.dragging && !root.hidden
+        visible: !root.dragging && !root.hidden && root.orbForm
         x: root.orbCenter.x - root.satSize / 2
         y: root.orbCenter.y - root.satSize / 2
 
@@ -706,7 +710,7 @@ PlasmoidItem {
 
     function slotHovered(item, index, m, windows) {
         previewHide.stop()
-        if (windows === 0) { previewShow.stop(); preview.visible = false; return }
+        if (windows === 0) { previewShow.stop(); preview.close(); return }
         previewRequest = { item: item, index: index, isGroup: m.IsGroupParent === true, name: m.AppName || m.display, icon: m.decoration }
         // already showing another app: switch right away, otherwise wait a moment
         if (preview.visible) showPreview(); else previewShow.restart()
@@ -717,25 +721,24 @@ PlasmoidItem {
     }
     function showPreview() {
         const r = previewRequest
-        if (!r || !ringOpen) return
-        preview.visible = false
+        if (!r || (orbForm && !ringOpen)) return
         preview.appRow = r.index
         preview.isGroup = r.isGroup
         preview.appName = r.name
         preview.appIcon = r.icon
         preview.angle = r.item.angle
-        preview.visualParent = r.item
-        preview.visible = true
+        preview.anchorItem = r.item
+        preview.open()                       // first time: fade in; already open: glide over
     }
     Timer { id: previewShow; interval: 350; onTriggered: root.showPreview() }
-    Timer { id: previewHide; interval: 320; onTriggered: if (!preview.hovered) preview.visible = false }
+    Timer { id: previewHide; interval: 320; onTriggered: if (!preview.hovered) preview.close() }
 
     PreviewPopup {
         id: preview
         visible: false
         tasksModel: appsModel
         accent: root.accent
-        onActivated: { visible = false; root.closeRing() }
+        onActivated: { close(); root.closeRing() }
         onHoveredChanged: hovered ? previewHide.stop() : previewHide.restart()
     }
 
@@ -763,6 +766,58 @@ PlasmoidItem {
         else if (m.AppId === frontAppId) appsModel.requestToggleMinimized(idx)   // was in front: into the orb
         else appsModel.requestActivate(idx)                                      // background or minimised: bring it back
         closeRing()
+    }
+
+    function dockClicked(index, m, mouse, item) {
+        const id = appsModel.data(appsModel.activeTask, TaskManager.AbstractTasksModel.AppId)
+        frontAppId = id ? String(id) : ""
+        slotClicked(index, m, mouse, item)
+    }
+
+    function openDockMenu(item, x, y) {
+        dockMenu.visualParent = item
+        dockMenu.open(x, y)
+    }
+    PlasmaExtras.Menu {
+        id: dockMenu
+        PlasmaExtras.MenuItem { text: i18n("All applications"); icon: "application-menu"; onClicked: root.openLauncher() }
+        PlasmaExtras.MenuItem { text: i18n("Window overview"); icon: "view-grid"; onClicked: root.toggleOverview() }
+        PlasmaExtras.MenuItem { separator: true }
+        PlasmaExtras.MenuItem { text: i18n("Customize…"); icon: "configure"; onClicked: root.settingsOpen = true }
+    }
+
+    property bool settingsOpen: false
+    SettingsPanel {
+        orb: root
+        open: root.settingsOpen
+        onCloseRequested: root.settingsOpen = false
+    }
+
+    // which monitors get a dock: the main one, all, or one chosen by name
+    readonly property var dockScreens: {
+        const all = Qt.application.screens
+        const rect = sc => Qt.rect(sc.virtualX, sc.virtualY, sc.width, sc.height)
+        if (cfg.dockScreen === "all") return all.map(rect)
+        const named = all.find(sc => sc.name === cfg.dockScreen)
+        return [named ? rect(named) : homeScreen()]
+    }
+    Instantiator {
+        model: root.cfg.form === "ember" ? root.dockScreens : []
+        delegate: DockEmber {
+            required property var modelData
+            orb: root
+            targetScreen: modelData
+            shown: !root.hidden
+        }
+    }
+    Instantiator {
+        model: root.cfg.form === "shelf" ? root.dockScreens : []
+        delegate: DockShelf {
+            required property var modelData
+            orb: root
+            targetScreen: modelData
+            shown: !root.hidden
+        }
     }
 
     PlasmaExtras.Menu {

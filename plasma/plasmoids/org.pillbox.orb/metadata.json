@@ -1,14 +1,18 @@
 {
     "KPackageStructure": "Plasma/Applet",
     "KPlugin": {
-        "Authors": [ { "Name": "Pillbox contributors" } ],
+        "Authors": [
+            {
+                "Name": "Pillbox contributors"
+            }
+        ],
         "Category": "Windows and Tasks",
-        "Description": "A floating, draggable orb that replaces the dock: launch apps from a ring, windows orbit it as satellites.",
+        "Description": "Floating orb or dock (Ember, Shelf) that replaces the panel: app ring, live previews, notifications.",
         "Icon": "start-here-kde",
         "Id": "org.pillbox.orb",
         "License": "MIT",
         "Name": "Pillbox Orb",
-        "Version": "0.3.0"
+        "Version": "0.4.0"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }
