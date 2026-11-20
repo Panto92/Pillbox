@@ -21,6 +21,12 @@ Item {
     readonly property color paper: "#cdd5db"
     readonly property color mist: "#8a96a0"
 
+    // ---- preview (sddm-greeter --test-mode): always a way out
+    readonly property bool preview: Qt.application.arguments.indexOf("--test-mode") >= 0
+    focus: true
+    Keys.onEscapePressed: if (preview) Qt.quit()
+    Timer { interval: 120000; running: root.preview; onTriggered: Qt.quit() }
+
     // ---- time
     property date now: new Date()
     Timer { interval: 1000; repeat: true; running: true; onTriggered: root.now = new Date() }
@@ -291,6 +297,32 @@ Item {
             PowerPill { label: "Neustart"; icon: "system-reboot"; shown: sddm.canReboot; onActivated: sddm.reboot() }
             PowerPill { label: "Ausschalten"; icon: "system-shutdown"; shown: sddm.canPowerOff; onActivated: sddm.powerOff() }
         }
+    }
+
+    // the way out of the preview, top right on every screen
+    Repeater {
+        model: root.preview ? screenModel : 0
+        delegate: Rectangle {
+            required property rect geometry
+            x: geometry.x + geometry.width - width - 24; y: geometry.y + 24
+            width: quitRow.implicitWidth + 32; height: 40; radius: 20
+            color: quitMouse.containsMouse ? root.accent : Qt.rgba(0.06, 0.075, 0.1, 0.75)
+            border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.15)
+            Row {
+                id: quitRow
+                anchors.centerIn: parent
+                spacing: 8
+                Text { text: "Vorschau beenden"; color: quitMouse.containsMouse ? root.ink : root.frost; font.pixelSize: 14; font.weight: Font.DemiBold }
+                Text { text: "✕"; color: quitMouse.containsMouse ? root.ink : root.frost; font.pixelSize: 14 }
+            }
+            MouseArea { id: quitMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Qt.quit() }
+        }
+    }
+    Text {
+        visible: root.preview
+        x: root.main.x + 24; y: root.main.y + 32
+        text: "Vorschau · Esc schließt"
+        color: root.paper; opacity: 0.7; font.pixelSize: 13
     }
 
     component PowerPill: Rectangle {

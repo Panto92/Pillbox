@@ -861,7 +861,12 @@ PlasmoidItem {
     }
     function setupLogin() { loginState = "working"; loginProbe.connectSource("pkexec " + loginDir + "/install-login.sh; echo PBLOGIN=done # " + Date.now()) }
     function removeLogin() { loginState = "working"; loginProbe.connectSource("pkexec " + loginDir + "/install-login.sh --remove; echo PBLOGIN=done # " + Date.now()) }
-    function previewLogin() { shell.connectSource("sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/pillbox") }
+    // the preview runs from the user's own staged copy (no root needed for updates) with the
+    // user's choices linked in; it has its own close button and Esc, and closes after 2 min at the latest
+    function previewLogin() {
+        const t = loginDir + "/pillbox"
+        shell.connectSource("ln -sf " + loginFile + " " + t + "/theme.conf.user; timeout 150 sddm-greeter-qt6 --test-mode --theme " + t + " # " + Date.now())
+    }
     function applyLogin() {
         if (loginState !== "ready") return
         let scene = String(cfg.loginScene || "auto").replace(/[^a-z]/g, "")
