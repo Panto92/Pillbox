@@ -84,6 +84,22 @@ a minute; all motion shares one slow clock (8 / 12 / 20 fps for calm / normal /
 lively) because for a wallpaper the cost is how often the whole screen must be
 redrawn; a maximised or fullscreen window pauses the scene entirely.
 
+## Login screen
+
+A calm SDDM login screen on a living atmosphere that follows the time of day
+(Aurora at night, Fogline in the morning, Horizon by day, Dune in the evening):
+a large clock, one glass card, session and power buttons as small pills. A wrong
+password shakes the card; Caps Lock is pointed out.
+
+```bash
+sudo ./sddm/install-login.sh            # install and switch to it
+sudo ./sddm/install-login.sh --remove   # back to your previous login screen
+```
+
+It only adds `/usr/share/sddm/themes/pillbox` and `/etc/sddm.conf.d/zz-pillbox.conf`;
+no existing file is changed. Pick a fixed scene in `theme.conf` (`scene=aurora`, …).
+While it is installed, it takes precedence over the login theme chosen in System Settings.
+
 ## Settings
 
 Right-click the Orb or a dock → **Customize…** opens the Pillbox settings centre:

@@ -1,0 +1,13 @@
+[SddmGreeterTheme]
+Name=Pillbox
+Description=A calm login screen on a living Pillbox atmosphere
+Author=Pillbox contributors
+License=MIT
+Type=sddm-theme
+Version=0.8.0
+Website=https://github.com/Panto92/Pillbox
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=pillbox
+Theme-API=2.0
+QtVersion=6
