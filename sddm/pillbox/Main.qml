@@ -16,6 +16,10 @@ Item {
     height: 1080
 
     readonly property color accent: config.accent || "#8fb0c2"
+
+    // English by default, German when the system speaks German (SDDM themes have no catalogue of their own)
+    readonly property bool german: Qt.locale().name.indexOf("de") === 0
+    function tr(en, de) { return german ? de : en }
     readonly property color ink: "#0b0e12"
     readonly property color frost: "#e9eef2"
     readonly property color paper: "#cdd5db"
@@ -222,7 +226,7 @@ Item {
                         anchors { left: parent.left; right: go.left; verticalCenter: parent.verticalCenter; leftMargin: 18; rightMargin: 6 }
                         echoMode: TextInput.Password
                         passwordCharacter: "●"
-                        placeholderText: "Passwort"
+                        placeholderText: root.tr("Password", "Passwort")
                         placeholderTextColor: root.mist
                         color: root.frost
                         font.pixelSize: 15
@@ -253,8 +257,8 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.preferredHeight: text.length ? 18 : 0
                     visible: text.length > 0
-                    text: root.failed ? "Falsches Passwort. Versuch es noch einmal."
-                        : keyboard.capsLock ? "Feststelltaste ist an"
+                    text: root.failed ? root.tr("Wrong password. Please try again.", "Falsches Passwort. Versuch es noch einmal.")
+                        : keyboard.capsLock ? root.tr("Caps Lock is on", "Feststelltaste ist an")
                         : ""
                     color: root.failed ? "#ffb1a6" : root.paper
                     font.pixelSize: 13
@@ -293,9 +297,9 @@ Item {
                 }
             }
             Item { Layout.fillWidth: true }
-            PowerPill { label: "Standby"; icon: "system-suspend"; shown: sddm.canSuspend; onActivated: sddm.suspend() }
-            PowerPill { label: "Neustart"; icon: "system-reboot"; shown: sddm.canReboot; onActivated: sddm.reboot() }
-            PowerPill { label: "Ausschalten"; icon: "system-shutdown"; shown: sddm.canPowerOff; onActivated: sddm.powerOff() }
+            PowerPill { label: root.tr("Sleep", "Standby"); icon: "system-suspend"; shown: sddm.canSuspend; onActivated: sddm.suspend() }
+            PowerPill { label: root.tr("Restart", "Neustart"); icon: "system-reboot"; shown: sddm.canReboot; onActivated: sddm.reboot() }
+            PowerPill { label: root.tr("Shut down", "Ausschalten"); icon: "system-shutdown"; shown: sddm.canPowerOff; onActivated: sddm.powerOff() }
         }
     }
 
@@ -312,7 +316,7 @@ Item {
                 id: quitRow
                 anchors.centerIn: parent
                 spacing: 8
-                Text { text: "Vorschau beenden"; color: quitMouse.containsMouse ? root.ink : root.frost; font.pixelSize: 14; font.weight: Font.DemiBold }
+                Text { text: root.tr("Close preview", "Vorschau beenden"); color: quitMouse.containsMouse ? root.ink : root.frost; font.pixelSize: 14; font.weight: Font.DemiBold }
                 Text { text: "✕"; color: quitMouse.containsMouse ? root.ink : root.frost; font.pixelSize: 14 }
             }
             MouseArea { id: quitMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Qt.quit() }
@@ -321,7 +325,7 @@ Item {
     Text {
         visible: root.preview
         x: root.main.x + 24; y: root.main.y + 32
-        text: "Vorschau · Esc schließt"
+        text: root.tr("Preview · Esc closes", "Vorschau · Esc schließt")
         color: root.paper; opacity: 0.7; font.pixelSize: 13
     }
 

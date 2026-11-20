@@ -1,0 +1,31 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Clear all"
+msgstr "Alle löschen"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Do not disturb"
+msgstr "Nicht stören"
+
+msgid "Nothing new"
+msgstr "Nichts Neues"
+
+msgid "Notifications"
+msgstr "Mitteilungen"
+
+msgid "Remove"
+msgstr "Entfernen"
+
+msgid "Reply…"
+msgstr "Antworten …"
+
+msgid "%1 unread notification"
+msgid_plural "%1 unread notifications"
+msgstr[0] "%1 ungelesene Mitteilung"
+msgstr[1] "%1 ungelesene Mitteilungen"

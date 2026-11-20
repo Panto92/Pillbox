@@ -105,6 +105,13 @@ It only adds `/usr/share/sddm/themes/pillbox`, `/etc/sddm.conf.d/zz-pillbox.conf
 Systems with another login manager (GDM, LightDM …) are detected and left alone. Pick a fixed scene in `theme.conf` (`scene=aurora`, …).
 While it is installed, it takes precedence over the login theme chosen in System Settings.
 
+## Languages
+
+Pillbox is written in English and follows your system language. German is
+included for everything (orb, settings centre, island clock, wallpaper settings,
+login screen). Translations live in `po/` – new languages are very welcome:
+copy a `de.po`, translate the `msgstr` lines and send a pull request.
+
 ## Settings
 
 Right-click the Orb or a dock → **Customize…** opens the Pillbox settings centre:

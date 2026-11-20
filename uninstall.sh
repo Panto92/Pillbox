@@ -79,7 +79,7 @@ fi
 rm -rf "$DATA/plasma/desktoptheme/Pillbox"
 rm -f  "$DATA/color-schemes/Pillbox.colors"
 rm -f  "$DATA/konsole/Pillbox.colorscheme" "$DATA/konsole/Pillbox.profile"
-rm -f  "$DATA"/locale/*/LC_MESSAGES/plasma_applet_org.pillbox.*.mo
+rm -f  "$DATA"/locale/*/LC_MESSAGES/plasma_applet_org.pillbox.*.mo "$DATA"/locale/*/LC_MESSAGES/plasma_wallpaper_org.pillbox.*.mo
 say "Removed Plasma style, colour scheme, Konsole profile and translations"
 
 say "Your settings backups are kept in $STATE/ (delete that folder if you don't need them)"

@@ -1,0 +1,77 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Atmosphere:"
+msgstr "Atmosphäre:"
+
+msgid "Aurora – polar night, a lone hut"
+msgstr "Aurora – Polarnacht, eine einsame Hütte"
+
+msgid "Battery & power:"
+msgstr "Akku und Energie:"
+
+msgid "Calm"
+msgstr "Ruhig"
+
+msgid "Contour – topographic lines"
+msgstr "Contour – Höhenlinien"
+
+msgid "Dune – desert, layered dunes"
+msgstr "Dune – Wüste mit Dünen"
+
+msgid "Fixed time:"
+msgstr "Feste Uhrzeit:"
+
+msgid "Flow – soft clouds of colour"
+msgstr "Flow – weiche Farbwolken"
+
+msgid "Fogline – misty lake under mountains"
+msgstr "Fogline – Nebelsee unter Bergen"
+
+msgid "Follow the clock"
+msgstr "Der Uhr folgen"
+
+msgid "Grid – a field of dots"
+msgstr "Grid – ein Punktraster"
+
+msgid "Horizon – flat hills, one clear sun"
+msgstr "Horizon – flache Hügel, eine klare Sonne"
+
+msgid "Lively"
+msgstr "Lebhaft"
+
+msgid "Motion:"
+msgstr "Bewegung:"
+
+msgid "Neon – a city at night"
+msgstr "Neon – eine Stadt bei Nacht"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Off"
+msgstr "Aus"
+
+msgid "Orbit – a planet in space"
+msgstr "Orbit – ein Planet im All"
+
+msgid "Pause while a maximised or fullscreen window covers the screen"
+msgstr "Pausieren, solange ein maximiertes oder Vollbild-Fenster den Bildschirm verdeckt"
+
+msgid "Reacts to your computer:"
+msgstr "Reagiert auf den Rechner:"
+
+msgid "Strong"
+msgstr "Deutlich"
+
+msgid "Subtle"
+msgstr "Dezent"
+
+msgid "Tide – open sea"
+msgstr "Tide – offenes Meer"
+
+msgid "Time of day:"
+msgstr "Tageszeit:"
