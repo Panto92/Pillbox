@@ -1,0 +1,12 @@
+[Icon Theme]
+Name=Pillbox
+Comment=Calm line icons for the panel and system tray; everything else comes from Breeze.
+Inherits=breeze-dark,breeze,hicolor
+Directories=symbolic
+
+[symbolic]
+Size=24
+MinSize=8
+MaxSize=512
+Type=Scalable
+Context=Status

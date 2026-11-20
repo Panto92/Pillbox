@@ -761,3 +761,21 @@ msgstr "Pillbox-Symbole"
 
 msgid "An own icon set for the system tray: line or duotone."
 msgstr "Ein eigener Symbolsatz für die Systemleiste: Linie oder Duoton."
+
+msgid "Icons"
+msgstr "Symbole"
+
+msgid "System icons"
+msgstr "Systemsymbole"
+
+msgid "Pillbox's own icons for network, sound, notifications and session. Duotone puts your accent colour underneath."
+msgstr "Pillbox-eigene Symbole für Netz, Ton, Mitteilungen und Sitzung. Duoton legt deine Akzentfarbe darunter."
+
+msgid "Original"
+msgstr "Original"
+
+msgid "Line"
+msgstr "Linie"
+
+msgid "Duotone"
+msgstr "Duoton"

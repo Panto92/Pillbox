@@ -780,10 +780,14 @@ Window {
                 SettingRow { label: i18n("Temperature"); Toggle { key: "statsTemp"; onPicked: panel.orb.setWidget("org.pillbox.stats", "showTemp", panel.cfg.statsTemp) } }
             }
             Group {
+                title: i18n("Icons")
+                SettingRow { label: i18n("System icons"); hint: i18n("Pillbox's own icons for network, sound, notifications and session. Duotone puts your accent colour underneath.")
+                    Segments { key: "iconTheme"; options: [["keep", i18n("Original")], ["Pillbox", i18n("Line")], ["Pillbox-Duo", i18n("Duotone")]]
+                               onPicked: panel.orb.applyIconTheme() } }
+            }
+            Group {
                 title: i18n("Coming next")
                 SettingRow { label: i18n("Arrangements"); hint: i18n("Islands, one capsule, a rail at the screen edge, corners, or a halo around the orb.")
-                    QQC2.Label { text: i18n("soon"); opacity: 0.6 } }
-                SettingRow { label: i18n("Pillbox icons"); hint: i18n("An own icon set for the system tray: line or duotone.")
                     QQC2.Label { text: i18n("soon"); opacity: 0.6 } }
             }
         }

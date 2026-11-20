@@ -857,6 +857,23 @@ PlasmoidItem {
         shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '" + js + "' # " + Date.now())
     }
 
+    // icon theme: remember what was there before, so "Original" brings it back
+    function applyIconTheme() {
+        const want = cfg.iconTheme === "Pillbox" || cfg.iconTheme === "Pillbox-Duo" ? cfg.iconTheme : String(cfg.iconThemeBefore || "breeze-dark").replace(/[^A-Za-z0-9_.-]/g, "")
+        iconProbe.connectSource("cur=$(kreadconfig6 --file kdeglobals --group Icons --key Theme); "
+            + "case \"$cur\" in Pillbox|Pillbox-Duo) ;; *) [ -n \"$cur\" ] && echo PBICON=$cur ;; esac; "
+            + "for c in /usr/lib/*/libexec/plasma-changeicons /usr/libexec/plasma-changeicons; do [ -x \"$c\" ] && exec \"$c\" " + want + "; done # " + Date.now())
+    }
+
+    property P5Support.DataSource iconProbe: P5Support.DataSource {
+        engine: "executable"
+        onNewData: (source, data) => {
+            disconnectSource(source)
+            const m = String(data.stdout || "").match(/PBICON=([A-Za-z0-9_.-]+)/)
+            if (m) root.cfg.iconThemeBefore = m[1]
+        }
+    }
+
     // ---------------------------------------------------------------- login screen
     // Set up once with root (pkexec), then the choices live in a file the user owns:
     // /var/lib/pillbox-login/theme.conf.user – no password needed to change them.

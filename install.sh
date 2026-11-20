@@ -93,6 +93,11 @@ for mo in "$SRC"/plasma/{plasmoids,wallpapers}/*/contents/locale/*/LC_MESSAGES/*
 done
 install_pkg Plasma/LookAndFeel "$SRC/plasma/look-and-feel/org.pillbox.desktop"
 
+# Pillbox icon themes (line and duotone); chosen in the settings centre
+mkdir -p "$DATA/icons"
+rm -rf "$DATA/icons/Pillbox" "$DATA/icons/Pillbox-Duo"
+cp -r "$SRC/icons/Pillbox" "$SRC/icons/Pillbox-Duo" "$DATA/icons/"
+
 # login screen files, ready for the settings centre's "Set up" button (that step needs root)
 LOGIN="$STATE/login"
 rm -rf "$LOGIN"; mkdir -p "$LOGIN/pillbox/scenes"

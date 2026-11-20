@@ -34,6 +34,9 @@
     <entry name="loginScene" type="String"><default>auto</default></entry>
     <!-- the load pill (org.pillbox.stats), mirrored here and written into the widget -->
     <entry name="statsStyle" type="String"><default>rings</default></entry>
+    <!-- icon theme: keep (whatever was set) | Pillbox | Pillbox-Duo -->
+    <entry name="iconTheme" type="String"><default>keep</default></entry>
+    <entry name="iconThemeBefore" type="String"><default>breeze-dark</default></entry>
     <entry name="statsCpu" type="Bool"><default>true</default></entry>
     <entry name="statsGpu" type="Bool"><default>true</default></entry>
     <entry name="statsRam" type="Bool"><default>true</default></entry>

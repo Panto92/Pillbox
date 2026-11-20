@@ -76,6 +76,10 @@ if [[ -e /usr/share/sddm/themes/pillbox ]]; then
     say "The Pillbox login screen is still installed. Remove it with:"
     say "    sudo $STATE/login/install-login.sh --remove"
 fi
+case "$(kreadconfig6 --file kdeglobals --group Icons --key Theme 2>/dev/null)" in
+    Pillbox|Pillbox-Duo) /usr/lib/*/libexec/plasma-changeicons breeze-dark >/dev/null 2>&1 || kwriteconfig6 --file kdeglobals --group Icons --key Theme breeze-dark ;;
+esac
+rm -rf "$DATA/icons/Pillbox" "$DATA/icons/Pillbox-Duo"
 rm -rf "$DATA/plasma/desktoptheme/Pillbox"
 rm -f  "$DATA/color-schemes/Pillbox.colors"
 rm -f  "$DATA/konsole/Pillbox.colorscheme" "$DATA/konsole/Pillbox.profile"
