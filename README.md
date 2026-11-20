@@ -1,176 +1,170 @@
-# Pillbox
+<p align="center">
+  <img src="docs/images/hero.jpg" alt="Pillbox OS – a calm, living desktop for KDE Plasma 6" width="100%">
+</p>
 
-A calm, modern desktop for **KDE Plasma 6**. Instead of a dock, a glowing
-**Orb** floats wherever you want it: click it for a ring of your apps, drag it
-anywhere, minimise windows into it. On top: three floating "pills" with your
-system stats, the clock and the tray.
+<p align="center">
+  <img src="docs/images/logo.svg" alt="" width="72"><br>
+  <b>A calm, living desktop for KDE Plasma 6.</b><br>
+  A glowing orb instead of a dock · wallpapers that breathe with your day · notifications that grow out of the clock
+</p>
 
-> **Status:** 0.7 – Orb and three dock forms, ten living wallpapers, a settings centre. Feedback welcome.
+<p align="center">
+  <img alt="Version" src="https://img.shields.io/badge/version-0.8-ff8a4c?style=flat-square">
+  <img alt="KDE Plasma 6" src="https://img.shields.io/badge/KDE%20Plasma-6-8fb0c2?style=flat-square">
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-7fdcb0?style=flat-square">
+  <img alt="Languages" src="https://img.shields.io/badge/languages-EN%20%C2%B7%20DE-b49cf0?style=flat-square">
+</p>
 
-## Why
+> **Pillbox OS is not a distribution.** It turns the Plasma 6 you already have –
+> Kubuntu, Fedora KDE, Arch, openSUSE, KDE neon … – into its own desktop, and
+> `./uninstall.sh` brings your old one back.
 
-Most "rices" with this look are built for Hyprland and need a dozen moving
-parts. Pillbox gets there with **plain Plasma**:
+---
 
-- no compiled code – only QML, SVG and Plasma's layout scripts
-- the global theme **only references things that ship with Plasma or with
-  Pillbox** – no missing icons or cursors after you apply it
-- missing style images fall back to Breeze, so Plasma updates don't break it
-- installs into your home directory, **no sudo**, keeps a backup, and
-  `./uninstall.sh` brings your old desktop back
+## Why Pillbox
 
-## The Orb
+Most desktops with this look are built on Hyprland and need a dozen moving parts.
+Pillbox gets there with **plain Plasma**:
 
-| | |
-|---|---|
-| **Click** | ring of your pinned and running apps |
-| **Drag** | put it anywhere, on any monitor (right-click → *Lock position*) |
-| **Hover an app in the ring** | live previews of its windows |
-| **Click a running app** | bring it to the front – or, if it already is, minimise it into the Orb |
-| **App with several windows** | shows all its windows side by side |
-| **Middle click** | window overview |
-| **All applications** | full-screen launcher with search and categories |
-| **Satellites** | your open windows orbit the ball; minimised windows fly into it |
-
-## Forms
-
-Don't want a floating ball? Pick another **form** – same apps, same behaviour:
-
-| Form | |
-|---|---|
-| **Orb** | the floating ball described above |
-| **Ember** | a thin seam of glowing dots that unfolds into a dock on hover |
-| **Shelf** | icons standing on a glass ledge; the hovered one lifts, tilts towards you and reflects |
-| **Liquid** | a dock of liquid glass: a drop swells out under the pointer, lifts the icon and flows along |
-
-Docks can sit at the **bottom, left or right**, on the main monitor, on **all
-monitors** or on one you choose, and can rest **always visible**, **small until
-the pointer comes** or **hidden behind a thin line**.
-
-## Living wallpapers
-
-**Pillbox Atmosphere** follows the time of day – blue hour, noon, evening glow,
-stars – and quietly shows what your computer is doing, without a single number:
-
-| | | CPU load | GPU load | Unread |
-|---|---|---|---|---|
-| **Flow** | soft clouds of colour | drift faster | warmer tones | a soft ring of light |
-| **Horizon** | flat layered hills, one clear sun | haze drifts through | the sun grows warmer | a flock of birds |
-| **Fogline** | misty lake under mountains | denser fog | the ridges glow | rings on the water |
-| **Dune** | layered desert dunes | sand blows over the crests | heat shimmer | a shooting star |
-| **Aurora** | Norwegian fjord in polar night | the aurora dances brighter | the hut's window lights up | snowfall |
-| **Tide** | open sea | waves grow | the sea glows | rain over the water |
-| **Neon** | a city at night | more windows light up | the signs glow | rain on a wet street |
-| **Orbit** | a ringed planet | the belt turns faster | the atmosphere glows | a comet |
-| **Contour** | topographic lines | lines move more | valleys glow warm | a wave runs through |
-| **Grid** | a calm field of dots | a wave of light | the centre glows | a ping |
-
-Every scene has its own options (colours, fog, sea, rain …), a **Try it** button that
-plays its reactions for eight seconds, and a time-of-day slider: follow the clock or
-hold the wallpaper at, say, 14:30.
-
-Built to cost next to nothing (measured on a 3440×1440 + 1080×1920 setup,
-share of *one* CPU core above a plain image wallpaper):
-
-| | Plasma | KWin |
-|---|---|---|
-| Fogline | +0.1 % | +1.7 % |
-| Horizon | +0.1 % | +2.6 % |
-| Flow | +1.5 % | +4.5 % |
-| any scene, with a maximised or fullscreen window | 0 | 0 |
-
-How: everything is built from GPU-drawn shapes and gradients; colours change once
-a minute; all motion shares one slow clock (8 / 12 / 20 fps for calm / normal /
-lively) because for a wallpaper the cost is how often the whole screen must be
-redrawn; a maximised or fullscreen window pauses the scene entirely.
-
-## Login screen
-
-A calm SDDM login screen on a living atmosphere that follows the time of day
-(Aurora at night, Fogline in the morning, Horizon by day, Dune in the evening):
-a large clock, one glass card, session and power buttons as small pills. A wrong
-password shakes the card; Caps Lock is pointed out.
-
-Easiest: **Customize… → Login screen → Set up…** in the settings centre. It asks once
-for your password (login screens are installed system-wide); after that you pick the
-atmosphere there without a password, and the accent follows the orb. By hand:
-
-```bash
-sudo ./sddm/install-login.sh            # install and switch to it
-sudo ./sddm/install-login.sh --remove   # back to your previous login screen
-```
-
-It only adds `/usr/share/sddm/themes/pillbox`, `/etc/sddm.conf.d/zz-pillbox.conf` and
-`/var/lib/pillbox-login/theme.conf.user` (owned by you); no existing file is changed.
-Systems with another login manager (GDM, LightDM …) are detected and left alone. Pick a fixed scene in `theme.conf` (`scene=aurora`, …).
-While it is installed, it takes precedence over the login theme chosen in System Settings.
-
-## Languages
-
-Pillbox is written in English and follows your system language. German is
-included for everything (orb, settings centre, island clock, wallpaper settings,
-login screen). Translations live in `po/` – new languages are very welcome:
-copy a `de.po`, translate the `msgstr` lines and send a pull request.
-
-## Settings
-
-Right-click the Orb or a dock → **Customize…** opens the Pillbox settings centre:
-a glass window with a sidebar – Form, Color, Wallpaper, Top bar, Behavior, Alerts,
-About. Every change applies **live**; the real orb, dock and wallpaper are the
-preview. Only the options of the chosen form are shown.
-Full behaviour spec: [docs/orb.md](docs/orb.md).
-
-## What's inside
-
-| Component | Description |
-|---|---|
-| Widget `Pillbox Orb` | The dock replacement described above |
-| Wallpaper `Pillbox Atmosphere` | Flow, Horizon, Fogline – follow the clock, react to load, pause when covered |
-| Widget `Pillbox Stats` | `CPU 12%  GPU 4%  RAM 31%  45°C` from Plasma's own sensors (NVIDIA, AMD, Intel) |
-| Global theme `Pillbox` | Colours, Plasma style, Breeze Dark icons, Breeze cursor |
-| Layout | Top: menu + stats · clock · media/tray/power pills. The Orb replaces the dock |
-| Color scheme + Plasma style | Muted grey-blue, dark |
-| Konsole profile, fastfetch config | Optional extras |
-
-English and German are included; other languages are welcome as `po/orb/<lang>.po`.
+- **Nothing compiled** – only QML, SVG and Plasma's own scripting. It survives Plasma updates.
+- **Only official interfaces.** No patched files, no hacks into Plasma.
+- **Measured, not guessed.** Every animated part is checked for CPU cost; a covered wallpaper costs nothing.
+- **Reversible.** Installs into your home folder, keeps a backup of your settings, removes itself cleanly.
+- **One settings centre** for everything – no hunting through ten dialogs.
 
 ## Install
 
 ```bash
 git clone https://github.com/Panto92/Pillbox.git pillbox
 cd pillbox
-./install.sh            # install only – your desktop does not change
-./install.sh --apply    # + Pillbox colours, style and icons; your panels and dock stay
-./install.sh --layout   # + the full Pillbox layout: the Orb replaces your dock
+./install.sh            # install only – your desktop does not change yet
+./install.sh --apply    # + Pillbox colours, style and icons; your panels stay
+./install.sh --layout   # + the full Pillbox layout: orb, island clock, living wallpaper
 ```
 
-Before anything on your desktop changes, your settings are backed up to
-`~/.local/share/pillbox/`. The first backup is kept as your pre-Pillbox state.
-
-Requirements: KDE Plasma 6.0 or newer (Wayland recommended).
-
-## Uninstall
+Your settings are backed up to `~/.local/share/pillbox/` first. Requirements: KDE Plasma 6.0 or newer (Wayland recommended).
 
 ```bash
-./uninstall.sh                # restores your pre-Pillbox panels, dock, theme and colours
-./uninstall.sh --keep-layout  # keeps your current panels, only removes Pillbox
+./uninstall.sh                # back to your desktop as it was before Pillbox
+./uninstall.sh --keep-layout  # keep your current panels, only remove Pillbox
 ```
 
-## Translations
+Afterwards: right-click the orb → **Customize…** opens the settings centre.
 
-Source strings are English. To add a language, copy `po/orb/de.po` to
-`po/orb/<lang>.po`, translate it and build the catalogue:
+---
 
-```bash
-python3 tools/po2mo.py po/orb/<lang>.po \
-  plasma/plasmoids/org.pillbox.orb/contents/locale/<lang>/LC_MESSAGES/plasma_applet_org.pillbox.orb.mo
-```
+## The Orb
+
+A glowing ball instead of a dock. Put it anywhere, on any monitor.
+
+| | |
+|---|---|
+| **Click** | a ring of your pinned and running apps |
+| **Hover an app** | live previews of its windows |
+| **Click a running app** | brings it to the front – or minimises it into the orb |
+| **Drag** | anywhere you like; lock it from the menu |
+| **Satellites** | your open windows orbit the ball |
+| **All applications** | a full-screen launcher with search |
+
+Not a fan of floating balls? Pick another **form** with the same behaviour:
+**Ember** (a seam of glowing dots that unfolds), **Shelf** (icons on a glass ledge) or
+**Liquid** (a dock of liquid glass). Docks go bottom, left or right, on one or all monitors.
+
+## Living wallpapers
+
+<p align="center"><img src="docs/images/atmospheres.jpg" alt="The ten Pillbox atmospheres" width="100%"></p>
+
+Ten **atmospheres** follow the time of day – blue hour, noon, evening glow, stars –
+and quietly show what your computer is doing, without a single number:
+
+| | | Busy CPU | Busy GPU | New notification |
+|---|---|---|---|---|
+| **Flow** | soft clouds of colour | drift faster | warmer tones | a ring of light |
+| **Horizon** | flat hills, one sun | haze drifts through | the sun grows warmer | a flock of birds |
+| **Fogline** | misty lake under mountains | denser fog | ridges glow | rings on the water |
+| **Dune** | desert dunes | sand blows over the crests | heat shimmer | a shooting star |
+| **Aurora** | a Norwegian fjord in polar night | the aurora dances | the hut lights up | snowfall |
+| **Tide** | open sea | waves grow | the sea glows | rain |
+| **Neon** | a city at night | more windows light up | signs glow | rain on a wet street |
+| **Orbit** | a ringed planet | the belt turns faster | the atmosphere glows | a comet |
+| **Contour** | topographic lines | lines move more | valleys glow | a wave runs through |
+| **Grid** | a calm field of dots | a wave of light | the centre glows | a ping |
+
+Each scene has its own options (colours, fog, sea, rain …), a **Try it** button and a
+time slider – follow the clock or keep it at, say, 14:30.
+
+**Cost** (3440×1440 + 1080×1920, share of one CPU core above a plain image):
+Fogline/Horizon ≈ +2 %, Flow ≈ +6 %, and **0** while a maximised or fullscreen window covers the screen.
+All motion shares one slow clock, because for a wallpaper the cost is how often the screen is redrawn.
+
+## The island clock
+
+<p align="center"><img src="docs/images/island.png" alt="A notification growing out of the clock" width="620"></p>
+
+The clock in the middle **grows into an island** when a notification arrives – with
+reply field and actions – and shrinks back. A dot stays until you've looked. A click
+on the clock opens the calendar, your notifications and *Do Not Disturb*.
+Plasma stays the notification server, so history, sounds and DND keep working.
+
+## Load, icons and the top bar
+
+<p align="center"><img src="docs/images/load-styles.png" alt="Load shown as rings, curves, bars and numbers" width="560"></p>
+
+CPU, GPU, memory and temperature as **rings, curves, bars or numbers**; a click
+shows the last minute as large curves.
+
+<p align="center"><img src="docs/images/icons-tray.png" alt="System tray with Breeze, Pillbox line and Pillbox duotone icons" width="560"></p>
+
+Pillbox brings its **own system icons** in two styles – *line* and *duotone*, which
+puts your accent colour underneath. Shown above: Breeze, Pillbox line, Pillbox duotone.
+
+## Login screen
+
+The login screen gets the same treatment: a living atmosphere that fits the time of
+day, a large clock and one glass card with your picture. Set it up once from the
+settings centre (**Login screen → Set up…**, asks for your password because login
+screens are system-wide); after that you change it there without a password.
+Systems with another login manager (GDM, LightDM …) are detected and left alone.
+
+## Settings centre
+
+Right-click the orb or a dock → **Customize…**: a glass window with a sidebar –
+Form, Color, Wallpaper, Login screen, Top bar, Behavior, Alerts, About. Every change
+applies **live**.
+
+---
+
+## Roadmap
+
+Pillbox is a long-term project; every idea from the sketches in [`docs/lab`](docs/lab)
+becomes an option you can switch on.
+
+- [x] Orb and three dock forms
+- [x] Ten living wallpapers with their own options
+- [x] Island clock with notification islands
+- [x] Login screen
+- [x] Load pill in four styles, own icon themes
+- [ ] Status pill with own panels (network, sound, bluetooth, session)
+- [ ] Arrangements: islands, one capsule, a rail at the screen edge, corners, a halo around the orb
+- [ ] Click effects: grow, slide in, bloom
+- [ ] Music module and control centre
+
+## Languages
+
+Pillbox is written in English and follows your system language; German is included
+everywhere. Translations live in [`po/`](po) – copy a `de.po`, translate the `msgstr`
+lines and open a pull request. New languages are very welcome.
+
+## Contributing
+
+Ideas, bug reports and pull requests are welcome – open an issue first for larger
+changes. Behaviour spec of the orb: [docs/orb.md](docs/orb.md).
 
 ## Credits
 
-The look is inspired by [43PR's Hyprland dotfiles](https://github.com/43PR/dotfiles)
-(MIT). Pillbox is an independent implementation for KDE Plasma and contains
-no code from that project. Concept sketches: `docs/lab/pillbox-lab.html`.
+The look was inspired by [43PR's Hyprland dotfiles](https://github.com/43PR/dotfiles)
+(MIT). Pillbox is an independent implementation for KDE Plasma and contains no code
+from that project.
 
 ## License
 
