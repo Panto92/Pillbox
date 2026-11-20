@@ -10,5 +10,7 @@
     <entry name="showTemp" type="Bool"><default>true</default></entry>
     <entry name="tempSensor" type="String"><default>cpu/all/maximumTemperature</default></entry>
     <entry name="updateInterval" type="Int"><default>2000</default></entry>
+    <!-- rings | spark | bars | numbers -->
+    <entry name="style" type="String"><default>rings</default></entry>
   </group>
 </kcfg>

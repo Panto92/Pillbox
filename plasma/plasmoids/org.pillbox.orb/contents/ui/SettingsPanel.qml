@@ -768,9 +768,22 @@ Window {
 
     property Component topPage: Component {
         ColumnLayout {
+            spacing: Kirigami.Units.gridUnit
+            Group {
+                title: i18n("Load")
+                SettingRow { label: i18n("Look"); hint: i18n("How CPU, GPU, memory and temperature appear in the left pill.")
+                    Segments { key: "statsStyle"; options: [["rings", i18n("Rings")], ["spark", i18n("Curves")], ["bars", i18n("Bars")], ["numbers", i18n("Numbers")]]
+                               onPicked: panel.orb.setWidget("org.pillbox.stats", "style", panel.cfg.statsStyle) } }
+                SettingRow { label: "CPU"; Toggle { key: "statsCpu"; onPicked: panel.orb.setWidget("org.pillbox.stats", "showCpu", panel.cfg.statsCpu) } }
+                SettingRow { label: "GPU"; Toggle { key: "statsGpu"; onPicked: panel.orb.setWidget("org.pillbox.stats", "showGpu", panel.cfg.statsGpu) } }
+                SettingRow { label: i18n("Memory"); Toggle { key: "statsRam"; onPicked: panel.orb.setWidget("org.pillbox.stats", "showRam", panel.cfg.statsRam) } }
+                SettingRow { label: i18n("Temperature"); Toggle { key: "statsTemp"; onPicked: panel.orb.setWidget("org.pillbox.stats", "showTemp", panel.cfg.statsTemp) } }
+            }
             Group {
                 title: i18n("Coming next")
-                SettingRow { label: i18n("Islands"); hint: i18n("The three pills will unfold into panels: graphs, calendar, a control centre. Choose what each pill shows here.")
+                SettingRow { label: i18n("Arrangements"); hint: i18n("Islands, one capsule, a rail at the screen edge, corners, or a halo around the orb.")
+                    QQC2.Label { text: i18n("soon"); opacity: 0.6 } }
+                SettingRow { label: i18n("Pillbox icons"); hint: i18n("An own icon set for the system tray: line or duotone.")
                     QQC2.Label { text: i18n("soon"); opacity: 0.6 } }
             }
         }

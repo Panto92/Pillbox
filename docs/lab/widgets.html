@@ -1,0 +1,354 @@
+<title>Pillbox Widgets</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a live stage on top driven by four control rows (arrangement, icons, app icons, stats, click effect); detail sections below. Single dark look, like the desktop. */
+:root {
+  --ink: #0b0e12;
+  --slate: #141a20;
+  --glass: rgba(16, 20, 26, 0.8);
+  --line: rgba(205, 213, 219, 0.1);
+  --mist: #7d8a94;
+  --paper: #cdd5db;
+  --frost: #e9eef2;
+  --accent: #ff8a4c;
+  --steel: #8fb0c2;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--ink); color: var(--paper); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 56px 96px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 80px; }
+.eyebrow { font: 500 12px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(44px, 7.5vw, 96px); line-height: .92; letter-spacing: -.035em; margin: 0; color: var(--frost); }
+h2 { font-family: var(--f-display); font-weight: 600; font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -.02em; line-height: 1.05; margin: 0; color: var(--frost); text-wrap: balance; }
+h3 { font: 600 16px var(--f-body); color: var(--frost); margin: 0; }
+.lead { margin: 18px 0 0; max-width: 64ch; color: var(--mist); font-size: 17px; }
+.lead b { color: var(--paper); font-weight: 600; }
+.sec-head { display: grid; gap: 4px; margin-bottom: 26px; }
+.sec-head p { margin: 10px 0 0; max-width: 66ch; color: var(--mist); }
+
+/* controls */
+.controls { display: grid; gap: 10px; margin: 0 0 18px; }
+.ctl { display: grid; grid-template-columns: 130px 1fr; gap: 12px; align-items: center; }
+.ctl > span { font: 500 11px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mist); }
+.segs { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 13px var(--f-body); color: var(--paper); background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 999px; padding: 6px 13px; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+.chip:hover { background: rgba(255,255,255,.09); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--ink); border-color: var(--accent); font-weight: 600; }
+.chip:focus-visible { outline: 2px solid var(--frost); outline-offset: 2px; }
+@media (max-width: 640px) { .ctl { grid-template-columns: 1fr; gap: 6px; } }
+
+/* stage */
+.stage-box { position: relative; width: 100%; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: #070a10; }
+.stage { position: absolute; left: 0; top: 0; width: 1100px; height: 600px; transform-origin: 0 0; overflow: hidden; font-family: var(--f-body);
+  background: radial-gradient(60% 50% at 28% 20%, rgba(80,255,160,.16), transparent 70%), radial-gradient(50% 40% at 72% 14%, rgba(190,110,255,.14), transparent 70%), linear-gradient(180deg, #070b14, #0d1424 60%, #05070b); }
+.stage::after { content: ""; position: absolute; inset: auto 0 0 0; height: 30%; background: #080b12; clip-path: polygon(0 45%, 13% 20%, 27% 38%, 42% 10%, 56% 32%, 70% 14%, 84% 34%, 100% 18%, 100% 100%, 0 100%); z-index: 0; }
+.caption { margin: 14px 2px 0; color: var(--mist); max-width: 86ch; min-height: 3.2em; }
+.caption b { color: var(--frost); font-weight: 600; }
+
+.g { position: absolute; z-index: 2; background: var(--glass); border: 1px solid rgba(255,255,255,.08); color: var(--frost); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.row { display: flex; align-items: center; gap: 12px; height: 100%; padding: 0 14px; white-space: nowrap; font-size: 13px; }
+.col { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 14px 0; }
+.time { font: 600 14px var(--f-body); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.date { color: var(--mist); font-size: 12.5px; }
+.ic { width: 18px; height: 18px; display: block; color: var(--frost); cursor: pointer; transition: transform .18s; }
+.ic:hover { transform: scale(1.15); }
+.ic .d { display: none; }
+.duo .ic .d { display: block; fill: var(--accent); opacity: .45; stroke: none; }
+.duo .ic { color: var(--frost); }
+.hit { position: relative; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; transition: background .2s; }
+.hit:hover { background: rgba(255,255,255,.08); }
+.badge { position: absolute; right: 3px; top: 3px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px #10141a; }
+.app { width: 22px; height: 22px; display: grid; place-items: center; font: 700 11px var(--f-display); cursor: pointer; transition: transform .18s; }
+.app:hover { transform: scale(1.12); }
+.app.orig { border-radius: 6px; color: #fff; }
+.app.mono { border-radius: 6px; background: transparent !important; color: var(--frost); border: 1.5px solid rgba(233,238,242,.75); }
+.app.glass { border-radius: 8px; color: var(--frost); position: relative; overflow: hidden; }
+.app.glass::before { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, rgba(255,255,255,.35), rgba(255,255,255,.04)); }
+.app.glass span { position: relative; }
+.sep { width: 1px; height: 16px; background: rgba(255,255,255,.12); }
+.hsep { width: 16px; height: 1px; background: rgba(255,255,255,.12); }
+.stat { display: flex; align-items: center; gap: 8px; font: 500 12px var(--f-mono); font-variant-numeric: tabular-nums; }
+.stat .k { color: var(--mist); font: 500 10.5px var(--f-mono); letter-spacing: .06em; }
+.orb { position: absolute; left: 50%; bottom: 46px; width: 46px; height: 46px; margin-left: -23px; border-radius: 50%; z-index: 3;
+  background: radial-gradient(circle at 35% 30%, #fff, var(--accent) 55%, #6b3218); box-shadow: 0 0 40px rgba(255,138,76,.5); }
+.halo { position: absolute; left: 50%; bottom: 23px; width: 92px; height: 92px; margin-left: -46px; z-index: 2; }
+
+/* the panel that opens on click */
+.panel { position: absolute; z-index: 6; background: rgba(14,18,24,.94); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(22px); color: var(--frost); overflow: hidden; opacity: 0; pointer-events: none; }
+.panel.on { opacity: 1; pointer-events: auto; }
+.panel .inner { padding: 18px; display: grid; gap: 12px; width: 340px; }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { border-radius: 14px; background: rgba(255,255,255,.06); padding: 10px 12px; font-size: 12px; display: grid; gap: 2px; }
+.tile b { font-size: 12.5px; }
+.tile.on { background: var(--accent); color: var(--ink); }
+.sl { height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); position: relative; }
+.sl i { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--frost); }
+.mini-l { color: var(--mist); font-size: 12px; }
+.bloom-ring { position: absolute; z-index: 5; border-radius: 50%; border: 2px solid var(--accent); pointer-events: none; opacity: 0; }
+
+/* detail sections */
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.card { background: var(--slate); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 10px; align-content: start; }
+.card p { margin: 0; color: var(--mist); font-size: 14px; }
+.iconrow { display: flex; flex-wrap: wrap; gap: 14px; padding: 14px; border-radius: 14px; background: #0f1318; }
+.iconrow .ic { width: 26px; height: 26px; }
+.pros { margin: 0; padding-left: 18px; color: var(--mist); font-size: 13.5px; }
+.pros li { margin: 2px 0; }
+.q { border-left: 2px solid var(--accent); padding: 2px 0 2px 14px; color: var(--paper); max-width: 72ch; margin: 0; }
+.qs { display: grid; gap: 12px; }
+@media (prefers-reduced-motion: reduce) { .panel, .g, .ic, .app { transition: none !important; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path class="d" d="M12 20.5 5.6 13a9 9 0 0 1 12.8 0Z"/><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0"/><path d="M5.6 12.6a9.2 9.2 0 0 1 12.8 0"/><path d="M8.8 16a4.6 4.6 0 0 1 6.4 0"/><circle cx="12" cy="19.2" r=".9" fill="currentColor"/></g></symbol>
+    <symbol id="i-bt" viewBox="0 0 24 24"><path class="d" d="M12 3v18l5-4.5L12 12l5-4.5Z"/><path d="M7 7.5 17 16.5 12 21V3l5 4.5L7 16.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-vol" viewBox="0 0 24 24"><path class="d" d="M4 9.5h3.5L12 5.5v13l-4.5-4H4Z"/><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4Z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18.3 6.5a7.6 7.6 0 0 1 0 11"/></g></symbol>
+    <symbol id="i-bat" viewBox="0 0 24 24"><rect class="d" x="4.5" y="8.5" width="10" height="7" rx="1.5"/><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2.5" y="6.5" width="17" height="11" rx="3"/><path d="M22 10.5v3"/></g></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path class="d" d="M6 16.5V11a6 6 0 0 1 12 0v5.5Z"/><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></g></symbol>
+    <symbol id="i-power" viewBox="0 0 24 24"><circle class="d" cx="12" cy="13" r="6"/><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3.5v8"/><path d="M7 6.8a7.5 7.5 0 1 0 10 0"/></g></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect class="d" x="4" y="4" width="7" height="7" rx="2"/><g fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="3.5"/></g></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path class="d" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect class="d" x="9" y="3.5" width="6" height="11" rx="3"/><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/></g></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Pillbox · Skizze · Widgets</p>
+  <h1>Statusleiste neu gedacht</h1>
+  <p class="lead">Uhr, Systemleiste und Auslastung in <b>fünf Anordnungen</b>, mit <b>eigenen Symbolen</b>, drei Arten von App-Symbolen, vier Darstellungen für CPU und GPU und drei Klick-Effekten. Stell oben eine Kombination zusammen und klick auf der Bühne auf die Symbole.</p>
+</header>
+
+<section aria-labelledby="s-stage">
+  <div class="controls">
+    <div class="ctl"><span>Anordnung</span><div class="segs" data-g="layout">
+      <button class="chip" data-v="islands">Inseln</button><button class="chip" data-v="capsule">Kapsel</button><button class="chip" data-v="rail">Seitenschiene</button><button class="chip" data-v="corners">Ecken</button><button class="chip" data-v="halo">Halo am Orb</button></div></div>
+    <div class="ctl"><span>Symbole</span><div class="segs" data-g="icons">
+      <button class="chip" data-v="line">Linie</button><button class="chip" data-v="duo">Duoton</button></div></div>
+    <div class="ctl"><span>App-Symbole</span><div class="segs" data-g="apps">
+      <button class="chip" data-v="glass">Glas</button><button class="chip" data-v="mono">Einfarbig</button><button class="chip" data-v="orig">Original</button></div></div>
+    <div class="ctl"><span>CPU / GPU</span><div class="segs" data-g="stats">
+      <button class="chip" data-v="rings">Ringe</button><button class="chip" data-v="spark">Kurven</button><button class="chip" data-v="bars">Balken</button><button class="chip" data-v="numbers">Zahlen</button></div></div>
+    <div class="ctl"><span>Klick-Effekt</span><div class="segs" data-g="effect">
+      <button class="chip" data-v="morph">Wachsen</button><button class="chip" data-v="sheet">Hereingleiten</button><button class="chip" data-v="bloom">Aufblühen</button></div></div>
+  </div>
+  <div class="stage-box" id="box"><div class="stage" id="stage"></div></div>
+  <p class="caption" id="cap"></p>
+</section>
+
+<section aria-labelledby="s-layouts">
+  <div class="sec-head"><p class="eyebrow">Die fünf Anordnungen</p><h2 id="s-layouts">Wo die Leiste wohnt</h2></div>
+  <div class="grid3">
+    <div class="card"><h3>Inseln</h3><p>Drei schwebende Pillen oben, wie heute, nur feiner. Bekannt, übersichtlich, passt zur Uhr-Insel.</p><ul class="pros"><li>vertraut für jeden</li><li>Nachrichten wachsen aus der Uhr</li></ul></div>
+    <div class="card"><h3>Kapsel</h3><p>Alles in einer einzigen Kapsel in der Mitte: links Status, Mitte Uhr, rechts Auslastung. Maximal ruhig.</p><ul class="pros"><li>kleinste Fläche</li><li>wirkt wie aus einem Guss</li></ul></div>
+    <div class="card"><h3>Seitenschiene</h3><p>Eine schmale senkrechte Schiene am rechten Rand. Ideal für Breitbildschirme, die Höhe bleibt frei.</p><ul class="pros"><li>volle Höhe für Fenster</li><li>Panels gleiten vom Rand herein</li></ul></div>
+    <div class="card"><h3>Ecken</h3><p>Keine Leiste. Vier ruhige Eck-Widgets: Auslastung oben links, Status oben rechts, große Uhr unten links.</p><ul class="pros"><li>Desktop wirkt leer und aufgeräumt</li><li>Uhr als Gestaltungselement</li></ul></div>
+    <div class="card"><h3>Halo am Orb</h3><p>Der Status lebt als leuchtender Ring um den Orb: Segmente für Netz, Ton und Auslastung. Ein Klick auf den Orb öffnet alles.</p><ul class="pros"><li>radikal neu</li><li>nur mit Orb-Form sinnvoll</li></ul></div>
+  </div>
+</section>
+
+<section aria-labelledby="s-icons">
+  <div class="sec-head"><p class="eyebrow">Eigene Symbole</p><h2 id="s-icons">Ein eigener Satz statt Breeze</h2>
+  <p>Gleiche Strichstärke, runde Enden, ein Raster von 24 Punkten. „Duoton“ legt eine Fläche in deiner Akzentfarbe darunter. Für Apps im Tray, deren Logos wir nicht neu zeichnen dürfen, gibt es drei Behandlungen.</p></div>
+  <div class="grid3">
+    <div class="card"><h3>Linie</h3><div class="iconrow" id="row-line"></div><p>Ruhig und neutral, passt zu jedem Hintergrund.</p></div>
+    <div class="card duo"><h3>Duoton</h3><div class="iconrow" id="row-duo"></div><p>Mehr Charakter: die Akzentfarbe zeigt, was aktiv ist.</p></div>
+    <div class="card"><h3>App-Symbole im Tray</h3><div class="iconrow" id="row-apps"></div><p>Glas: Farbe bleibt, wird aber eingefasst. Einfarbig: nur die Form, wie Systemsymbole. Original: unverändert.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="s-q">
+  <div class="sec-head"><p class="eyebrow">Deine Wahl</p><h2 id="s-q">Was gefällt dir?</h2></div>
+  <div class="qs">
+    <p class="q">Welche <b>Anordnung</b>? Man kann auch zwei anbieten, zum Beispiel Inseln als Standard und Seitenschiene als Option.</p>
+    <p class="q">Welcher <b>Symbol-Stil</b> und welche <b>App-Behandlung</b>?</p>
+    <p class="q">Welche <b>Darstellung für CPU und GPU</b>, und welcher <b>Klick-Effekt</b> fühlt sich am besten an?</p>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var st = { layout: 'islands', icons: 'line', apps: 'glass', stats: 'rings', effect: 'morph' };
+  var stage = document.getElementById('stage'), box = document.getElementById('box');
+  function fit() { var k = box.clientWidth / 1100; stage.style.transform = 'scale(' + k + ')'; box.style.height = (600 * k) + 'px'; }
+  window.addEventListener('resize', fit); fit();
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function ic(name, badge) { return '<span class="hit" data-open="' + name + '"><svg class="ic"><use href="#i-' + name + '"/></svg>' + (badge ? '<i class="badge"></i>' : '') + '</span>'; }
+  var APPS = [['D', '#5865f2'], ['S', '#1b2838'], ['B', '#175ddc']];
+  function apps() { return APPS.map(function (a) { return '<span class="app ' + st.apps + '" data-open="app" style="background:' + a[1] + '"><span>' + a[0] + '</span></span>'; }).join(''); }
+  function status(vertical) {
+    var s = ic('wifi') + ic('bt') + ic('vol') + ic('bell', true) + (vertical ? '<span class="hsep"></span>' : '<span class="sep"></span>') + apps() + (vertical ? '<span class="hsep"></span>' : '<span class="sep"></span>') + ic('power');
+    return s;
+  }
+  // live load values
+  var load = { cpu: 12, gpu: 31, ram: 29, hist: { cpu: [], gpu: [] } };
+  for (var i = 0; i < 24; i++) { load.hist.cpu.push(10 + Math.random() * 15); load.hist.gpu.push(25 + Math.random() * 15); }
+  function ring(v, label, col) {
+    var r = 9, c = 2 * Math.PI * r, off = c * (1 - v / 100);
+    return '<span class="stat"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="' + r + '" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="3"/><circle cx="12" cy="12" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" transform="rotate(-90 12 12)"/></svg><span class="k">' + label + '</span></span>';
+  }
+  function spark(h, label, col) {
+    var pts = h.map(function (v, i) { return (i * 2.6).toFixed(1) + ',' + (20 - v / 100 * 18).toFixed(1); }).join(' ');
+    return '<span class="stat"><span class="k">' + label + '</span><svg width="62" height="20" viewBox="0 0 62 20"><polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="1.6" stroke-linejoin="round"/></svg><span>' + Math.round(h[h.length - 1]) + '%</span></span>';
+  }
+  function bars(h, label, col) {
+    var b = h.slice(-8).map(function (v, i) { return '<rect x="' + (i * 4) + '" y="' + (18 - v / 100 * 16).toFixed(1) + '" width="2.6" height="' + (v / 100 * 16 + 2).toFixed(1) + '" rx="1.2" fill="' + col + '" opacity="' + (0.35 + i * 0.09).toFixed(2) + '"/>'; }).join('');
+    return '<span class="stat"><span class="k">' + label + '</span><svg width="32" height="20" viewBox="0 0 32 20">' + b + '</svg></span>';
+  }
+  function stats(vertical) {
+    var a, b, accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ff8a4c';
+    if (st.stats === 'rings') { a = ring(load.cpu, 'CPU', accent); b = ring(load.gpu, 'GPU', '#7fdcb0'); }
+    else if (st.stats === 'spark') { a = spark(load.hist.cpu, 'CPU', accent); b = spark(load.hist.gpu, 'GPU', '#7fdcb0'); }
+    else if (st.stats === 'bars') { a = bars(load.hist.cpu, 'CPU', accent); b = bars(load.hist.gpu, 'GPU', '#7fdcb0'); }
+    else { a = '<span class="stat"><span class="k">CPU</span>' + Math.round(load.cpu) + '%</span>'; b = '<span class="stat"><span class="k">GPU</span>' + Math.round(load.gpu) + '%</span>'; }
+    return '<span data-open="system" style="display:flex;' + (vertical ? 'flex-direction:column;gap:12px' : 'gap:14px') + ';cursor:pointer">' + a + b + '</span>';
+  }
+  function clock(big) {
+    var d = new Date(), t = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+    var dt = d.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' });
+    if (big) return '<div data-open="calendar" style="cursor:pointer"><div style="font:300 64px var(--f-body);letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums">' + t + '</div><div class="date" style="font-size:14px;margin-top:6px">' + dt + '</div></div>';
+    return '<span data-open="calendar" style="display:flex;gap:8px;align-items:baseline;cursor:pointer"><span class="date">' + dt + '</span><span class="time">' + t + '</span></span>';
+  }
+
+  var captions = {
+    islands: '<b>Inseln.</b> Links Start und Auslastung, Mitte die Uhr, rechts Status, Apps und Ausschalten. Jede Pille öffnet ihr eigenes Panel.',
+    capsule: '<b>Kapsel.</b> Eine einzige Glas-Kapsel. Status links, Uhr in der Mitte, Auslastung rechts. Ein Klick irgendwo öffnet das passende Panel aus der Kapsel heraus.',
+    rail: '<b>Seitenschiene.</b> Senkrecht am rechten Rand: Uhr oben gestapelt, darunter Status und Auslastung. Panels gleiten von rechts herein, die volle Höhe bleibt für Fenster.',
+    corners: '<b>Ecken.</b> Keine Leiste mehr. Auslastung oben links, Status oben rechts, die Uhr groß und leise unten links als Teil des Hintergrunds.',
+    halo: '<b>Halo am Orb.</b> Der Status ist ein Ring aus Segmenten um den Orb: grün für Netz, Akzent für Ton, die Länge zeigt die Auslastung. Ein Klick auf ein Segment öffnet das Panel direkt am Orb. Die Uhr steht klein darüber.'
+  };
+
+  function render() {
+    stage.classList.toggle('duo', st.icons === 'duo');
+    var h = '';
+    if (st.layout === 'islands') {
+      h += '<div class="g" data-anchor="left" style="left:14px;top:12px;height:38px;border-radius:19px"><div class="row">' + ic('grid') + '<span class="sep"></span>' + stats(false) + '</div></div>';
+      h += '<div class="g" data-anchor="top" style="left:50%;transform:translateX(-50%);top:12px;height:38px;border-radius:19px"><div class="row">' + clock() + '</div></div>';
+      h += '<div class="g" data-anchor="right" style="right:14px;top:12px;height:38px;border-radius:19px"><div class="row" style="gap:6px">' + status(false) + '</div></div>';
+    } else if (st.layout === 'capsule') {
+      h += '<div class="g" data-anchor="top" style="left:50%;transform:translateX(-50%);top:12px;height:42px;border-radius:21px"><div class="row" style="gap:8px">' + ic('grid') + ic('wifi') + ic('vol') + ic('bell', true) + '<span class="sep"></span>' + clock() + '<span class="sep"></span>' + stats(false) + '<span class="sep"></span>' + ic('power') + '</div></div>';
+    } else if (st.layout === 'rail') {
+      var d = new Date();
+      h += '<div class="g" data-anchor="rail" style="right:12px;top:50%;transform:translateY(-50%);width:54px;border-radius:27px"><div class="col"><div data-open="calendar" style="text-align:center;cursor:pointer;font:600 17px var(--f-body);line-height:1.05;font-variant-numeric:tabular-nums">' + ('0' + d.getHours()).slice(-2) + '<br>' + ('0' + d.getMinutes()).slice(-2) + '</div><span class="hsep"></span>' + ic('wifi') + ic('bt') + ic('vol') + ic('bell', true) + '<span class="hsep"></span>' + apps() + '<span class="hsep"></span>' + stats(true) + '<span class="hsep"></span>' + ic('power') + '</div></div>';
+      h += '<div class="g" style="left:14px;top:12px;width:44px;height:44px;border-radius:22px"><div class="row" style="justify-content:center;padding:0">' + ic('grid') + '</div></div>';
+    } else if (st.layout === 'corners') {
+      h += '<div class="g" data-anchor="left" style="left:18px;top:16px;height:40px;border-radius:20px"><div class="row">' + stats(false) + '</div></div>';
+      h += '<div class="g" data-anchor="right" style="right:18px;top:16px;height:40px;border-radius:20px"><div class="row" style="gap:6px">' + status(false) + '</div></div>';
+      h += '<div style="position:absolute;left:40px;bottom:40px;z-index:2;color:var(--frost)">' + clock(true) + '</div>';
+    } else {
+      // halo: segments around the orb
+      var seg = function (a0, a1, col, name) {
+        var r = 42, cx = 46, cy = 46, f = function (a) { a = (a - 90) * Math.PI / 180; return (cx + r * Math.cos(a)).toFixed(1) + ' ' + (cy + r * Math.sin(a)).toFixed(1); };
+        return '<path data-open="' + name + '" d="M' + f(a0) + ' A' + r + ' ' + r + ' 0 0 1 ' + f(a1) + '" stroke="' + col + '" stroke-width="5" fill="none" stroke-linecap="round" style="cursor:pointer;filter:drop-shadow(0 0 6px ' + col + ')"/>';
+      };
+      var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+      h += '<svg class="halo" viewBox="0 0 92 92">' + seg(-50, -12, '#7fdcb0', 'wifi') + seg(-2, 36, accent, 'vol') + seg(46, 46 + load.cpu * 0.9, '#e9eef2', 'system') + seg(150, 150 + load.gpu * 0.9, '#b49cf0', 'system') + seg(-140, -60, 'rgba(233,238,242,.5)', 'bell') + '</svg>';
+      h += '<div style="position:absolute;left:50%;transform:translateX(-50%);bottom:118px;z-index:2">' + clock() + '</div>';
+    }
+    h += '<div class="orb" data-open="' + (st.layout === 'halo' ? 'control' : 'launcher') + '" style="cursor:pointer"></div>';
+    h += '<div class="panel" id="panel"><div class="inner" id="pinner"></div></div>';
+    stage.innerHTML = h;
+    document.getElementById('cap').innerHTML = captions[st.layout];
+    // magnetic hover for the icons
+    stage.querySelectorAll('.hit').forEach(function (el) {
+      el.addEventListener('mousemove', function (e) { if (reduce) return; var r = el.getBoundingClientRect(); var k = 1100 / box.clientWidth; el.style.transform = 'translate(' + ((e.clientX - r.left - r.width / 2) * 0.18 * k) + 'px,' + ((e.clientY - r.top - r.height / 2) * 0.18 * k) + 'px)'; });
+      el.addEventListener('mouseleave', function () { el.style.transform = ''; });
+    });
+  }
+
+  var panels = {
+    wifi: '<h3>Netz</h3><div class="tiles"><div class="tile on"><b>WLAN</b>Heimnetz · 866 Mbit</div><div class="tile"><b>Kabel</b>nicht verbunden</div></div><div class="mini-l">↓ 4,2 MB/s · ↑ 0,3 MB/s</div>',
+    bt: '<h3>Bluetooth</h3><div class="tiles"><div class="tile on"><b>Kopfhörer</b>verbunden · 80 %</div><div class="tile"><b>Controller</b>bereit</div></div>',
+    vol: '<h3>Ton</h3><div class="mini-l">Lautstärke</div><div class="sl"><i style="width:64%"></i></div><div class="mini-l">Mikrofon</div><div class="sl"><i style="width:40%"></i></div><div class="tiles"><div class="tile on"><b>Kopfhörer</b>Ausgabe</div><div class="tile"><b>Lautsprecher</b>HDMI</div></div>',
+    bell: '<h3>Mitteilungen</h3><div class="tile"><b>Discord · Mara</b>Bist du heute Abend online?</div><div class="tile"><b>Zen</b>Download fertig</div><div class="tiles"><div class="tile"><b>Nicht stören</b>aus</div><div class="tile"><b>Alle löschen</b>2 Einträge</div></div>',
+    power: '<h3>Sitzung</h3><div class="tiles"><div class="tile"><b>Sperren</b>Meta+L</div><div class="tile"><b>Abmelden</b></div><div class="tile"><b>Neustart</b></div><div class="tile on"><b>Ausschalten</b></div></div>',
+    app: '<h3>Discord</h3><div class="tile"><b>Öffnen</b></div><div class="tile"><b>Status: Online</b></div><div class="tile"><b>Beenden</b></div>',
+    system: '<h3>System</h3><div class="tiles"><div class="tile"><b>CPU 12 %</b>Ryzen · 48 °C</div><div class="tile"><b>GPU 31 %</b>RTX · 52 °C</div><div class="tile"><b>RAM</b>9,4 / 32 GB</div><div class="tile"><b>Netz</b>↓ 4,2 MB/s</div></div>',
+    calendar: '<h3>Freitag, 20. November</h3><div class="tiles"><div class="tile"><b>4 °C</b>klar</div><div class="tile"><b>20:30</b>Video-Aufnahme</div></div><div class="mini-l">Kalender, Termine und Mitteilungen</div>',
+    grid: '<h3>Start</h3><div class="tiles"><div class="tile"><b>Zen</b></div><div class="tile"><b>Dolphin</b></div><div class="tile"><b>Konsole</b></div><div class="tile"><b>Discord</b></div></div>',
+    launcher: '<h3>Orb</h3><div class="mini-l">Ein Klick auf den Orb öffnet wie gewohnt den Ring.</div>',
+    control: '<h3>Kontrollzentrum</h3><div class="tiles"><div class="tile on"><b>WLAN</b>Heimnetz</div><div class="tile on"><b>Bluetooth</b>Kopfhörer</div><div class="tile"><b>Nicht stören</b>aus</div><div class="tile"><b>Nachtlicht</b>ab 21:00</div></div><div class="mini-l">Lautstärke</div><div class="sl"><i style="width:64%"></i></div>'
+  };
+
+  function openPanel(name, el, ev) {
+    var p = document.getElementById('panel'), inner = document.getElementById('pinner');
+    inner.innerHTML = panels[name] || panels.control;
+    var sr = stage.getBoundingClientRect(), k = 1100 / sr.width, r = el.getBoundingClientRect();
+    var ex = (r.left - sr.left) * k, ey = (r.top - sr.top) * k, ew = r.width * k, eh = r.height * k;
+    var pw = 340, ph = inner.scrollHeight || 260;
+    // target: below the element, kept on stage; rail opens to the left
+    var tx = Math.min(1100 - pw - 14, Math.max(14, ex + ew / 2 - pw / 2)), ty = Math.min(600 - ph - 14, ey + eh + 12);
+    if (st.layout === 'rail') { tx = 1100 - 66 - pw - 10; ty = Math.max(14, Math.min(600 - ph - 14, ey - 40)); }
+    if (st.layout === 'halo' || name === 'launcher' || name === 'control') { tx = 550 - pw / 2; ty = 600 - 120 - ph; }
+    p.style.transition = 'none'; p.style.clipPath = ''; p.style.transform = '';
+    var dur = reduce ? '0s' : '.45s', ease = 'cubic-bezier(.2,.9,.2,1)';
+    if (st.effect === 'morph') {
+      p.style.left = ex + 'px'; p.style.top = ey + 'px'; p.style.width = ew + 'px'; p.style.height = eh + 'px'; p.style.borderRadius = Math.min(ew, eh) / 2 + 'px';
+      p.classList.add('on'); void p.offsetWidth;
+      p.style.transition = ['left', 'top', 'width', 'height', 'border-radius'].map(function (x) { return x + ' ' + dur + ' ' + ease; }).join(',');
+      p.style.left = tx + 'px'; p.style.top = ty + 'px'; p.style.width = pw + 'px'; p.style.height = ph + 'px'; p.style.borderRadius = '22px';
+    } else if (st.effect === 'sheet') {
+      var fromRight = st.layout === 'rail';
+      p.style.left = tx + 'px'; p.style.top = ty + 'px'; p.style.width = pw + 'px'; p.style.height = ph + 'px'; p.style.borderRadius = '22px';
+      p.style.transform = fromRight ? 'translateX(120px)' : 'translateY(-24px)'; p.style.opacity = '0'; p.classList.add('on'); void p.offsetWidth;
+      p.style.transition = 'transform ' + dur + ' ' + ease + ', opacity .3s';
+      p.style.transform = 'none'; p.style.opacity = '1';
+    } else {
+      var cx = (ev ? (ev.clientX - sr.left) * k : ex + ew / 2) - tx, cy = (ev ? (ev.clientY - sr.top) * k : ey + eh / 2) - ty;
+      p.style.left = tx + 'px'; p.style.top = ty + 'px'; p.style.width = pw + 'px'; p.style.height = ph + 'px'; p.style.borderRadius = '22px';
+      p.style.clipPath = 'circle(0px at ' + cx + 'px ' + cy + 'px)'; p.classList.add('on'); void p.offsetWidth;
+      p.style.transition = 'clip-path ' + (reduce ? '0s' : '.55s') + ' ' + ease;
+      p.style.clipPath = 'circle(' + (pw * 1.3) + 'px at ' + cx + 'px ' + cy + 'px)';
+    }
+  }
+  function closePanel() { var p = document.getElementById('panel'); if (p) { p.classList.remove('on'); p.style.opacity = ''; } }
+
+  stage.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-open]');
+    if (t && stage.contains(t)) { e.stopPropagation(); openPanel(t.getAttribute('data-open'), t, e); }
+    else if (!e.target.closest('.panel')) closePanel();
+  });
+
+  document.querySelectorAll('.segs').forEach(function (g) {
+    var key = g.getAttribute('data-g');
+    g.querySelectorAll('.chip').forEach(function (c) {
+      c.setAttribute('aria-pressed', c.getAttribute('data-v') === st[key] ? 'true' : 'false');
+      c.addEventListener('click', function () {
+        st[key] = c.getAttribute('data-v');
+        g.querySelectorAll('.chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
+        render();
+      });
+    });
+  });
+
+  // icon showcase rows
+  var names = ['wifi', 'bt', 'vol', 'bat', 'bell', 'moon', 'mic', 'power', 'grid'];
+  var row = names.map(function (n) { return '<svg class="ic"><use href="#i-' + n + '"/></svg>'; }).join('');
+  document.getElementById('row-line').innerHTML = row;
+  document.getElementById('row-duo').innerHTML = row;
+  document.getElementById('row-apps').innerHTML = ['glass', 'mono', 'orig'].map(function (s) {
+    return '<span style="display:flex;gap:8px">' + APPS.map(function (a) { return '<span class="app ' + s + '" style="width:28px;height:28px;background:' + a[1] + '"><span>' + a[0] + '</span></span>'; }).join('') + '</span>';
+  }).join('<span class="sep" style="align-self:center"></span>');
+
+  render();
+  // a little life in the load figures (only redraws the stats, not the whole stage)
+  if (!reduce) setInterval(function () {
+    load.cpu = Math.max(3, Math.min(95, load.cpu + (Math.random() - .5) * 12));
+    load.gpu = Math.max(5, Math.min(95, load.gpu + (Math.random() - .5) * 14));
+    load.hist.cpu.push(load.cpu); load.hist.cpu.shift(); load.hist.gpu.push(load.gpu); load.hist.gpu.shift();
+    var open = document.getElementById('panel') && document.getElementById('panel').classList.contains('on');
+    if (!open) render();
+  }, 1600);
+})();
+</script>

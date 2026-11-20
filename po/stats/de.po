@@ -1,0 +1,50 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "System"
+msgstr "System"
+
+msgid "CPU %1 · GPU %2 · RAM %3 · %4"
+msgstr "CPU %1 · GPU %2 · RAM %3 · %4"
+
+msgid "Look:"
+msgstr "Darstellung:"
+
+msgid "Rings"
+msgstr "Ringe"
+
+msgid "Curves"
+msgstr "Kurven"
+
+msgid "Bars"
+msgstr "Balken"
+
+msgid "Numbers"
+msgstr "Zahlen"
+
+msgid "Show:"
+msgstr "Anzeigen:"
+
+msgid "CPU usage"
+msgstr "CPU-Auslastung"
+
+msgid "GPU usage"
+msgstr "GPU-Auslastung"
+
+msgid "Memory usage"
+msgstr "Speicherauslastung"
+
+msgid "Temperature"
+msgstr "Temperatur"
+
+msgid "Temperature sensor:"
+msgstr "Temperatursensor:"
+
+msgid "Any sensor id from “kstatsviewer --list”, e.g. gpu/gpu1/temperature"
+msgstr "Jede Sensor-ID aus „kstatsviewer --list“, z. B. gpu/gpu1/temperature"
+
+msgid "Update every (ms):"
+msgstr "Aktualisieren alle (ms):"

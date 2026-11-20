@@ -10,8 +10,17 @@ KCM.SimpleKCM {
     property alias cfg_showTemp: showTemp.checked
     property alias cfg_tempSensor: tempSensor.text
     property alias cfg_updateInterval: updateInterval.value
+    property string cfg_style
 
     Kirigami.FormLayout {
+        QQC2.ComboBox {
+            Kirigami.FormData.label: i18n("Look:")
+            textRole: "text"; valueRole: "value"
+            model: [{ text: i18n("Rings"), value: "rings" }, { text: i18n("Curves"), value: "spark" },
+                    { text: i18n("Bars"), value: "bars" }, { text: i18n("Numbers"), value: "numbers" }]
+            currentIndex: Math.max(0, indexOfValue(cfg_style))
+            onActivated: cfg_style = currentValue
+        }
         QQC2.CheckBox { id: showCpu; Kirigami.FormData.label: i18n("Show:"); text: i18n("CPU usage") }
         QQC2.CheckBox { id: showGpu; text: i18n("GPU usage") }
         QQC2.CheckBox { id: showRam; text: i18n("Memory usage") }

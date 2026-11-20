@@ -722,3 +722,42 @@ msgstr "Bringt die neueste Pillbox-Version auf den Anmeldebildschirm. Fragt nach
 
 msgid "Update…"
 msgstr "Aktualisieren …"
+
+msgid "Load"
+msgstr "Auslastung"
+
+msgid "Look"
+msgstr "Darstellung"
+
+msgid "How CPU, GPU, memory and temperature appear in the left pill."
+msgstr "Wie CPU, GPU, Speicher und Temperatur in der linken Pille erscheinen."
+
+msgid "Rings"
+msgstr "Ringe"
+
+msgid "Curves"
+msgstr "Kurven"
+
+msgid "Bars"
+msgstr "Balken"
+
+msgid "Numbers"
+msgstr "Zahlen"
+
+msgid "Memory"
+msgstr "Speicher"
+
+msgid "Temperature"
+msgstr "Temperatur"
+
+msgid "Arrangements"
+msgstr "Anordnungen"
+
+msgid "Islands, one capsule, a rail at the screen edge, corners, or a halo around the orb."
+msgstr "Inseln, eine Kapsel, eine Schiene am Bildschirmrand, Ecken oder ein Halo um den Orb."
+
+msgid "Pillbox icons"
+msgstr "Pillbox-Symbole"
+
+msgid "An own icon set for the system tray: line or duotone."
+msgstr "Ein eigener Symbolsatz für die Systemleiste: Linie oder Duoton."

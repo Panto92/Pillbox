@@ -848,6 +848,15 @@ PlasmoidItem {
         onNewData: (source, data) => disconnectSource(source)
     }
 
+    // ---------------------------------------------------------------- other Pillbox widgets
+    // write one setting into every instance of a widget in any panel (out of process, like the wallpaper)
+    function setWidget(type, key, value) {
+        const t = String(type).replace(/[^a-z.]/g, ""), k = String(key).replace(/[^A-Za-z]/g, "")
+        const v = typeof value === "boolean" ? (value ? "true" : "false") : "\"" + String(value).replace(/[^a-z]/g, "") + "\""
+        const js = "panels().forEach(function(p){ p.widgets(\"" + t + "\").forEach(function(w){ w.currentConfigGroup = [\"General\"]; w.writeConfig(\"" + k + "\", " + v + "); }); });"
+        shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '" + js + "' # " + Date.now())
+    }
+
     // ---------------------------------------------------------------- login screen
     // Set up once with root (pkexec), then the choices live in a file the user owns:
     // /var/lib/pillbox-login/theme.conf.user – no password needed to change them.
