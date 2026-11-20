@@ -1,0 +1,157 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid "All applications"
+msgstr "Alle Programme"
+
+msgid "Appearance"
+msgstr "Aussehen"
+
+msgid "Aura – rotating ring of light"
+msgstr "Aura – rotierender Lichtring"
+
+msgid "Behavior:"
+msgstr "Verhalten:"
+
+msgid "Calm – still ring of light"
+msgstr "Ruhig – Lichtring ohne Bewegung"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Close all"
+msgstr "Alle schließen"
+
+msgid "Color scheme accent"
+msgstr "Akzentfarbe des Farbschemas"
+
+msgid "Color:"
+msgstr "Farbe:"
+
+msgid "Custom color"
+msgstr "Eigene Farbe"
+
+msgid "Customize orb…"
+msgstr "Orb anpassen …"
+
+msgid "drag onto the orb"
+msgstr "auf den Orb ziehen"
+
+msgid "Effect:"
+msgstr "Effekt:"
+
+msgid "Ember"
+msgstr "Glut"
+
+msgid "fast"
+msgstr "schnell"
+
+msgid "Fog"
+msgstr "Nebel"
+
+msgid "Gold"
+msgstr "Gold"
+
+msgid "Ice"
+msgstr "Eis"
+
+msgid "launch"
+msgstr "starten"
+
+msgid "Lock position"
+msgstr "Position fixieren"
+
+msgid "Mint"
+msgstr "Mint"
+
+msgid "New window"
+msgstr "Neues Fenster"
+
+msgid "Orb color"
+msgstr "Farbe des Orbs"
+
+msgid "Pick any color"
+msgstr "Beliebige Farbe wählen"
+
+msgid "Pin to orb"
+msgstr "Im Orb anheften"
+
+msgid "Plain – just the ball"
+msgstr "Schlicht – nur die Kugel"
+
+msgid "Preview:"
+msgstr "Vorschau:"
+
+msgid "Pulse – strong breathing"
+msgstr "Puls – kräftiges Atmen"
+
+msgid "Reset position"
+msgstr "Position zurücksetzen"
+
+msgid "Rose"
+msgstr "Rose"
+
+msgid "Show all windows"
+msgstr "Alle Fenster zeigen"
+
+msgid "Show open windows as satellites"
+msgstr "Offene Fenster als Satelliten zeigen"
+
+msgid "Size:"
+msgstr "Größe:"
+
+msgid "slow"
+msgstr "langsam"
+
+msgid "Speed:"
+msgstr "Tempo:"
+
+msgid "Unpin from orb"
+msgstr "Vom Orb lösen"
+
+msgid "Violet"
+msgstr "Violett"
+
+msgid "White"
+msgstr "Weiß"
+
+msgid "Window overview"
+msgstr "Fensterübersicht"
+
+msgid "%1 window"
+msgid_plural "%1 windows"
+msgstr[0] "%1 Fenster"
+msgstr[1] "%1 Fenster"
+
+msgid "minimized"
+msgstr "minimiert"
+
+msgid "Close window"
+msgstr "Fenster schließen"
+
+msgid "Ring:"
+msgstr "Ring:"
+
+msgid "Icon size"
+msgstr "Symbolgröße"
+
+msgid "%1 px"
+msgstr "%1 px"
+
+msgid "Apps glow in their own icon color"
+msgstr "Programme leuchten in der Farbe ihres Symbols"
+
+msgid "Ring size:"
+msgstr "Ringgröße:"
+
+msgid "Search applications…"
+msgstr "Programme durchsuchen …"
+
+msgid "No matching applications"
+msgstr "Keine passenden Programme"

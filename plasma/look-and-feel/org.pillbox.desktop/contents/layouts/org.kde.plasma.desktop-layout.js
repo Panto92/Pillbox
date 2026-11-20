@@ -1,12 +1,11 @@
 /*
  * Pillbox desktop layout
- *   top:    three floating "pills"  – stats (left) · clock (center) · media/tray/power (right)
- *   bottom: floating dock            – launcher + pinned/running apps
+ *   top:     three floating "pills" – menu + stats (left) · clock (center) · media/tray/power (right)
+ *   desktop: the Pillbox Orb replaces the dock (floating, draggable, on the primary screen)
  * SPDX-License-Identifier: MIT
  */
 
 var PILL_HEIGHT = 30;
-var DOCK_HEIGHT = 56;
 
 function pill(alignment, widgets) {
     var p = new Panel;
@@ -20,12 +19,18 @@ function pill(alignment, widgets) {
     return p;
 }
 
-// Desktop: keep the default folder view, but use the image wallpaper plugin
-desktopsForActivity(currentActivity()).forEach(function (d) {
+// Desktop: keep the default folder view, use the image wallpaper plugin,
+// and put the Orb on the primary screen's desktop
+var desktops = desktopsForActivity(currentActivity());
+desktops.forEach(function (d) {
     d.wallpaperPlugin = "org.kde.image";
 });
+var primary = desktops.filter(function (d) { return d.screen === 0; })[0] || desktops[0];
+if (primary && knownWidgetTypes.indexOf("org.pillbox.orb") >= 0) {
+    primary.addWidget("org.pillbox.orb");
+}
 
-pill("left",   ["org.pillbox.stats"]);
+pill("left",   ["org.kde.plasma.kickoff", "org.pillbox.stats"]);
 
 var center = pill("center", ["org.kde.plasma.digitalclock"]);
 var clock = center.widgets("org.kde.plasma.digitalclock")[0];
@@ -41,13 +46,3 @@ if (clock) {
 pill("right",  ["org.kde.plasma.mediacontroller",
                 "org.kde.plasma.systemtray",
                 "org.kde.plasma.lock_logout"]);
-
-var dock = new Panel;
-dock.location = "bottom";
-dock.height = DOCK_HEIGHT;
-dock.floating = true;
-dock.lengthMode = "fit";
-dock.alignment = "center";
-dock.hiding = "none";
-dock.addWidget("org.kde.plasma.kickoff");
-dock.addWidget("org.kde.plasma.icontasks");

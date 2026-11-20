@@ -49,6 +49,12 @@ backup() {
     done
     tar -czf "$out" -C "$CONF" "${files[@]}"
     say "Backup of current settings: $out"
+    # the very first backup is the state before Pillbox: uninstall.sh restores it.
+    # (installs from before this existed: take the oldest backup, not the current one)
+    if [[ ! -e "$STATE/original-settings.tar.gz" ]]; then
+        cp "$(ls -1 "$STATE"/backups/settings-*.tar.gz | head -1)" "$STATE/original-settings.tar.gz"
+        say "Saved your pre-Pillbox desktop – ./uninstall.sh brings it back"
+    fi
 }
 
 install_pkg() {   # type, source dir
@@ -75,6 +81,14 @@ say "Installed Plasma style: Pillbox"
 
 # 3. Widgets and global theme
 install_pkg Plasma/Applet      "$SRC/plasma/plasmoids/org.pillbox.stats"
+install_pkg Plasma/Applet      "$SRC/plasma/plasmoids/org.pillbox.orb"
+# translations (also shipped inside the package; this copy is what KDE's i18n looks up first)
+for mo in "$SRC"/plasma/plasmoids/*/contents/locale/*/LC_MESSAGES/*.mo; do
+    [[ -e "$mo" ]] || continue
+    lang="$(basename "$(dirname "$(dirname "$mo")")")"
+    mkdir -p "$DATA/locale/$lang/LC_MESSAGES"
+    cp "$mo" "$DATA/locale/$lang/LC_MESSAGES/"
+done
 install_pkg Plasma/LookAndFeel "$SRC/plasma/look-and-feel/org.pillbox.desktop"
 
 # 4. Konsole (own file names, never overwrites your profiles)
