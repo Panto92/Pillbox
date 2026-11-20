@@ -155,3 +155,18 @@ msgstr "Programme durchsuchen …"
 
 msgid "No matching applications"
 msgstr "Keine passenden Programme"
+
+msgid "Hide while a fullscreen app is in front (games, video)"
+msgstr "Ausblenden, solange eine Vollbild-Anwendung vorne ist (Spiele, Videos)"
+
+msgid "Fade out over windows, full again on hover"
+msgstr "Über Fenstern verblassen, beim Drüberfahren wieder voll"
+
+msgid "Notifications:"
+msgstr "Benachrichtigungen:"
+
+msgid "Show unread counts on the orb and in the ring"
+msgstr "Anzahl ungelesener am Orb und im Ring zeigen"
+
+msgid "Wave of light for new notifications (not in Do Not Disturb)"
+msgstr "Lichtwelle bei neuen Benachrichtigungen (nicht bei „Nicht stören“)"

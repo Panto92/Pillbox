@@ -42,6 +42,7 @@ elif [[ "$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage 2
     say "Switched global theme back to Breeze Dark (panels kept)"
 fi
 
+"$(dirname "$0")/kwin/browser-rule.sh" remove && say "Removed the browser window rule" || true
 kpackagetool6 -t Plasma/LookAndFeel -r org.pillbox.desktop >/dev/null 2>&1 && say "Removed global theme" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.orb     >/dev/null 2>&1 && say "Removed the Orb" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.stats   >/dev/null 2>&1 && say "Removed widget: Pillbox Stats" || true

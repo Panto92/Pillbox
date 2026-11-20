@@ -11,6 +11,7 @@
  * SPDX-License-Identifier: MIT
  */
 import QtQuick
+import QtQuick.Shapes
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.extras as PlasmaExtras
@@ -18,6 +19,7 @@ import org.kde.plasma.components as PC3
 import org.kde.kirigami as Kirigami
 import org.kde.taskmanager as TaskManager
 import org.kde.plasma.workspace.dbus as DBus
+import org.kde.notificationmanager as NotificationManager
 
 PlasmoidItem {
     id: root
@@ -30,8 +32,8 @@ PlasmoidItem {
     readonly property color accent: cfg.colorMode === "system" ? vivid(Kirigami.Theme.highlightColor) : cfg.customColor
     readonly property int ballSize: Math.round(30 * cfg.ballScale / 100)
     readonly property real k: ballSize / 30                          // scale factor for everything around the ball
-    readonly property int orbSize: Math.ceil(ballSize * 2.15)        // ball window (ball + aura + glow)
-    readonly property int satSize: Math.ceil(ballSize * 5)           // satellite window
+    readonly property int orbSize: ballSize + 6                      // input window: only the ball takes clicks
+    readonly property int satSize: Math.ceil(ballSize * 5)           // click-through window: ball visuals + satellites
     // a too dark or grey scheme accent would make a dull orb: lift it
     function vivid(c) {
         return c.hslLightness < 0.5 ? Qt.hsla(c.hslHue, Math.max(c.hslSaturation, 0.35), 0.62, 1) : c
@@ -40,6 +42,7 @@ PlasmoidItem {
     property bool dragging: false
     property point dragPos: Qt.point(0, 0)            // global pointer position while dragging
     property bool orbHover: false
+    property bool dropHover: false
     property bool ringOpen: false
     property double ringClosedAt: 0
     // the ring takes keyboard focus when it opens, which deactivates the user's window.
@@ -48,6 +51,140 @@ PlasmoidItem {
 
     readonly property point orbPos: clampPos(Plasmoid.configuration.orbX, Plasmoid.configuration.orbY)
     readonly property point orbCenter: Qt.point(orbPos.x + orbSize / 2, orbPos.y + orbSize / 2)
+
+    // ---------------------------------------------------------------- notifications
+    // Unread = created after you last looked at that app (its window became active)
+    // and not yet read in Plasma's notification centre.
+    readonly property bool dnd: NotificationManager.Server.inhibited
+    property var unreadByApp: ({})                 // appKey -> count
+    property int unreadTotal: 0
+    property var seenByApp: ({})                   // appKey -> ms timestamp
+
+    function appKey(s) {
+        return s ? String(s).toLowerCase().replace(/\.desktop$/, "").replace(/^applications:/, "") : ""
+    }
+    function unreadFor(appId) {
+        const k = appKey(appId)
+        if (!k) return 0
+        let n = 0
+        for (const key in unreadByApp)
+            if (key === k || key.indexOf(k) >= 0 || k.indexOf(key) >= 0) n += unreadByApp[key]
+        return n
+    }
+
+    NotificationManager.Notifications {
+        id: notifModel
+        showNotifications: true
+        showJobs: true
+        showExpired: true
+        showDismissed: true
+        groupMode: NotificationManager.Notifications.GroupDisabled
+        limit: 0
+        onRowsInserted: (parent, first, last) => root.notificationsAdded(first, last)
+        onRowsRemoved: countTimer.restart()
+        onDataChanged: countTimer.restart()
+    }
+    Timer { id: countTimer; interval: 150; onTriggered: root.recount() }
+
+    function recount() {
+        const N = NotificationManager.Notifications
+        const map = {}
+        let total = 0
+        for (let i = 0; i < notifModel.rowCount(); ++i) {
+            const idx = notifModel.index(i, 0)
+            if (notifModel.data(idx, N.TypeRole) !== N.NotificationType) continue
+            if (notifModel.data(idx, N.ReadRole) === true) continue
+            const key = appKey(notifModel.data(idx, N.DesktopEntryRole) || notifModel.data(idx, N.ApplicationNameRole))
+            const created = notifModel.data(idx, N.CreatedRole)
+            if (seenByApp[key] && created && created.getTime() <= seenByApp[key]) continue
+            map[key] = (map[key] || 0) + 1
+            total++
+        }
+        unreadByApp = map
+        unreadTotal = total
+    }
+    function notificationsAdded(first, last) {
+        countTimer.restart()
+        if (dnd || hidden || !cfg.notificationRipple) return
+        const N = NotificationManager.Notifications
+        for (let i = first; i <= last; ++i) {
+            const idx = notifModel.index(i, 0)
+            if (notifModel.data(idx, N.TypeRole) !== N.NotificationType) continue
+            const created = notifModel.data(idx, N.CreatedRole)
+            if (created && Date.now() - created.getTime() > 10000) continue      // history loaded at start-up
+            ripple.play(notifModel.data(idx, N.ApplicationIconNameRole) || notifModel.data(idx, N.IconNameRole) || "")
+            return
+        }
+    }
+    // looking at an app clears its badge
+    function markSeen(appId) {
+        const k = appKey(appId)
+        if (!k) return
+        const m = Object.assign({}, seenByApp); m[k] = Date.now(); seenByApp = m
+        Plasmoid.configuration.notificationsSeen = JSON.stringify(m)
+        countTimer.restart()
+    }
+    Connections {
+        target: winModel
+        function onActiveTaskChanged() {
+            const id = winModel.data(winModel.activeTask, TaskManager.AbstractTasksModel.AppId)
+            if (id) root.markSeen(id)
+        }
+    }
+    Component.onCompleted: {
+        try { seenByApp = JSON.parse(Plasmoid.configuration.notificationsSeen || "{}") } catch (e) { seenByApp = {} }
+        countTimer.restart()
+        envTimer.restart()
+    }
+
+    // the pulsing orb means "something waits for you": a click goes straight there
+    function jumpToAttention() {
+        for (let i = 0; i < winModel.count; ++i) {
+            const idx = winModel.makeModelIndex(i)
+            if (winModel.data(idx, TaskManager.AbstractTasksModel.IsDemandingAttention) === true) {
+                winModel.requestActivate(idx)
+                return true
+            }
+        }
+        return false
+    }
+
+    // ---------------------------------------------------------------- environment
+    // fullscreenHere: an active fullscreen window covers the orb -> hide completely (games, video)
+    // covered:        any window lies under the orb -> "ghost" (faint until hovered)
+    property bool fullscreenHere: false
+    property bool covered: false
+    readonly property bool hidden: fullscreenHere && cfg.hideInFullscreen && !dragging
+    readonly property bool ghost: covered && cfg.ghostOverWindows && !orbHover && !ringOpen && !dragging
+
+    function updateEnvironment() {
+        const r = ballSize
+        const ox = orbCenter.x - r, oy = orbCenter.y - r, ow = r * 2, oh = r * 2
+        let cov = false, full = false
+        for (let i = 0; i < winModel.count; ++i) {
+            const idx = winModel.makeModelIndex(i)
+            if (winModel.data(idx, TaskManager.AbstractTasksModel.IsMinimized) === true) continue
+            const g = winModel.data(idx, TaskManager.AbstractTasksModel.Geometry)
+            if (!g || g.width <= 0) continue
+            const hit = g.x < ox + ow && g.x + g.width > ox && g.y < oy + oh && g.y + g.height > oy
+            if (!hit) continue
+            cov = true
+            if (winModel.data(idx, TaskManager.AbstractTasksModel.IsFullScreen) === true
+                && winModel.data(idx, TaskManager.AbstractTasksModel.IsActive) === true) full = true
+        }
+        covered = cov
+        fullscreenHere = full
+        if (full) closeRing()
+    }
+    Timer { id: envTimer; interval: 120; onTriggered: root.updateEnvironment() }
+    Connections {
+        target: winModel
+        function onDataChanged() { envTimer.restart() }
+        function onRowsInserted() { envTimer.restart() }
+        function onRowsRemoved() { envTimer.restart() }
+        function onActiveTaskChanged() { envTimer.restart() }
+    }
+    onOrbCenterChanged: envTimer.restart()
 
     // ---------------------------------------------------------------- geometry
     function screens() {
@@ -165,7 +302,7 @@ PlasmoidItem {
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus
         hideOnWindowDeactivate: false
         title: "Pillbox Orb"
-        visible: true
+        visible: !root.hidden
         x: root.orbPos.x
         y: root.orbPos.y
 
@@ -173,24 +310,13 @@ PlasmoidItem {
             id: orbItem
             width: root.orbSize; height: root.orbSize
 
-            OrbBall {
-                id: ballVisual
-                anchors.centerIn: parent
-                ballSize: root.ballSize
-                accent: root.accent
-                effect: root.cfg.effect
-                speed: root.cfg.effectSpeed
-                hot: root.orbHover || drop.containsDrag || root.ringOpen
-                alert: winModel.anyTaskDemandsAttention
-                opacity: root.dragging ? 0 : 1
-            }
-
             // minimise target: KWin animates minimised windows into this item
             Item { id: minimizeTarget; anchors.centerIn: parent; width: root.ballSize; height: root.ballSize }
 
             DropArea {
                 id: drop
                 anchors.fill: parent
+                onContainsDragChanged: root.dropHover = containsDrag
                 onEntered: drag => drag.accepted = drag.hasUrls
                 onDropped: drop => {
                     drop.urls.forEach(u => appsModel.requestAddLauncher(u))
@@ -240,7 +366,10 @@ PlasmoidItem {
                         root.dragging = false
                         return
                     }
-                    if (mouse.button === Qt.LeftButton) root.toggleRing()
+                    if (mouse.button === Qt.LeftButton) {
+                        if (!root.ringOpen && winModel.anyTaskDemandsAttention && root.jumpToAttention()) return
+                        root.toggleRing()
+                    }
                     else if (mouse.button === Qt.MiddleButton) root.toggleOverview()
                 }
                 onCanceled: root.dragging = false
@@ -285,14 +414,97 @@ PlasmoidItem {
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus | Qt.WindowTransparentForInput
         hideOnWindowDeactivate: false
         title: "Pillbox Orb Satellites"
-        visible: !root.dragging && winModel.count > 0 && root.cfg.showSatellites
+        visible: !root.dragging && !root.hidden
         x: root.orbCenter.x - root.satSize / 2
         y: root.orbCenter.y - root.satSize / 2
 
         mainItem: Item {
             width: root.satSize; height: root.satSize
+            // ghost mode fades only the ball and the satellites; news (badge, ripple, progress) stays visible
+            readonly property real ghostOpacity: root.ghost ? 0.3 : 1
+
+            OrbBall {
+                anchors.centerIn: parent
+                width: root.ballSize * 2.15; height: width
+                ballSize: root.ballSize
+                accent: root.accent
+                effect: root.cfg.effect
+                speed: root.cfg.effectSpeed
+                hot: root.orbHover || root.dropHover || root.ringOpen
+                alert: winModel.anyTaskDemandsAttention
+                opacity: winModel.anyTaskDemandsAttention ? 1 : parent.ghostOpacity
+                Behavior on opacity { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
+            }
+
+            // new notification: a ring of light in the app's colour runs outwards
+            Rectangle {
+                id: ripple
+                property color tint: root.accent
+                function play(icon) {
+                    rippleColors.source = icon
+                    rippleColors.update()
+                    rippleStart.restart()
+                }
+                Kirigami.ImageColors { id: rippleColors }
+                Timer {
+                    id: rippleStart; interval: 60
+                    onTriggered: {
+                        const c = rippleColors.dominant
+                        ripple.tint = (c.a === 0 || c.hslSaturation < 0.2) ? root.accent
+                                    : Qt.hsla(c.hslHue, Math.max(c.hslSaturation, 0.6), 0.62, 1)
+                        rippleAnim.restart()
+                    }
+                }
+                anchors.centerIn: parent
+                width: root.ballSize; height: width; radius: width / 2
+                color: "transparent"
+                border.width: 3
+                border.color: tint
+                opacity: 0
+                ParallelAnimation {
+                    id: rippleAnim
+                    NumberAnimation { target: ripple; property: "width"; from: root.ballSize; to: root.satSize * 0.95; duration: 1100; easing.type: Easing.OutCubic }
+                    NumberAnimation { target: ripple; property: "opacity"; from: 0.95; to: 0; duration: 1100; easing.type: Easing.InQuad }
+                    NumberAnimation { target: ripple; property: "border.width"; from: 4; to: 1; duration: 1100 }
+                }
+            }
+
+            // running job (download, copy): progress arc around the ball
+            Shape {
+                anchors.centerIn: parent
+                width: root.ballSize * 1.45; height: width
+                visible: notifModel.activeJobsCount > 0
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    strokeColor: Qt.rgba(1, 1, 1, 0.14); strokeWidth: 2.5; fillColor: "transparent"
+                    PathAngleArc { centerX: root.ballSize * 0.725; centerY: centerX; radiusX: root.ballSize * 0.66; radiusY: radiusX; startAngle: 0; sweepAngle: 360 }
+                }
+                ShapePath {
+                    strokeColor: root.accent; strokeWidth: 2.5; fillColor: "transparent"; capStyle: ShapePath.RoundCap
+                    PathAngleArc { centerX: root.ballSize * 0.725; centerY: centerX; radiusX: root.ballSize * 0.66; radiusY: radiusX; startAngle: -90; sweepAngle: Math.max(4, notifModel.jobsPercentage * 3.6) }
+                }
+            }
+
+            // unread count
+            Rectangle {
+                visible: root.cfg.showBadges && root.unreadTotal > 0
+                x: parent.width / 2 + root.ballSize * 0.28
+                y: parent.height / 2 - root.ballSize * 0.72
+                height: Math.max(16, root.ballSize * 0.55); width: Math.max(height, badgeText.implicitWidth + 8)
+                radius: height / 2
+                color: root.accent
+                border.width: 1.5; border.color: "#0d1013"
+                PC3.Label {
+                    id: badgeText
+                    anchors.centerIn: parent
+                    text: root.unreadTotal > 99 ? "99+" : root.unreadTotal
+                    color: "#0d1013"; font.bold: true
+                    font.pixelSize: parent.height * 0.62
+                }
+            }
+
             Repeater {
-                model: winModel
+                model: root.cfg.showSatellites ? winModel : null
                 delegate: Item {
                     id: sat
                     required property int index
@@ -300,6 +512,8 @@ PlasmoidItem {
                     readonly property real radius: ((root.orbHover || root.ringOpen ? 34 : 27) + (index % 3) * 9) * root.k
                     anchors.centerIn: parent
                     width: 0; height: 0
+                    opacity: parent.ghostOpacity
+                    Behavior on opacity { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
 
                     RotationAnimator on rotation {
                         from: (sat.index * 137) % 360; to: from + 360
@@ -446,6 +660,7 @@ PlasmoidItem {
                     front: windows > 0 && root.frontAppId !== "" && model.AppId === root.frontAppId
                     minimized: model.IsMinimized === true
                     highlighted: ringItem.hovered === index
+                    badge: root.cfg.showBadges ? root.unreadFor(model.AppId) : 0
                     onEntered: {
                         ringItem.hovered = index
                         ringItem.hoveredName = model.AppName || model.display

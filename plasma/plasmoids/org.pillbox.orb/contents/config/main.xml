@@ -24,5 +24,13 @@
     <!-- scales the whole ring (distance, tiles, hub); independent of the ball size -->
     <entry name="ringScale" type="Int"><default>100</default><min>60</min><max>150</max></entry>
     <entry name="appColors" type="Bool"><default>true</default></entry>
+    <!-- hide completely while an active fullscreen window covers the orb (games, video) -->
+    <entry name="hideInFullscreen" type="Bool"><default>true</default></entry>
+    <!-- fade to a faint "ghost" while a window lies under the orb; full again on hover -->
+    <entry name="ghostOverWindows" type="Bool"><default>true</default></entry>
+    <entry name="showBadges" type="Bool"><default>true</default></entry>
+    <entry name="notificationRipple" type="Bool"><default>true</default></entry>
+    <!-- JSON: appKey -> last time you looked at that app (ms) -->
+    <entry name="notificationsSeen" type="String"><default>{}</default></entry>
   </group>
 </kcfg>

@@ -22,6 +22,11 @@ KCM.SimpleKCM {
     property alias cfg_ringIconSize: iconSlider.value
     property alias cfg_ringScale: ringScaleSlider.value
     property alias cfg_appColors: appColorBox.checked
+    property alias cfg_hideInFullscreen: fullscreenBox.checked
+    property alias cfg_ghostOverWindows: ghostBox.checked
+    property alias cfg_showBadges: badgeBox.checked
+    property alias cfg_notificationRipple: rippleBox.checked
+    property string cfg_notificationsSeen
     property alias cfg_locked: lockBox.checked
     property int cfg_orbX
     property int cfg_orbY
@@ -38,6 +43,11 @@ KCM.SimpleKCM {
     property int cfg_ringIconSizeDefault
     property int cfg_ringScaleDefault
     property bool cfg_appColorsDefault
+    property bool cfg_hideInFullscreenDefault
+    property bool cfg_ghostOverWindowsDefault
+    property bool cfg_showBadgesDefault
+    property bool cfg_notificationRippleDefault
+    property string cfg_notificationsSeenDefault
     property bool cfg_lockedDefault
     property int cfg_orbXDefault
     property int cfg_orbYDefault
@@ -183,6 +193,26 @@ KCM.SimpleKCM {
             Kirigami.FormData.label: i18n("Behavior:")
             text: i18n("Show open windows as satellites")
         }
+        QQC2.CheckBox {
+            id: fullscreenBox
+            text: i18n("Hide while a fullscreen app is in front (games, video)")
+        }
+        QQC2.CheckBox {
+            id: ghostBox
+            text: i18n("Fade out over windows, full again on hover")
+        }
+        QQC2.CheckBox {
+            id: badgeBox
+            Kirigami.FormData.label: i18n("Notifications:")
+            text: i18n("Show unread counts on the orb and in the ring")
+        }
+        QQC2.CheckBox {
+            id: rippleBox
+            text: i18n("Wave of light for new notifications (not in Do Not Disturb)")
+        }
+
+        Item { Kirigami.FormData.isSection: true }
+
         QQC2.CheckBox {
             id: lockBox
             text: i18n("Lock position")

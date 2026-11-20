@@ -5,7 +5,7 @@ A calm, modern desktop for **KDE Plasma 6**. Instead of a dock, a glowing
 anywhere, minimise windows into it. On top: three floating "pills" with your
 system stats, the clock and the tray.
 
-> **Status:** 0.2 – the Orb works. Feedback welcome.
+> **Status:** 0.3 – the Orb works, incl. notifications. Feedback welcome.
 
 ## Why
 

@@ -37,6 +37,29 @@ windows behind them. Windows are handled in the ring.
 flies it **into the ball**: the Orb registers itself as the minimise target, so
 KWin's built-in *Magic Lamp* / *Squash* animation ends at the ball.
 
+## Around windows, fullscreen, notifications
+
+| Situation | The Orb |
+|---|---|
+| A window lies under it | **ghost**: ball and satellites fade to 30 %, full again on hover. Badges and waves stay visible. |
+| An active fullscreen window covers it (game, video, F11) | **hidden** completely; back when fullscreen ends |
+| Next to the ball | clicks go through to the window below (only the ball takes input) |
+| New notification | a **wave of light** in the app's icon colour runs outwards (not in Do Not Disturb, not in fullscreen) |
+| Unread notifications | number at the ball (total) and on each app in the ring |
+| You look at an app (its window becomes active) | that app's count clears; reading it in Plasma's notification centre does too |
+| A window demands attention | ball pulses amber; **a click on the ball jumps straight to that window** |
+| Download / copy job running | progress arc around the ball |
+
+Both automatic behaviours and the notification extras can be turned off in the settings.
+
+## Browsers and links
+
+Wayland's focus-stealing prevention keeps a minimised browser hidden when another
+app opens a link. `install.sh --apply` adds one KWin rule (`kwin/browser-rule.sh`)
+that lets every common browser (Firefox incl. snap/flatpak, Chrome/Chromium,
+Brave, Vivaldi, Edge, Opera, LibreWolf, Floorp, Zen, Epiphany, Falkon) come to the
+front. Other user rules are left untouched; `uninstall.sh` removes it again.
+
 ## The ring
 
 Opens around the ball, clamped to the monitor. It shows every app that is

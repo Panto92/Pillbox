@@ -10,3 +10,6 @@
 *.jsc
 *.plasmoid
 *.tar.gz
+
+# internal handoff notes for the next session – not for the public repo
+NEXT.md

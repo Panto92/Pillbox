@@ -105,6 +105,11 @@ if (( FASTFETCH )); then
     say "Installed fastfetch config"
 fi
 
+if (( APPLY )); then
+    "$SRC/kwin/browser-rule.sh" add
+    say "Browsers now come to the front when they receive a link"
+fi
+
 if (( LAYOUT )); then
     plasma-apply-lookandfeel -a org.pillbox.desktop --resetLayout
     # Plasma ignores panel alignment set inside a look-and-feel layout script, and

@@ -25,6 +25,7 @@ Item {
     property real angleOffset: 0          // degrees; the outer ring sits between the inner slots
     property int tile: 60
     property bool useAppColor: true
+    property int badge: 0
 
     // glow colour: the icon's own dominant colour, unless it is greyish (then the orb colour)
     Kirigami.ImageColors { id: iconColors; source: slot.iconSource }
@@ -98,6 +99,20 @@ Item {
                 border.width: slot.minimized ? 1 : 0
                 border.color: "#e6ecf0"
             }
+        }
+    }
+
+    Rectangle {
+        visible: slot.badge > 0
+        anchors { right: parent.right; top: parent.top; rightMargin: -5; topMargin: -5 }
+        height: 18; width: Math.max(height, badgeLabel.implicitWidth + 8); radius: height / 2
+        color: slot.tint
+        border.width: 1.5; border.color: "#0d1013"
+        Text {
+            id: badgeLabel
+            anchors.centerIn: parent
+            text: slot.badge > 99 ? "99+" : slot.badge
+            color: "#0d1013"; font.bold: true; font.pixelSize: 11
         }
     }
 
