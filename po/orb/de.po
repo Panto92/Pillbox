@@ -652,7 +652,7 @@ msgid "Spacing"
 msgstr "Abstand"
 
 msgid "Login screen"
-msgstr "Anmeldung"
+msgstr "Anmeldebildschirm"
 
 msgid "The screen where you type your password: a large clock and one glass card on a living atmosphere."
 msgstr "Der Bildschirm, auf dem du dein Passwort eingibst: eine große Uhr und eine Glaskarte auf einer lebenden Atmosphäre."
