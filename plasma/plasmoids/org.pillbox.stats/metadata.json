@@ -1,0 +1,18 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Pillbox contributors"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "Compact CPU, GPU, RAM and temperature readout for a panel pill.",
+        "Icon": "utilities-system-monitor",
+        "Id": "org.pillbox.stats",
+        "License": "MIT",
+        "Name": "Pillbox Stats",
+        "Version": "0.1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

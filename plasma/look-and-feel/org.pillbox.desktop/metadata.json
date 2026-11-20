@@ -1,0 +1,17 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Pillbox contributors"
+            }
+        ],
+        "Category": "",
+        "Description": "Floating pill panels and a muted grey-blue palette. Only references components that ship with Plasma or with Pillbox itself.",
+        "Id": "org.pillbox.desktop",
+        "License": "MIT",
+        "Name": "Pillbox",
+        "Version": "0.1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

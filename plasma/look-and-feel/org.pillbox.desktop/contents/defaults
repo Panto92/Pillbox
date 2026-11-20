@@ -1,0 +1,28 @@
+# Pillbox global theme defaults.
+# Rule: only reference things that ship with Plasma itself or with Pillbox,
+# so applying the theme never leaves missing icons, cursors or styles behind.
+
+[kdeglobals][General]
+ColorScheme=Pillbox
+
+[kdeglobals][Icons]
+Theme=breeze-dark
+
+[kdeglobals][KDE]
+widgetStyle=Breeze
+
+[plasmarc][Theme]
+name=Pillbox
+
+[kcminputrc][Mouse]
+cursorTheme=breeze_cursors
+
+[kwinrc][org.kde.kdecoration2]
+library=org.kde.breeze
+theme=Breeze
+
+[kwinrc][WindowSwitcher]
+LayoutName=org.kde.breeze.desktop
+
+[kwinrc][DesktopSwitcher]
+LayoutName=org.kde.breeze.desktop

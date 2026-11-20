@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "Plasma/Theme",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Pillbox contributors"
+            }
+        ],
+        "Description": "Muted grey-blue Plasma style. Missing images fall back to Breeze, so it survives Plasma updates.",
+        "Id": "Pillbox",
+        "License": "MIT",
+        "Name": "Pillbox",
+        "Version": "0.1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

@@ -1,0 +1,12 @@
+# Editor- und Systemdateien
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# kompilierte QML-Caches und Pakete
+*.qmlc
+*.jsc
+*.plasmoid
+*.tar.gz
