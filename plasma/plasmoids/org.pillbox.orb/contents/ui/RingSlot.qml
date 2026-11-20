@@ -41,7 +41,10 @@ Item {
     signal exited()
     signal clicked(var mouse)
 
-    readonly property real angle: (-90 + angleOffset + slotIndex * 360 / Math.max(1, slotCount)) * Math.PI / 180
+    property var arc: ({ full: true, start: -90, sweep: 360 })   // see ringWin.arc in main.qml
+    readonly property real angle: (arc.full
+        ? -90 + angleOffset + slotIndex * 360 / Math.max(1, slotCount)
+        : arc.start + (slotCount > 1 ? slotIndex * arc.sweep / (slotCount - 1) : arc.sweep / 2)) * Math.PI / 180
 
     width: tile; height: tile
     x: centre.x - width / 2 + (open ? Math.cos(angle) * ringRadius : 0)

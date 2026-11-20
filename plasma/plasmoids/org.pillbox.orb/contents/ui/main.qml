@@ -590,8 +590,23 @@ PlasmoidItem {
         readonly property int innerCount: slots > 14 ? 10 : slots
         readonly property int outerCount: slots - innerCount
         readonly property real step: tile + 18
-        readonly property real r1: Math.max(tile * 1.9, innerCount * step / (2 * Math.PI))
-        readonly property real r2: outerCount > 0 ? Math.max(r1 + tile + 20, outerCount * step / (2 * Math.PI)) : r1
+        // near a screen edge the ring opens as an arc facing away from it:
+        // one edge → half circle (200°), a corner → quarter arc (110°)
+        readonly property var arc: {
+            const s = root.screenAt(root.orbCenter.x, root.orbCenter.y)
+            // would a full ring stick out of the screen here?
+            const need = Math.max(tile * 1.9, innerCount * step / (2 * Math.PI)) + tile * 0.75
+            const near = { l: root.orbCenter.x - s.x < need, r: s.x + s.width - root.orbCenter.x < need,
+                           t: root.orbCenter.y - s.y < need, b: s.y + s.height - root.orbCenter.y < need }
+            let dx = (near.l ? 1 : 0) - (near.r ? 1 : 0), dy = (near.t ? 1 : 0) - (near.b ? 1 : 0)
+            if (dx === 0 && dy === 0) return { full: true, start: -90, sweep: 360 }
+            const dir = Math.atan2(dy, dx) * 180 / Math.PI
+            const sweep = dx !== 0 && dy !== 0 ? 110 : 200
+            return { full: false, start: dir - sweep / 2, sweep: sweep }
+        }
+        readonly property real arcFrac: arc.sweep / 360
+        readonly property real r1: Math.max(tile * 1.9, innerCount * step / (2 * Math.PI * arcFrac))
+        readonly property real r2: outerCount > 0 ? Math.max(r1 + tile + 20, outerCount * step / (2 * Math.PI * arcFrac)) : r1
         readonly property real radius: r2                                               // outermost ring
         readonly property int boxSize: Math.ceil(r2 * 2 + tile * 2 + 60)
         readonly property point pos: root.clampBox(root.orbCenter.x - boxSize / 2, root.orbCenter.y - boxSize / 2, boxSize, boxSize)
@@ -661,6 +676,7 @@ PlasmoidItem {
                     slotCount: ringWin.ringOf(index) === 0 ? ringWin.innerCount : ringWin.outerCount
                     ringRadius: ringWin.ringOf(index) === 0 ? ringWin.r1 : ringWin.r2
                     angleOffset: ringWin.ringOf(index) === 0 ? 0 : 180 / Math.max(1, ringWin.outerCount)
+                    arc: ringWin.arc
                     tile: ringWin.tile
                     useAppColor: root.cfg.appColors
                     centre: ringItem.centre
@@ -691,6 +707,7 @@ PlasmoidItem {
                 slotCount: ringWin.outerCount > 0 ? ringWin.outerCount : ringWin.innerCount
                 ringRadius: ringWin.outerCount > 0 ? ringWin.r2 : ringWin.r1
                 angleOffset: ringWin.outerCount > 0 ? 180 / Math.max(1, ringWin.outerCount) : 0
+                arc: ringWin.arc
                 tile: ringWin.tile
                 centre: ringItem.centre
                 open: root.ringOpen
