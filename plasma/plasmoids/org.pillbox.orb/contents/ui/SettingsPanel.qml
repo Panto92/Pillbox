@@ -45,6 +45,7 @@ Window {
         { id: "form",       name: i18n("Form"),        icon: "view-app-grid-symbolic" },
         { id: "color",      name: i18n("Color"),       icon: "color-management" },
         { id: "wallpaper",  name: i18n("Wallpaper"),   icon: "preferences-desktop-wallpaper" },
+        { id: "login",      name: i18n("Login screen"), icon: "system-users" },
         { id: "topbar",     name: i18n("Top bar"),     icon: "view-split-top-bottom" },
         { id: "behavior",   name: i18n("Behavior"),    icon: "preferences-system-windows-behavior" },
         { id: "alerts",     name: i18n("Alerts"),      icon: "preferences-desktop-notification-bell" },
@@ -176,7 +177,7 @@ Window {
                         Layout.rightMargin: Kirigami.Units.gridUnit * 1.5
                         Layout.bottomMargin: Kirigami.Units.gridUnit
                         sourceComponent: panel.page === "form" ? formPage : panel.page === "color" ? colorPage
-                                       : panel.page === "wallpaper" ? wallPage : panel.page === "topbar" ? topPage
+                                       : panel.page === "wallpaper" ? wallPage : panel.page === "login" ? loginPage : panel.page === "topbar" ? topPage
                                        : panel.page === "behavior" ? behaviorPage : panel.page === "alerts" ? alertsPage : aboutPage
                     }
                 }
@@ -462,6 +463,154 @@ Window {
                 title: i18n("Apps")
                 SettingRow { label: i18n("Apps glow in their own icon color"); hint: i18n("Discord blue, Zen orange – in the ring and the docks.")
                     Toggle { key: "appColors" } }
+            }
+        }
+    }
+
+    property Component loginPage: Component {
+        ColumnLayout {
+            spacing: Kirigami.Units.gridUnit
+            Component.onCompleted: panel.orb.checkLogin()
+            QQC2.Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                opacity: 0.75
+                text: i18n("The screen where you type your password: a large clock and one glass card on a living atmosphere.")
+            }
+            QQC2.Label {
+                Layout.fillWidth: true
+                visible: panel.orb.loginState === "nosddm"
+                wrapMode: Text.WordWrap
+                text: i18n("This system uses a different login manager than SDDM, so the Pillbox login screen can't be used here.")
+            }
+            // not set up yet
+            Group {
+                title: i18n("Set up")
+                visible: panel.orb.loginState === "missing" || panel.orb.loginState === "working" || panel.orb.loginState === "unknown"
+                SettingRow {
+                    label: panel.orb.loginState === "working" ? i18n("Setting up…") : i18n("Use the Pillbox login screen")
+                    hint: i18n("Asks once for your password, because login screens are installed for the whole system. After that you change it here without a password.")
+                    QQC2.Button {
+                        text: i18n("Set up…")
+                        icon.name: "dialog-password"
+                        enabled: panel.orb.loginState === "missing"
+                        onClicked: panel.orb.setupLogin()
+                    }
+                }
+            }
+            // set up: choose the scene
+            Group {
+                title: i18n("Background")
+                visible: panel.orb.loginState === "ready"
+                Item {
+                    id: lgBox
+                    Layout.fillWidth: true
+                    Layout.topMargin: Kirigami.Units.smallSpacing
+                    readonly property int cols: width > Kirigami.Units.gridUnit * 40 ? 4 : 3
+                    readonly property real gap: Kirigami.Units.gridUnit
+                    readonly property real tileW: Math.floor((width - gap * (cols - 1)) / cols)
+                    readonly property real rad: Kirigami.Units.gridUnit * 0.6
+                    implicitHeight: lgGrid.implicitHeight
+                    Grid {
+                        id: lgGrid
+                        columns: lgBox.cols
+                        columnSpacing: lgBox.gap
+                        rowSpacing: Kirigami.Units.gridUnit * 0.8
+                        Repeater {
+                            model: [
+                                { v: "auto", n: i18n("Time of day"), h: i18n("Aurora at night, Horizon by day"), img: "aurora" },
+                                { v: "desktop", n: i18n("Like the desktop"), h: i18n("the same as your wallpaper"), img: "" },
+                                { v: "flow", n: "Flow", h: i18n("clouds of colour"), img: "flow" },
+                                { v: "horizon", n: "Horizon", h: i18n("flat hills, one sun"), img: "horizon" },
+                                { v: "fogline", n: "Fogline", h: i18n("misty lake"), img: "fogline" },
+                                { v: "dune", n: "Dune", h: i18n("desert"), img: "dune" },
+                                { v: "aurora", n: "Aurora", h: i18n("polar night"), img: "aurora" },
+                                { v: "tide", n: "Tide", h: i18n("open sea"), img: "tide" },
+                                { v: "neon", n: "Neon", h: i18n("city at night"), img: "neon" },
+                                { v: "orbit", n: "Orbit", h: i18n("planet in space"), img: "orbit" },
+                                { v: "contour", n: "Contour", h: i18n("contour lines"), img: "contour" },
+                                { v: "grid", n: "Grid", h: i18n("field of dots"), img: "grid" }
+                            ]
+                            delegate: QQC2.AbstractButton {
+                                id: lt
+                                required property var modelData
+                                readonly property bool chosen: (panel.cfg.loginScene || "auto") === modelData.v
+                                readonly property string img: modelData.v === "desktop" ? (panel.cfg.wallScene && panel.cfg.wallScene !== "keep" ? panel.cfg.wallScene : "") : modelData.img
+                                width: lgBox.tileW
+                                hoverEnabled: true
+                                padding: 0
+                                background: null
+                                onClicked: { panel.cfg.loginScene = modelData.v; panel.orb.applyLogin() }
+                                contentItem: Column {
+                                    spacing: Kirigami.Units.smallSpacing
+                                    Item {
+                                        width: lt.width; height: Math.round(width * 0.58)
+                                        scale: lt.pressed ? 0.98 : lt.hovered ? 1.02 : 1
+                                        Behavior on scale { NumberAnimation { duration: Kirigami.Units.shortDuration; easing.type: Easing.OutCubic } }
+                                        Rectangle {
+                                            anchors.fill: parent; anchors.margins: -4
+                                            radius: lgBox.rad + 4; color: "transparent"
+                                            border.width: 2; border.color: panel.accent
+                                            visible: lt.chosen
+                                        }
+                                        KirigamiPrimitives.ShadowedImage {
+                                            anchors.fill: parent
+                                            visible: lt.img.length > 0
+                                            source: visible ? Qt.resolvedUrl("../images/wall-" + lt.img + ".jpg") : ""
+                                            fillMode: Image.PreserveAspectCrop
+                                            asynchronous: true
+                                            radius: lgBox.rad
+                                            color: Qt.rgba(1, 1, 1, 0.04)
+                                            border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.08)
+                                        }
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            visible: lt.img.length === 0
+                                            radius: lgBox.rad
+                                            color: Qt.rgba(1, 1, 1, 0.04)
+                                            border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.1)
+                                            Kirigami.Icon { anchors.centerIn: parent; source: "preferences-desktop-wallpaper"; width: parent.height * 0.36; height: width; opacity: 0.7 }
+                                        }
+                                        // a tiny login card on every tile, so it reads as "login screen"
+                                        Rectangle {
+                                            anchors.centerIn: parent
+                                            anchors.verticalCenterOffset: parent.height * 0.08
+                                            width: parent.width * 0.3; height: parent.height * 0.3
+                                            radius: height * 0.25
+                                            color: Qt.rgba(0.06, 0.075, 0.1, 0.62)
+                                            border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.12)
+                                            Rectangle { anchors.horizontalCenter: parent.horizontalCenter; y: parent.height * 0.16; width: parent.height * 0.3; height: width; radius: width / 2; color: Qt.rgba(1, 1, 1, 0.25) }
+                                            Rectangle { anchors.horizontalCenter: parent.horizontalCenter; y: parent.height * 0.62; width: parent.width * 0.78; height: parent.height * 0.18; radius: height / 2; color: Qt.rgba(1, 1, 1, 0.14) }
+                                        }
+                                        Rectangle {
+                                            visible: lt.chosen
+                                            anchors { top: parent.top; right: parent.right; margins: Kirigami.Units.smallSpacing * 1.5 }
+                                            width: Kirigami.Units.gridUnit * 1.2; height: width; radius: width / 2
+                                            color: panel.accent
+                                            Kirigami.Icon { anchors.centerIn: parent; source: "checkmark"; width: parent.width * 0.65; height: width; color: "#0b0e12"; isMask: true }
+                                        }
+                                    }
+                                    Column {
+                                        width: lt.width
+                                        topPadding: 2
+                                        QQC2.Label { width: parent.width; text: lt.modelData.n; font.weight: Font.DemiBold; elide: Text.ElideRight; color: lt.chosen ? panel.accent : Kirigami.Theme.textColor }
+                                        QQC2.Label { width: parent.width; text: lt.modelData.h; font: Kirigami.Theme.smallFont; opacity: 0.6; elide: Text.ElideRight }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Group {
+                title: i18n("More")
+                visible: panel.orb.loginState === "ready"
+                SettingRow { label: i18n("Accent colour"); hint: i18n("The login screen uses the same accent as the orb and changes with it.")
+                    Rectangle { width: Kirigami.Units.gridUnit * 1.5; height: width; radius: width / 2; color: panel.accent } }
+                SettingRow { label: i18n("Preview"); hint: i18n("Opens the login screen in a window. Close it with Alt+F4.")
+                    QQC2.Button { text: i18n("Show"); icon.name: "view-preview"; onClicked: panel.orb.previewLogin() } }
+                SettingRow { label: i18n("Remove"); hint: i18n("Back to your previous login screen. Asks for your password.")
+                    QQC2.Button { text: i18n("Remove…"); icon.name: "edit-delete"; onClicked: panel.orb.removeLogin() } }
             }
         }
     }

@@ -20,6 +20,7 @@ import org.kde.kirigami as Kirigami
 import org.kde.taskmanager as TaskManager
 import org.kde.plasma.workspace.dbus as DBus
 import org.kde.plasma.plasma5support as P5Support
+import QtCore
 import org.kde.notificationmanager as NotificationManager
 
 PlasmoidItem {
@@ -846,6 +847,41 @@ PlasmoidItem {
         engine: "executable"
         onNewData: (source, data) => disconnectSource(source)
     }
+
+    // ---------------------------------------------------------------- login screen
+    // Set up once with root (pkexec), then the choices live in a file the user owns:
+    // /var/lib/pillbox-login/theme.conf.user – no password needed to change them.
+    readonly property string loginDir: String(StandardPaths.writableLocation(StandardPaths.GenericDataLocation)).replace("file://", "") + "/pillbox/login"
+    readonly property string loginFile: "/var/lib/pillbox-login/theme.conf.user"
+    property string loginState: "unknown"          // unknown | nosddm | missing | ready | working
+    function checkLogin() {
+        // other systems may use another login manager (GDM, LightDM …): then say so instead of offering a button
+        loginProbe.connectSource("if ! systemctl is-enabled --quiet sddm 2>/dev/null && ! command -v sddm >/dev/null; then echo PBLOGIN=nosddm; "
+                                 + "elif test -w " + loginFile + " && test -d /usr/share/sddm/themes/pillbox; then echo PBLOGIN=ready; else echo PBLOGIN=missing; fi # " + Date.now())
+    }
+    function setupLogin() { loginState = "working"; loginProbe.connectSource("pkexec " + loginDir + "/install-login.sh; echo PBLOGIN=done # " + Date.now()) }
+    function removeLogin() { loginState = "working"; loginProbe.connectSource("pkexec " + loginDir + "/install-login.sh --remove; echo PBLOGIN=done # " + Date.now()) }
+    function previewLogin() { shell.connectSource("sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/pillbox") }
+    function applyLogin() {
+        if (loginState !== "ready") return
+        let scene = String(cfg.loginScene || "auto").replace(/[^a-z]/g, "")
+        if (scene === "desktop") scene = cfg.wallScene && cfg.wallScene !== "keep" ? String(cfg.wallScene).replace(/[^a-z]/g, "") : "auto"
+        const a = accent, hex = "#" + [a.r, a.g, a.b].map(v => ("0" + Math.round(v * 255).toString(16)).slice(-2)).join("")
+        shell.connectSource("printf '[General]\\nscene=%s\\naccent=%s\\n' '" + scene + "' '" + hex + "' > " + loginFile + " # " + Date.now())
+    }
+    property P5Support.DataSource loginProbe: P5Support.DataSource {
+        engine: "executable"
+        onNewData: (source, data) => {
+            disconnectSource(source)
+            const out = String(data.stdout || "")
+            if (out.indexOf("PBLOGIN=nosddm") >= 0) root.loginState = "nosddm"
+            else if (out.indexOf("PBLOGIN=ready") >= 0) root.loginState = "ready"
+            else if (out.indexOf("PBLOGIN=missing") >= 0) root.loginState = "missing"
+            else if (out.indexOf("PBLOGIN=done") >= 0) { root.checkLogin(); applyAfterSetup.restart() }
+        }
+    }
+    property Timer applyAfterSetup: Timer { interval: 800; onTriggered: root.applyLogin() }
+    onAccentChanged: if (loginState === "ready") applyLogin()
 
     property bool settingsOpen: false
     SettingsPanel {

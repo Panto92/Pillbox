@@ -93,6 +93,14 @@ for mo in "$SRC"/plasma/plasmoids/*/contents/locale/*/LC_MESSAGES/*.mo; do
 done
 install_pkg Plasma/LookAndFeel "$SRC/plasma/look-and-feel/org.pillbox.desktop"
 
+# login screen files, ready for the settings centre's "Set up" button (that step needs root)
+LOGIN="$STATE/login"
+rm -rf "$LOGIN"; mkdir -p "$LOGIN/pillbox/scenes"
+cp "$SRC/sddm/install-login.sh" "$LOGIN/"
+cp "$SRC"/sddm/pillbox/{Main.qml,metadata.desktop,theme.conf} "$LOGIN/pillbox/"
+W="$SRC/plasma/wallpapers/org.pillbox.atmosphere/contents/ui"
+cp "$W"/*Scene.qml "$W"/{palette.js,Stars.qml,Glow.qml,Meteor.qml,Precip.qml} "$LOGIN/pillbox/scenes/"
+
 # 4. Konsole (own file names, never overwrites your profiles)
 mkdir -p "$DATA/konsole"
 cp "$SRC/konsole/Pillbox.colorscheme" "$SRC/konsole/Pillbox.profile" "$DATA/konsole/"

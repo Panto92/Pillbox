@@ -30,6 +30,8 @@
     <entry name="wallHour" type="Double"><default>17.5</default></entry>
     <!-- per-scene options as JSON, e.g. {"AuroraColor":"green"} -->
     <entry name="wallOpts" type="String"><default>{}</default></entry>
+    <!-- login screen: auto (time of day) | desktop (same as the wallpaper) | a scene name -->
+    <entry name="loginScene" type="String"><default>auto</default></entry>
     <entry name="ballScale" type="Int"><default>100</default><min>60</min><max>200</max></entry>
     <!-- "custom": use customColor, "system": the colour scheme's accent -->
     <entry name="colorMode" type="String"><default>custom</default></entry>

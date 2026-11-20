@@ -650,3 +650,66 @@ msgstr "Fein"
 
 msgid "Spacing"
 msgstr "Abstand"
+
+msgid "Login screen"
+msgstr "Anmeldung"
+
+msgid "The screen where you type your password: a large clock and one glass card on a living atmosphere."
+msgstr "Der Bildschirm, auf dem du dein Passwort eingibst: eine große Uhr und eine Glaskarte auf einer lebenden Atmosphäre."
+
+msgid "Set up"
+msgstr "Einrichten"
+
+msgid "Setting up…"
+msgstr "Wird eingerichtet …"
+
+msgid "Use the Pillbox login screen"
+msgstr "Pillbox-Anmeldebildschirm verwenden"
+
+msgid "Asks once for your password, because login screens are installed for the whole system. After that you change it here without a password."
+msgstr "Fragt einmal nach deinem Passwort, weil Anmeldebildschirme für das ganze System installiert werden. Danach änderst du ihn hier ohne Passwort."
+
+msgid "Set up…"
+msgstr "Einrichten …"
+
+msgid "Background"
+msgstr "Hintergrund"
+
+msgid "Like the desktop"
+msgstr "Wie der Desktop"
+
+msgid "the same as your wallpaper"
+msgstr "wie dein Hintergrundbild"
+
+msgid "Aurora at night, Horizon by day"
+msgstr "nachts Aurora, tagsüber Horizon"
+
+msgid "More"
+msgstr "Mehr"
+
+msgid "Accent colour"
+msgstr "Akzentfarbe"
+
+msgid "The login screen uses the same accent as the orb and changes with it."
+msgstr "Der Anmeldebildschirm nutzt dieselbe Akzentfarbe wie der Orb und ändert sich mit ihr."
+
+msgid "Preview"
+msgstr "Vorschau"
+
+msgid "Opens the login screen in a window. Close it with Alt+F4."
+msgstr "Öffnet den Anmeldebildschirm in einem Fenster. Schließen mit Alt+F4."
+
+msgid "Show"
+msgstr "Anzeigen"
+
+msgid "Remove"
+msgstr "Entfernen"
+
+msgid "Back to your previous login screen. Asks for your password."
+msgstr "Zurück zu deinem bisherigen Anmeldebildschirm. Fragt nach deinem Passwort."
+
+msgid "Remove…"
+msgstr "Entfernen …"
+
+msgid "This system uses a different login manager than SDDM, so the Pillbox login screen can't be used here."
+msgstr "Dieses System nutzt einen anderen Anmeldemanager als SDDM, deshalb lässt sich der Pillbox-Anmeldebildschirm hier nicht verwenden."

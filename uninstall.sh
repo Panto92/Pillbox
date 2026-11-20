@@ -72,6 +72,10 @@ kpackagetool6 -t Plasma/Applet      -r org.pillbox.orb     >/dev/null 2>&1 && sa
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.island  >/dev/null 2>&1 && say "Removed the island clock" || true
 kpackagetool6 -t Plasma/Wallpaper   -r org.pillbox.atmosphere >/dev/null 2>&1 && say "Removed the living wallpaper" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.stats   >/dev/null 2>&1 && say "Removed widget: Pillbox Stats" || true
+if [[ -e /usr/share/sddm/themes/pillbox ]]; then
+    say "The Pillbox login screen is still installed. Remove it with:"
+    say "    sudo $STATE/login/install-login.sh --remove"
+fi
 rm -rf "$DATA/plasma/desktoptheme/Pillbox"
 rm -f  "$DATA/color-schemes/Pillbox.colors"
 rm -f  "$DATA/konsole/Pillbox.colorscheme" "$DATA/konsole/Pillbox.profile"

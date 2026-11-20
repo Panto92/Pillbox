@@ -91,13 +91,18 @@ A calm SDDM login screen on a living atmosphere that follows the time of day
 a large clock, one glass card, session and power buttons as small pills. A wrong
 password shakes the card; Caps Lock is pointed out.
 
+Easiest: **Customize… → Login screen → Set up…** in the settings centre. It asks once
+for your password (login screens are installed system-wide); after that you pick the
+atmosphere there without a password, and the accent follows the orb. By hand:
+
 ```bash
 sudo ./sddm/install-login.sh            # install and switch to it
 sudo ./sddm/install-login.sh --remove   # back to your previous login screen
 ```
 
-It only adds `/usr/share/sddm/themes/pillbox` and `/etc/sddm.conf.d/zz-pillbox.conf`;
-no existing file is changed. Pick a fixed scene in `theme.conf` (`scene=aurora`, …).
+It only adds `/usr/share/sddm/themes/pillbox`, `/etc/sddm.conf.d/zz-pillbox.conf` and
+`/var/lib/pillbox-login/theme.conf.user` (owned by you); no existing file is changed.
+Systems with another login manager (GDM, LightDM …) are detected and left alone. Pick a fixed scene in `theme.conf` (`scene=aurora`, …).
 While it is installed, it takes precedence over the login theme chosen in System Settings.
 
 ## Settings
