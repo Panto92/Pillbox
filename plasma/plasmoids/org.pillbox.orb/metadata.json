@@ -7,12 +7,12 @@
             }
         ],
         "Category": "Windows and Tasks",
-        "Description": "Floating orb or dock (Ember, Shelf) that replaces the panel: app ring, live previews, notifications.",
+        "Description": "Floating orb or dock (Ember, Shelf, Liquid) that replaces the panel: app ring, live previews, notifications.",
         "Icon": "start-here-kde",
         "Id": "org.pillbox.orb",
         "License": "MIT",
         "Name": "Pillbox Orb",
-        "Version": "0.4.0"
+        "Version": "0.5.0"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }

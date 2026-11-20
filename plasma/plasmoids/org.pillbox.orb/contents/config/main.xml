@@ -11,7 +11,7 @@
     </entry>
   </group>
   <group name="Appearance">
-    <!-- orb | ember | shelf  (liquid to come) -->
+    <!-- orb | ember | shelf | liquid -->
     <entry name="form" type="String"><default>orb</default></entry>
     <!-- docks: never | compact (small until hovered) | autohide (slides away, a line stays) -->
     <entry name="dockHide" type="String"><default>never</default></entry>

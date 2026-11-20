@@ -281,3 +281,9 @@ msgstr "Hauptbildschirm"
 
 msgid "All monitors"
 msgstr "Alle Monitore"
+
+msgid "liquid glass"
+msgstr "flüssiges Glas"
+
+msgid "Liquid – a dock of liquid glass with a drop that follows you"
+msgstr "Liquid – ein Dock aus flüssigem Glas, dessen Tropfen dir folgt"

@@ -140,10 +140,11 @@ PlasmaCore.Dialog {
 
         // all applications, at the left end
         ShelfIcon {
+            id: shelfAllApps
             index: -1
             iconSource: "view-app-grid-symbolic"
             x: dock.pad
-            onClicked: dock.orb.openLauncher()
+            onClicked: dock.orb.openLauncher(shelfAllApps)
         }
 
         Repeater {
@@ -180,6 +181,20 @@ PlasmaCore.Dialog {
         property point tiltAt: Qt.point(0.5, 0.5)
         signal clicked(var mouse)
 
+        // launching: a soft bounce + glow until the first window appears (max 6 s)
+        property bool launching: false
+        property real bounceY: 0
+        onWindowsChanged: if (windows > 0) launching = false
+        Timer { running: it.launching; interval: 6000; onTriggered: it.launching = false }
+        SequentialAnimation on bounceY {
+            running: it.launching
+            loops: Animation.Infinite
+            NumberAnimation { to: -dock.tile * 0.3; duration: 230; easing.type: Easing.OutQuad }
+            NumberAnimation { to: 0; duration: 430; easing.type: Easing.OutBounce }
+            PauseAnimation { duration: 220 }
+            onRunningChanged: if (!running) it.bounceY = 0
+        }
+
         width: dock.tile; height: dock.tile
         y: stage.baseY - height - (hover.hovered ? dock.lift : 0)
         Behavior on y { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
@@ -212,6 +227,7 @@ PlasmaCore.Dialog {
             Behavior on opacity { NumberAnimation { duration: 300 } }
             // tilt towards the pointer
             transform: [
+                Translate { y: it.bounceY },
                 Rotation { origin.x: icon.width / 2; origin.y: icon.height / 2; axis { x: 0; y: 1; z: 0 }
                            angle: hover.hovered ? (it.tiltAt.x - 0.5) * 34 : 0
                            Behavior on angle { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } } },

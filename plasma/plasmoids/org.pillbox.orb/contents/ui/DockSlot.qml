@@ -23,6 +23,20 @@ Item {
     property real counterTurn: 0                       // keeps the icon upright on side docks
     signal clicked(var mouse)
 
+    // launching: a soft bounce + glow until the first window appears (max 6 s)
+    property bool launching: false
+    property real bounceY: 0
+    onWindowsChanged: if (windows > 0) launching = false
+    Timer { running: slot.launching; interval: 6000; onTriggered: slot.launching = false }
+    SequentialAnimation on bounceY {
+        running: slot.launching
+        loops: Animation.Infinite
+        NumberAnimation { to: -slot.tile * 0.3; duration: 230; easing.type: Easing.OutQuad }
+        NumberAnimation { to: 0; duration: 430; easing.type: Easing.OutBounce }
+        PauseAnimation { duration: 220 }
+        onRunningChanged: if (!running) slot.bounceY = 0
+    }
+
     width: tile; height: tile
 
     Behavior on x { SequentialAnimation { PauseAnimation { duration: slot.expanded ? slot.delay : 0 } NumberAnimation { duration: 380; easing.type: Easing.OutBack } } }
@@ -67,6 +81,7 @@ Item {
         }
         Kirigami.Icon {
             anchors.centerIn: parent
+            anchors.verticalCenterOffset: slot.bounceY
             rotation: slot.counterTurn
             width: Math.round(slot.tile * 0.66); height: width
             source: slot.iconSource

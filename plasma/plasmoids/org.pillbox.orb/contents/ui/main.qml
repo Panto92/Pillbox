@@ -51,7 +51,7 @@ PlasmoidItem {
 
     readonly property var apps: appsModel                          // for the dock forms
     readonly property bool previewVisible: preview.visible
-    readonly property bool orbForm: cfg.form !== "ember" && cfg.form !== "shelf"
+    readonly property bool orbForm: cfg.form !== "ember" && cfg.form !== "shelf" && cfg.form !== "liquid"
 
     readonly property point orbPos: clampPos(Plasmoid.configuration.orbX, Plasmoid.configuration.orbY)
     readonly property point orbCenter: Qt.point(orbPos.x + orbSize / 2, orbPos.y + orbSize / 2)
@@ -237,7 +237,14 @@ PlasmoidItem {
         })
     }
     property bool launcherOpen: false
-    function openLauncher() { closeRing(); launcherOpen = true }
+    property point launcherOrigin: orbCenter
+    // item: what was clicked (dock icon, hub button) – the launcher grows out of it
+    function openLauncher(item) {
+        closeRing()
+        if (item && item.mapToGlobal) launcherOrigin = item.mapToGlobal(item.width / 2, item.height / 2)
+        else launcherOrigin = orbForm ? orbCenter : Qt.point(homeScreen().x + homeScreen().width / 2, homeScreen().y + homeScreen().height)
+        launcherOpen = true
+    }
     function toggleOverview() { closeRing(); invokeShortcut("kwin", "Overview") }
     function showAppWindows(index) {
         // activate one window of the app, then let KWin present all windows of that class
@@ -636,7 +643,7 @@ PlasmoidItem {
                     anchors.centerIn: parent
                     spacing: 6
                     visible: ringItem.hovered < 0
-                    PC3.ToolButton { icon.name: "application-menu"; display: PC3.AbstractButton.IconOnly; text: i18n("All applications"); PC3.ToolTip.text: text; PC3.ToolTip.visible: hovered; onClicked: root.openLauncher() }
+                    PC3.ToolButton { id: hubAllApps; icon.name: "application-menu"; display: PC3.AbstractButton.IconOnly; text: i18n("All applications"); PC3.ToolTip.text: text; PC3.ToolTip.visible: hovered; onClicked: root.openLauncher(hubAllApps) }
                     PC3.ToolButton { icon.name: "view-grid"; display: PC3.AbstractButton.IconOnly; text: i18n("Window overview"); PC3.ToolTip.text: text; PC3.ToolTip.visible: hovered; onClicked: root.toggleOverview() }
                 }
             }
@@ -677,6 +684,7 @@ PlasmoidItem {
             }
 
             RingSlot {
+                id: addSlotItem
                 slotIndex: ringWin.outerCount > 0 ? ringWin.outerCount - 1 : ringWin.slots - 1
                 slotCount: ringWin.outerCount > 0 ? ringWin.outerCount : ringWin.innerCount
                 ringRadius: ringWin.outerCount > 0 ? ringWin.r2 : ringWin.r1
@@ -690,7 +698,7 @@ PlasmoidItem {
                 highlighted: ringItem.hovered === 9999
                 onEntered: { ringItem.hovered = 9999; ringItem.hoveredName = i18n("Add"); ringItem.hoveredInfo = i18n("drag onto the orb") }
                 onExited: if (ringItem.hovered === 9999) ringItem.hovered = -1
-                onClicked: root.openLauncher()
+                onClicked: root.openLauncher(addSlotItem)
             }
         }
     }
@@ -702,6 +710,7 @@ PlasmoidItem {
         accent: root.accent
         area: root.screenAt(root.orbCenter.x, root.orbCenter.y)
         open: root.launcherOpen
+        origin: root.launcherOrigin
         onCloseRequested: root.launcherOpen = false
     }
 
@@ -761,7 +770,11 @@ PlasmoidItem {
             appsModel.requestNewInstance(idx)
             closeRing(); return
         }
-        if (windows === 0) appsModel.requestActivate(idx)                  // launch
+        if (windows === 0) {                                               // launch
+            appsModel.requestActivate(idx)
+            if (item && item.launching !== undefined) item.launching = true   // dock icon bounces until the window is there
+            if (orbForm && cfg.notificationRipple !== false) ripple.play(m.decoration)
+        }
         else if (windows > 1) showAppWindows(index)                       // present all its windows
         else if (m.AppId === frontAppId) appsModel.requestToggleMinimized(idx)   // was in front: into the orb
         else appsModel.requestActivate(idx)                                      // background or minimised: bring it back
@@ -804,6 +817,15 @@ PlasmoidItem {
     Instantiator {
         model: root.cfg.form === "ember" ? root.dockScreens : []
         delegate: DockEmber {
+            required property var modelData
+            orb: root
+            targetScreen: modelData
+            shown: !root.hidden
+        }
+    }
+    Instantiator {
+        model: root.cfg.form === "liquid" ? root.dockScreens : []
+        delegate: DockLiquid {
             required property var modelData
             orb: root
             targetScreen: modelData

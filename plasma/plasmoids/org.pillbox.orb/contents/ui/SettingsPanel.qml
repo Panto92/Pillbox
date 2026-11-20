@@ -43,7 +43,7 @@ PlasmaCore.Dialog {
         { value: "orb",   name: i18n("Orb"),    hint: i18n("floating ball"),        icon: "media-record" },
         { value: "ember", name: i18n("Ember"),  hint: i18n("seam that unfolds"),    icon: "view-more-horizontal-symbolic" },
         { value: "shelf", name: i18n("Shelf"),  hint: i18n("glass ledge"),          icon: "view-app-grid-symbolic" },
-        { value: "liquid", name: i18n("Liquid"), hint: i18n("coming soon"),         icon: "color-picker-white", soon: true }
+        { value: "liquid", name: i18n("Liquid"), hint: i18n("liquid glass"),        icon: "color-picker-white" }
     ]
 
     mainItem: Item {

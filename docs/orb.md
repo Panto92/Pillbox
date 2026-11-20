@@ -1,4 +1,4 @@
-# Pillbox Orb – behaviour spec (v0.4)
+# Pillbox Orb – behaviour spec (v0.5)
 
 The Orb replaces the dock. It is a small glowing ball that floats above all
 windows and can live anywhere on any monitor.
@@ -91,16 +91,16 @@ The Orb's widget shortcut (default suggestion `Meta+Space`) opens the ring.
 launcher moves into the left top pill, so there is always a visible menu
 button, and the Orb can open it too.
 
-## Dock forms (Ember, Shelf)
+## Dock forms (Ember, Shelf, Liquid)
 
 The widget has a **form** setting; every form shares the logic above (apps, click
 rules, previews, badges, fullscreen/ghost behaviour, launcher).
 
-| | Ember | Shelf |
-|---|---|---|
-| At rest | seam of dots (bright = running, dim = pinned) | icons on a glass ledge |
-| Hover | unfolds from the centre, staggered | icon lifts and tilts towards the pointer; reflection appears |
-| Right click on the dock | All applications · Window overview · Customize… | same |
+| | Ember | Shelf | Liquid |
+|---|---|---|---|
+| At rest | seam of dots (bright = running, dim = pinned) | icons on a glass ledge | a bar of liquid glass; the drop rests under the active app |
+| Hover | unfolds from the centre, staggered | icon lifts and tilts towards the pointer; reflection appears | a drop swells out, lifts the icon and follows the pointer with a spring; glow in the app's colour |
+| Right click on the dock | All applications · Window overview · Customize… | same | same |
 
 - **Edge:** bottom, left, right. The dock is laid out as a bottom dock and turned
   as a whole; icons turn back so they stay upright; previews open inwards.
@@ -109,3 +109,14 @@ rules, previews, badges, fullscreen/ghost behaviour, launcher).
   The dock window really shrinks, so it never blocks clicks above it.
 - Positions are computed from the window's *actual* size, so a dock always hugs
   its edge and never spills onto a neighbouring monitor.
+
+## Motion
+
+- **Launching** an app from a dock: its icon bounces softly until the first window
+  appears (at most 6 s). From the Orb's ring: a wave in the app's colour.
+- **All applications** grows out of the button you clicked, the backdrop dims,
+  tiles rise in as a cascade; closing reverses it quickly.
+- **Previews** fade and grow from the slot side, cards fan in, the popup glides
+  between apps.
+- Liquid's merging look uses blur + a threshold mask (`MultiEffect`) – no custom
+  shader, nothing to compile.

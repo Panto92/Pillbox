@@ -144,7 +144,7 @@ PlasmaCore.Dialog {
                 opacity: dock.expanded ? 0.85 : 0
                 Behavior on opacity { NumberAnimation { duration: 250 } }
             }
-            MouseArea { anchors.fill: parent; enabled: dock.expanded; onClicked: dock.orb.openLauncher() }
+            MouseArea { anchors.fill: parent; enabled: dock.expanded; onClicked: dock.orb.openLauncher(allApps) }
         }
 
         Repeater {

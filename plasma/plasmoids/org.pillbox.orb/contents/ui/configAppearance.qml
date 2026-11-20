@@ -78,7 +78,8 @@ KCM.SimpleKCM {
             model: [
                 { text: i18n("Orb – floating ball you can place anywhere"), value: "orb" },
                 { text: i18n("Ember – glowing seam that unfolds into a dock"), value: "ember" },
-                { text: i18n("Shelf – icons on a glass ledge that tilt towards you"), value: "shelf" }
+                { text: i18n("Shelf – icons on a glass ledge that tilt towards you"), value: "shelf" },
+                { text: i18n("Liquid – a dock of liquid glass with a drop that follows you"), value: "liquid" }
             ]
             Component.onCompleted: currentIndex = Math.max(0, indexOfValue(page.cfg_form))
             onActivated: page.cfg_form = currentValue

@@ -5,7 +5,7 @@ A calm, modern desktop for **KDE Plasma 6**. Instead of a dock, a glowing
 anywhere, minimise windows into it. On top: three floating "pills" with your
 system stats, the clock and the tray.
 
-> **Status:** 0.4 – Orb plus two dock forms (Ember, Shelf), live settings panel. Feedback welcome.
+> **Status:** 0.5 – Orb plus three dock forms (Ember, Shelf, Liquid), live settings panel. Feedback welcome.
 
 ## Why
 
@@ -41,7 +41,7 @@ Don't want a floating ball? Pick another **form** – same apps, same behaviour:
 | **Orb** | the floating ball described above |
 | **Ember** | a thin seam of glowing dots that unfolds into a dock on hover |
 | **Shelf** | icons standing on a glass ledge; the hovered one lifts, tilts towards you and reflects |
-| **Liquid** | *coming next* |
+| **Liquid** | a dock of liquid glass: a drop swells out under the pointer, lifts the icon and flows along |
 
 Docks can sit at the **bottom, left or right**, on the main monitor, on **all
 monitors** or on one you choose, and can rest **always visible**, **small until

@@ -21,7 +21,15 @@ PlasmaCore.Dialog {
     property rect area: Qt.rect(0, 0, 1920, 1080)   // the monitor to cover
     property color accent: "#8fb0c2"
     property bool open: false
+    property point origin: Qt.point(area.x + area.width / 2, area.y + area.height)   // global: where it grows from
+    property bool revealed: false            // drives the cascade of the app tiles
+    property bool closing: false
     signal closeRequested()
+    onOpenChanged: {
+        if (open) { closing = false; revealed = false; Qt.callLater(() => revealed = true) }
+        else { revealed = false; closing = true; closeTimer.restart() }
+    }
+    property Timer closeTimer: Timer { interval: 190; onTriggered: launcher.closing = false }
 
     type: PlasmaCore.Dialog.PopupMenu
     location: PlasmaCore.Types.Floating
@@ -29,7 +37,7 @@ PlasmaCore.Dialog {
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
     hideOnWindowDeactivate: true
     title: "Pillbox Launcher"
-    visible: open
+    visible: open || closing
     x: area.x
     y: area.y
 
@@ -40,7 +48,7 @@ PlasmaCore.Dialog {
             categories.currentIndex = 0
             requestActivate()
             search.forceActiveFocus()
-        } else if (open) {
+        } else if (open && !closing) {
             closeRequested()                       // focus moved elsewhere
         }
     }
@@ -92,7 +100,8 @@ PlasmaCore.Dialog {
         id: backdrop
         width: launcher.area.width
         height: launcher.area.height
-        color: Qt.rgba(0.035, 0.045, 0.06, 0.86)
+        color: Qt.rgba(0.035, 0.045, 0.06, launcher.revealed ? 0.86 : 0)
+        Behavior on color { ColorAnimation { duration: launcher.revealed ? 260 : 170 } }
         focus: true
 
         Keys.onEscapePressed: launcher.closeRequested()
@@ -107,10 +116,16 @@ PlasmaCore.Dialog {
             width: Math.min(parent.width - Kirigami.Units.gridUnit * 6, Kirigami.Units.gridUnit * 70)
             height: parent.height - y - Kirigami.Units.gridUnit * 3
             spacing: Kirigami.Units.gridUnit
-            opacity: launcher.open ? 1 : 0
-            scale: launcher.open ? 1 : 0.96
-            Behavior on opacity { NumberAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+            // grows out of the orb / dock spot you clicked
+            opacity: launcher.revealed ? 1 : 0
+            transform: Scale {
+                origin.x: launcher.origin.x - launcher.area.x - content.x
+                origin.y: launcher.origin.y - launcher.area.y - content.y
+                xScale: launcher.revealed ? 1 : 0.82
+                yScale: xScale
+                Behavior on xScale { NumberAnimation { duration: launcher.revealed ? 340 : 170; easing.type: launcher.revealed ? Easing.OutCubic : Easing.InCubic } }
+            }
+            Behavior on opacity { NumberAnimation { duration: launcher.revealed ? 240 : 150 } }
 
             // search
             PC3.TextField {
@@ -194,6 +209,13 @@ PlasmaCore.Dialog {
                     required property int index
                     required property var model
                     width: grid.cellWidth; height: grid.cellHeight
+                    // cascade: tiles rise in one after another when the launcher opens
+                    opacity: launcher.revealed ? 1 : 0
+                    transform: Translate {
+                        y: launcher.revealed ? 0 : Kirigami.Units.gridUnit
+                        Behavior on y { SequentialAnimation { PauseAnimation { duration: launcher.revealed ? 90 + Math.min(tile.index, 40) * 11 : 0 } NumberAnimation { duration: 260; easing.type: Easing.OutCubic } } }
+                    }
+                    Behavior on opacity { SequentialAnimation { PauseAnimation { duration: launcher.revealed ? 90 + Math.min(tile.index, 40) * 11 : 0 } NumberAnimation { duration: 220 } } }
                     readonly property bool lit: hover.hovered || (grid.activeFocus && grid.currentIndex === index)
                                                 || (launcher.searching && index === 0 && !grid.activeFocus)
                     readonly property string pinUrl: launcher.launcherUrl(model)
