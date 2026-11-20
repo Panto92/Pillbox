@@ -870,7 +870,8 @@ PlasmoidItem {
     // plasmashell crashes the DBus QML plugin when the reply arrives. Clicks are
     // collected for a moment, and the plugin is only switched when it really changes
     // (switching rebuilds the whole scene).
-    function applyWallpaper() { wallTimer.restart() }
+    // throttled, not debounced: while a slider is dragged the wallpaper follows every ~0.12 s
+    function applyWallpaper() { if (!wallTimer.running) wallTimer.start() }
     function wallOpts() { try { return JSON.parse(cfg.wallOpts || "{}") } catch (e) { return {} } }
     function wallOptsScript() {
         const o = wallOpts(); let js = ""
@@ -881,9 +882,9 @@ PlasmoidItem {
         return js
     }
     property bool wallPreviewPending: false
-    function previewWallpaper() { wallPreviewPending = true; wallTimer.restart() }
+    function previewWallpaper() { wallPreviewPending = true; if (!wallTimer.running) wallTimer.start() }
     property Timer wallTimer: Timer {
-        interval: 200
+        interval: 120
         onTriggered: {
             const c = root.cfg
             let js

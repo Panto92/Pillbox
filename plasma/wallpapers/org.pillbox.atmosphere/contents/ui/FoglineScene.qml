@@ -26,7 +26,7 @@ Item {
     // golden hour: warm light on the snow in the morning and evening, or from the GPU
     readonly property real golden: Math.max(Math.max(0, 1 - Math.abs(hour - 7) / 1.6), Math.max(0, 1 - Math.abs(hour - 18.6) / 1.6))
     readonly property real glow: Math.min(1, golden * (1 - night) + gpu * 0.7)
-    readonly property real dens: Math.min(1, cpu + ({ light: 0, normal: 0.25, dense: 0.6 }[(env && env.cfg && env.cfg.FoglineFog) || "normal"] || 0.25))
+    readonly property real dens: Math.min(1, cpu + ({ light: 0.1, normal: 0.45, dense: 0.8 }[(env && env.cfg && env.cfg.FoglineFog) || "normal"] || 0.45))
     readonly property var light: sunPos.up ? P.mix([255, 238, 210], [255, 170, 120], golden) : [222, 230, 245]
     readonly property real lightX: (sunPos.up ? sunPos.x : 0.7) * width
 
@@ -96,10 +96,10 @@ Item {
         x: -((scene.t * span / speed) % span)
         y: yPos - thick / 2
         width: scene.width * 2; height: thick
-        opacity: (0.25 + scene.dens * 0.6) * strength * (0.6 + 0.4 * (1 - scene.night))
+        opacity: Math.min(1, (0.35 + scene.dens * 0.75) * strength * (0.65 + 0.35 * (1 - scene.night)))
         gradient: Gradient {
             GradientStop { position: 0; color: "transparent" }
-            GradientStop { position: 0.5; color: P.col(P.mix(scene.sky.bot, [236, 240, 245], 0.45), 0.55) }
+            GradientStop { position: 0.5; color: P.col(P.mix(scene.sky.bot, [236, 240, 245], 0.5), 0.75) }
             GradientStop { position: 1; color: "transparent" }
         }
     }
