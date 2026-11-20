@@ -488,19 +488,28 @@ Window {
                             id: tr
                             property var stops: []
                             property real value: 0
+                            // the colour at a position: the given colours spread evenly, blended in between
+                            function at(pos) {
+                                const n = stops.length
+                                if (n === 0) return "black"
+                                if (n === 1) return stops[0]
+                                const f = pos * (n - 1), i = Math.min(n - 2, Math.floor(f)), k = f - i
+                                const a = stops[i], b = stops[i + 1]
+                                return Qt.rgba(a.r + (b.r - a.r) * k, a.g + (b.g - a.g) * k, a.b + (b.b - a.b) * k, 1)
+                            }
                             signal moved(real v)
                             implicitWidth: Kirigami.Units.gridUnit * 14; implicitHeight: Kirigami.Units.gridUnit * 1.1
                             Rectangle {
                                 anchors.fill: parent; radius: height / 2
                                 gradient: Gradient {
                                     orientation: Gradient.Horizontal
-                                    GradientStop { position: 0; color: tr.stops[0] || "black" }
-                                    GradientStop { position: 0.17; color: tr.stops[1] || tr.stops[0] || "black" }
-                                    GradientStop { position: 0.33; color: tr.stops[2] || tr.stops[1] || "black" }
-                                    GradientStop { position: 0.5; color: tr.stops[3] || tr.stops[2] || "black" }
-                                    GradientStop { position: 0.67; color: tr.stops[4] || tr.stops[3] || "black" }
-                                    GradientStop { position: 0.83; color: tr.stops[5] || tr.stops[4] || "black" }
-                                    GradientStop { position: 1; color: tr.stops[6] || tr.stops[5] || "black" }
+GradientStop { position: 0; color: tr.at(0) }
+                                    GradientStop { position: 0.17; color: tr.at(0.17) }
+                                    GradientStop { position: 0.33; color: tr.at(0.33) }
+                                    GradientStop { position: 0.5; color: tr.at(0.5) }
+                                    GradientStop { position: 0.67; color: tr.at(0.67) }
+                                    GradientStop { position: 0.83; color: tr.at(0.83) }
+                                    GradientStop { position: 1; color: tr.at(1) }
                                 }
                                 border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.12)
                             }
