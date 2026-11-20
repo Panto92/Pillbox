@@ -770,6 +770,12 @@ Window {
         ColumnLayout {
             spacing: Kirigami.Units.gridUnit
             Group {
+                title: i18n("Arrangement")
+                SettingRow { label: i18n("Top bar"); hint: i18n("Three floating islands, one bar across the whole width, or everything in one capsule. Widgets keep their settings.")
+                    Segments { key: "arrangement"; options: [["islands", i18n("Islands")], ["bar", i18n("Full bar")], ["capsule", i18n("Capsule")]]
+                               onPicked: panel.orb.applyArrangement() } }
+            }
+            Group {
                 title: i18n("Load")
                 SettingRow { label: i18n("Look"); hint: i18n("How CPU, GPU, memory and temperature appear in the left pill.")
                     Segments { key: "statsStyle"; options: [["rings", i18n("Rings")], ["spark", i18n("Curves")], ["bars", i18n("Bars")], ["numbers", i18n("Numbers")]]
@@ -787,7 +793,7 @@ Window {
             }
             Group {
                 title: i18n("Coming next")
-                SettingRow { label: i18n("Arrangements"); hint: i18n("Islands, one capsule, a rail at the screen edge, corners, or a halo around the orb.")
+                SettingRow { label: i18n("More arrangements"); hint: i18n("A rail at the screen edge, corners, or a halo around the orb.")
                     QQC2.Label { text: i18n("soon"); opacity: 0.6 } }
             }
         }

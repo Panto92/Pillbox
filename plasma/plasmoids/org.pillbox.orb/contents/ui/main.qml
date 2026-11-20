@@ -939,6 +939,13 @@ PlasmoidItem {
         }
     }
 
+    // rebuild the top panels in another arrangement (code/arrange.js), keeping each widget's settings
+    function applyArrangement() {
+        const mode = String(cfg.arrangement || "islands").replace(/[^a-z]/g, "")
+        const file = String(Qt.resolvedUrl("../code/arrange.js")).replace("file://", "")
+        shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \"$(sed s/MODE/" + mode + "/ '" + file + "')\" # " + Date.now())
+    }
+
     // ---------------------------------------------------------------- login screen
     // Set up once with root (pkexec), then the choices live in a file the user owns:
     // /var/lib/pillbox-login/theme.conf.user – no password needed to change them.

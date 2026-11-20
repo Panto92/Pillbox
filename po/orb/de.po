@@ -787,3 +787,21 @@ msgstr[1] "%1 weitere Apps"
 
 msgid "show all"
 msgstr "alle zeigen"
+
+msgid "Arrangement"
+msgstr "Anordnung"
+
+msgid "Three floating islands, one bar across the whole width, or everything in one capsule. Widgets keep their settings."
+msgstr "Drei schwebende Inseln, eine Leiste über die ganze Breite oder alles in einer Kapsel. Die Widgets behalten ihre Einstellungen."
+
+msgid "Full bar"
+msgstr "Durchgehend"
+
+msgid "Capsule"
+msgstr "Kapsel"
+
+msgid "More arrangements"
+msgstr "Weitere Anordnungen"
+
+msgid "A rail at the screen edge, corners, or a halo around the orb."
+msgstr "Eine Schiene am Bildschirmrand, Ecken oder ein Halo um den Orb."
