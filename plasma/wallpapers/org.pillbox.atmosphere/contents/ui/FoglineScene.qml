@@ -52,19 +52,19 @@ Item {
     }
     Shape {
         id: sunGlow
-        readonly property real R: scene.height * 0.5
+        readonly property real rad: scene.height * 0.5
         readonly property var tone: scene.hour > 16 || scene.hour < 9 ? [255, 168, 120] : [255, 244, 225]
-        x: scene.sunPos.x * scene.width - R; y: scene.sunPos.y * scene.height - R
-        width: R * 2; height: R * 2
+        x: scene.sunPos.x * scene.width - sunGlow.rad; y: scene.sunPos.y * scene.height - sunGlow.rad
+        width: rad * 2; height: rad * 2
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             strokeColor: "transparent"
             fillGradient: RadialGradient {
-                centerX: sunGlow.R; centerY: sunGlow.R; centerRadius: sunGlow.R; focalX: sunGlow.R; focalY: sunGlow.R
+                centerX: sunGlow.rad; centerY: sunGlow.rad; centerRadius: sunGlow.rad; focalX: sunGlow.rad; focalY: sunGlow.rad
                 GradientStop { position: 0; color: P.col(sunGlow.tone, 0.42 * scene.sky.light) }
                 GradientStop { position: 1; color: P.col(sunGlow.tone, 0) }
             }
-            PathAngleArc { centerX: sunGlow.R; centerY: sunGlow.R; radiusX: sunGlow.R; radiusY: sunGlow.R; startAngle: 0; sweepAngle: 360 }
+            PathAngleArc { centerX: sunGlow.rad; centerY: sunGlow.rad; radiusX: sunGlow.rad; radiusY: sunGlow.rad; startAngle: 0; sweepAngle: 360 }
         }
     }
 
@@ -116,22 +116,22 @@ Item {
         Shape {
             id: fogBlob
             required property int index
-            readonly property real R: scene.height * (0.18 + (index % 3) * 0.06) * (1 + scene.dens * 0.6)
-            y: scene.height * (0.6 + (index % 3) * 0.06) - R
-            width: R * 2; height: R * 2
+            readonly property real rad: scene.height * (0.18 + (index % 3) * 0.06) * (1 + scene.dens * 0.6)
+            y: scene.height * (0.6 + (index % 3) * 0.06) - rad
+            width: rad * 2; height: rad * 2
             opacity: (0.06 + 0.3 * scene.dens) * (0.5 + 0.5 * scene.sky.light)
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
                 strokeColor: "transparent"
                 fillGradient: RadialGradient {
-                    centerX: fogBlob.R; centerY: fogBlob.R; centerRadius: fogBlob.R; focalX: fogBlob.R; focalY: fogBlob.R
+                    centerX: fogBlob.rad; centerY: fogBlob.rad; centerRadius: fogBlob.rad; focalX: fogBlob.rad; focalY: fogBlob.rad
                     GradientStop { position: 0; color: P.col(P.mix(scene.sky.bot, [235, 240, 244], 0.45)) }
                     GradientStop { position: 1; color: "transparent" }
                 }
-                PathAngleArc { centerX: fogBlob.R; centerY: fogBlob.R; radiusX: fogBlob.R; radiusY: fogBlob.R; startAngle: 0; sweepAngle: 360 }
+                PathAngleArc { centerX: fogBlob.rad; centerY: fogBlob.rad; radiusX: fogBlob.rad; radiusY: fogBlob.rad; startAngle: 0; sweepAngle: 360 }
             }
-            readonly property real span: scene.width + fogBlob.R * 2 + 40
-            x: ((scene.t * span / (70 + fogBlob.index * 7) + fogBlob.index * span / 6) % span) - fogBlob.R * 2
+            readonly property real span: scene.width + fogBlob.rad * 2 + 40
+            x: ((scene.t * span / (70 + fogBlob.index * 7) + fogBlob.index * span / 6) % span) - fogBlob.rad * 2
         }
     }
     // a ring on the water for each new notification

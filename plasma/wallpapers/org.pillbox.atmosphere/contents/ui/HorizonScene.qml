@@ -47,17 +47,17 @@ Item {
         y: (scene.sunPos.up ? scene.sunPos.y : 0.22) * scene.height
         Shape {
             id: halo
-            readonly property real R: sunItem.r * 4
-            x: -R; y: -R; width: R * 2; height: R * 2
+            readonly property real rad: sunItem.r * 4
+            x: -rad; y: -rad; width: rad * 2; height: rad * 2
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
                 strokeColor: "transparent"
                 fillGradient: RadialGradient {
-                    centerX: halo.R; centerY: halo.R; centerRadius: halo.R; focalX: halo.R; focalY: halo.R
+                    centerX: halo.rad; centerY: halo.rad; centerRadius: halo.rad; focalX: halo.rad; focalY: halo.rad
                     GradientStop { position: 0; color: P.col(sunItem.tone, 0.16 + scene.heat * 0.12) }
                     GradientStop { position: 1; color: P.col(sunItem.tone, 0) }
                 }
-                PathAngleArc { centerX: halo.R; centerY: halo.R; radiusX: halo.R; radiusY: halo.R; startAngle: 0; sweepAngle: 360 }
+                PathAngleArc { centerX: halo.rad; centerY: halo.rad; radiusX: halo.rad; radiusY: halo.rad; startAngle: 0; sweepAngle: 360 }
             }
         }
         Rectangle { x: -sunItem.r; y: -sunItem.r; width: sunItem.r * 2; height: width; radius: width / 2; color: P.col(sunItem.tone, 0.95) }

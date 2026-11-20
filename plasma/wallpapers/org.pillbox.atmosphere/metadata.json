@@ -1,13 +1,17 @@
 {
     "KPackageStructure": "Plasma/Wallpaper",
     "KPlugin": {
-        "Authors": [ { "Name": "Pillbox contributors" } ],
+        "Authors": [
+            {
+                "Name": "Pillbox contributors"
+            }
+        ],
         "Description": "Living wallpapers that follow the time of day and gently show what your computer is doing. Built to cost next to nothing.",
         "Icon": "preferences-desktop-wallpaper",
         "Id": "org.pillbox.atmosphere",
         "License": "MIT",
         "Name": "Pillbox Atmosphere",
-        "Version": "0.6.0"
+        "Version": "0.6.1"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }

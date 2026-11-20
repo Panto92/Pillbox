@@ -19,6 +19,7 @@ import org.kde.plasma.components as PC3
 import org.kde.kirigami as Kirigami
 import org.kde.taskmanager as TaskManager
 import org.kde.plasma.workspace.dbus as DBus
+import org.kde.plasma.plasma5support as P5Support
 import org.kde.notificationmanager as NotificationManager
 
 PlasmoidItem {
@@ -799,23 +800,35 @@ PlasmoidItem {
         PlasmaExtras.MenuItem { text: i18n("Customize…"); icon: "configure"; onClicked: root.settingsOpen = true }
     }
 
-    // wallpaper on every desktop, driven from the settings centre via Plasma's own scripting
-    function applyWallpaper() {
-        const c = cfg
-        let js
-        if (c.wallScene === "keep") {
-            js = "desktops().forEach(function(d){ if (d.wallpaperPlugin === 'org.pillbox.atmosphere') d.wallpaperPlugin = 'org.kde.image'; });"
-        } else {
-            js = "desktops().forEach(function(d){ d.wallpaperPlugin = 'org.pillbox.atmosphere';"
-               + " d.currentConfigGroup = ['Wallpaper', 'org.pillbox.atmosphere', 'General'];"
-               + " d.writeConfig('Scene', '" + c.wallScene + "');"
-               + " d.writeConfig('FollowTime', " + (c.wallFollow ? "true" : "false") + ");"
-               + " d.writeConfig('Reactivity', '" + c.wallReact + "');"
-               + " d.writeConfig('Motion', '" + c.wallMotion + "');"
-               + " d.writeConfig('PauseWhenCovered', " + (c.wallPause ? "true" : "false") + "); });"
+    // wallpaper on every desktop, driven from the settings centre. The script runs in a
+    // separate qdbus6 process: calling plasmashell's own DBus interface from inside
+    // plasmashell crashes the DBus QML plugin when the reply arrives. Clicks are
+    // collected for a moment, and the plugin is only switched when it really changes
+    // (switching rebuilds the whole scene).
+    function applyWallpaper() { wallTimer.restart() }
+    property Timer wallTimer: Timer {
+        interval: 350
+        onTriggered: {
+            const c = root.cfg
+            let js
+            if (c.wallScene === "keep") {
+                js = "desktops().forEach(function(d){ if (d.wallpaperPlugin == \"org.pillbox.atmosphere\") d.wallpaperPlugin = \"org.kde.image\"; });"
+            } else {
+                const str = v => "\"" + String(v).replace(/[^a-z]/g, "") + "\""
+                js = "desktops().forEach(function(d){ if (d.wallpaperPlugin != \"org.pillbox.atmosphere\") d.wallpaperPlugin = \"org.pillbox.atmosphere\";"
+                   + " d.currentConfigGroup = [\"Wallpaper\", \"org.pillbox.atmosphere\", \"General\"];"
+                   + " d.writeConfig(\"Scene\", " + str(c.wallScene) + ");"
+                   + " d.writeConfig(\"FollowTime\", " + (c.wallFollow ? "true" : "false") + ");"
+                   + " d.writeConfig(\"Reactivity\", " + str(c.wallReact) + ");"
+                   + " d.writeConfig(\"Motion\", " + str(c.wallMotion) + ");"
+                   + " d.writeConfig(\"PauseWhenCovered\", " + (c.wallPause ? "true" : "false") + "); });"
+            }
+            root.shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '" + js + "'")
         }
-        DBus.SessionBus.asyncCall({ service: "org.kde.plasmashell", path: "/PlasmaShell", iface: "org.kde.PlasmaShell",
-                                    member: "evaluateScript", arguments: [new DBus.string(js)] })
+    }
+    property P5Support.DataSource shell: P5Support.DataSource {
+        engine: "executable"
+        onNewData: (source, data) => disconnectSource(source)
     }
 
     property bool settingsOpen: false

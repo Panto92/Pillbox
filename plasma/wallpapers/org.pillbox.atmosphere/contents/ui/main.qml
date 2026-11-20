@@ -102,7 +102,6 @@ WallpaperItem {
     Loader {
         id: scene
         anchors.fill: parent
-        asynchronous: true
         source: root.cfg.Scene === "horizon" ? "HorizonScene.qml"
               : root.cfg.Scene === "fogline" ? "FoglineScene.qml" : "FlowScene.qml"
         onLoaded: item.env = root
