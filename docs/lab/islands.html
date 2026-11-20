@@ -1,0 +1,563 @@
+<title>Pillbox Islands</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one long sketchbook – a live stage on top, then the parts in detail. Single dark look, like the desktop itself. */
+:root {
+  --ink: #0b0e12;
+  --slate: #141a20;
+  --glass: rgba(16, 20, 26, 0.82);
+  --line: rgba(205, 213, 219, 0.1);
+  --mist: #7d8a94;
+  --paper: #cdd5db;
+  --frost: #e9eef2;
+  --steel: #8fb0c2;
+  --warn: #ff8a7a;
+  --go: #7fdcb0;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--ink); color: var(--paper); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-block: 56px 96px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 88px; }
+.eyebrow { font: 500 12px var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--steel); margin: 0 0 12px; }
+h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(44px, 7.5vw, 96px); line-height: 0.92; letter-spacing: -0.035em; margin: 0; color: var(--frost); }
+h2 { font-family: var(--f-display); font-weight: 600; font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -0.02em; line-height: 1.05; margin: 0; color: var(--frost); text-wrap: balance; }
+h3 { font: 600 16px var(--f-body); color: var(--frost); margin: 0; }
+.lead { margin: 18px 0 0; max-width: 62ch; color: var(--mist); font-size: 17px; }
+.lead b { color: var(--paper); font-weight: 600; }
+.sec-head { display: grid; gap: 4px; margin-bottom: 28px; }
+.sec-head p { margin: 10px 0 0; max-width: 64ch; color: var(--mist); }
+.mono { font-family: var(--f-mono); }
+
+/* ---------- stage */
+.switcher { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 16px; }
+.chip { font: 500 13px var(--f-body); color: var(--paper); background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+.chip:hover { background: rgba(255,255,255,0.09); }
+.chip[aria-pressed="true"] { background: var(--steel); color: var(--ink); border-color: var(--steel); font-weight: 600; }
+.chip:focus-visible, .lib-item:focus-visible, button:focus-visible { outline: 2px solid var(--steel); outline-offset: 2px; }
+.stage-box { position: relative; width: 100%; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: #070a10; }
+.stage { position: absolute; left: 0; top: 0; width: 1100px; height: 560px; transform-origin: 0 0; overflow: hidden;
+  background:
+    radial-gradient(60% 50% at 30% 18%, rgba(80,255,160,0.18), transparent 70%),
+    radial-gradient(50% 40% at 70% 12%, rgba(190,110,255,0.16), transparent 70%),
+    linear-gradient(180deg, #070b14 0%, #0d1424 55%, #0a0f18 70%, #05070b 100%); }
+.stage::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 34%;
+  background: linear-gradient(180deg, transparent, rgba(5,7,11,.9)),
+  conic-gradient(from 200deg at 30% 120%, #0c121c, #121a28, #0c121c); clip-path: polygon(0 40%, 14% 18%, 26% 34%, 41% 8%, 55% 30%, 68% 12%, 82% 32%, 100% 16%, 100% 100%, 0 100%); }
+.caption { margin: 14px 2px 0; color: var(--mist); max-width: 80ch; min-height: 3.2em; }
+.caption b { color: var(--frost); font-weight: 600; }
+
+.pill { position: absolute; top: 10px; z-index: 3; background: var(--glass); border: 1px solid rgba(255,255,255,0.08); color: var(--frost);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border-radius: 16px; overflow: hidden; transition: width .5s cubic-bezier(.2,.9,.2,1), height .5s cubic-bezier(.2,.9,.2,1), border-radius .5s, box-shadow .3s; }
+.pill .face { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity .25s; }
+.pill .face.on { opacity: 1; pointer-events: auto; transition-delay: .12s; }
+#pl { left: 14px; } #pr { right: 14px; } #pc { left: 50%; transform: translateX(-50%); }
+.row { display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 12px; font: 500 12.5px var(--f-body); white-space: nowrap; }
+.ico { width: 16px; height: 16px; flex: none; }
+.dim { color: var(--mist); }
+.num { font: 500 12px var(--f-mono); font-variant-numeric: tabular-nums; }
+.sep { width: 1px; height: 14px; background: rgba(255,255,255,0.12); }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--steel); display: inline-block; }
+.bar-mini { width: 26px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.12); position: relative; overflow: hidden; }
+.bar-mini i { position: absolute; inset: 0 auto 0 0; background: var(--steel); border-radius: 2px; }
+.pad { padding: 16px 18px; }
+.app { width: 34px; height: 34px; border-radius: 10px; flex: none; display: grid; place-items: center; font: 700 14px var(--f-display); color: var(--ink); }
+.btn { font: 600 12px var(--f-body); border: 0; border-radius: 999px; padding: 6px 12px; background: rgba(255,255,255,0.08); color: var(--frost); cursor: pointer; }
+.btn.pri { background: var(--steel); color: var(--ink); }
+.slider { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.12); position: relative; }
+.slider i { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--frost); }
+.tile { border-radius: 14px; background: rgba(255,255,255,0.06); padding: 10px 12px; display: grid; gap: 4px; font-size: 12px; }
+.tile.on { background: var(--steel); color: var(--ink); }
+.tile b { font-weight: 600; font-size: 12.5px; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font: 500 11px var(--f-mono); }
+.cal span { padding: 4px 0; border-radius: 6px; color: var(--paper); }
+.cal .h { color: var(--mist); }
+.cal .t { background: var(--steel); color: var(--ink); }
+.ev { display: grid; grid-template-columns: 3px 1fr; gap: 10px; font-size: 12px; }
+.ev i { border-radius: 2px; background: var(--steel); }
+.graph { height: 44px; width: 100%; }
+.edit .pill { outline: 1.5px dashed rgba(143,176,194,.7); outline-offset: 3px; }
+.plus { width: 22px; height: 22px; border-radius: 50%; border: 0; background: var(--steel); color: var(--ink); font: 700 15px/22px var(--f-body); text-align: center; padding: 0; cursor: pointer; }
+.mod { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 3px 6px; border-radius: 999px; background: rgba(255,255,255,0.07); font-size: 12px; }
+.mod .x { width: 14px; height: 14px; border-radius: 50%; background: rgba(255,138,122,.85); color: var(--ink); font: 700 10px/14px var(--f-body); text-align: center; }
+.popover { position: absolute; z-index: 5; right: 14px; top: 62px; width: 330px; border-radius: 16px; background: var(--glass); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(18px); padding: 14px; display: grid; gap: 10px; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: opacity .3s, transform .3s; }
+.edit .popover { opacity: 1; transform: none; pointer-events: auto; }
+.pop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pop-grid div { display: flex; gap: 8px; align-items: center; padding: 7px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); font-size: 12px; }
+.pop-grid div.on { background: rgba(143,176,194,0.2); color: var(--frost); }
+.orb { position: absolute; left: 50%; bottom: 46px; width: 44px; height: 44px; margin-left: -22px; border-radius: 50%; z-index: 2;
+  background: radial-gradient(circle at 35% 30%, #fff, var(--steel) 55%, #3d5868); box-shadow: 0 0 40px rgba(143,176,194,.55); }
+.ripple { position: absolute; left: 50%; bottom: 68px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #5aa7ff; transform: translate(-50%, 50%); opacity: 0; z-index: 1; }
+.notif-on .ripple { animation: rip 1.8s ease-out .3s 2; }
+@keyframes rip { from { width: 10px; height: 10px; opacity: .9; } to { width: 260px; height: 260px; opacity: 0; } }
+
+/* ---------- notification gallery */
+.ngrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; align-items: start; }
+.ncard { display: grid; gap: 12px; }
+.ncard > p { margin: 0; color: var(--mist); font-size: 13.5px; }
+.nisland { background: var(--slate); border: 1px solid var(--line); border-radius: 22px; padding: 12px 14px; display: grid; gap: 10px; }
+.nrow { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.nrow > div { min-width: 0; }
+.nt { font-weight: 600; color: var(--frost); font-size: 13.5px; }
+.nb { color: var(--paper); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nmeta { font: 500 11px var(--f-mono); color: var(--mist); }
+.reply { display: flex; gap: 8px; }
+.reply span { flex: 1; border-radius: 999px; background: rgba(255,255,255,0.06); padding: 6px 12px; font-size: 12.5px; color: var(--mist); }
+.stack { position: relative; padding-bottom: 14px; }
+.stack::before, .stack::after { content: ""; position: absolute; left: 14px; right: 14px; height: 20px; border-radius: 0 0 18px 18px; background: #11161c; border: 1px solid var(--line); border-top: 0; }
+.stack::before { bottom: 6px; } .stack::after { bottom: 0; left: 26px; right: 26px; background: #0e1217; }
+.stack .nisland { position: relative; z-index: 1; }
+.critical { border-color: rgba(255,138,122,.5); box-shadow: 0 0 0 1px rgba(255,138,122,.2), 0 0 30px rgba(255,138,122,.12); }
+.center-panel { background: var(--slate); border: 1px solid var(--line); border-radius: 22px; padding: 16px; display: grid; gap: 12px; }
+.center-panel header { display: flex; justify-content: space-between; align-items: center; }
+.group-h { font: 500 11px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mist); }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-top: 30px; }
+.rule { border-top: 1px solid var(--line); padding-top: 14px; }
+.rule p { margin: 6px 0 0; color: var(--mist); font-size: 14px; }
+
+/* ---------- module library */
+.lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.lib-item { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; padding: 12px; border-radius: 14px; background: var(--slate); border: 1px solid var(--line); cursor: pointer; text-align: left; color: inherit; font: inherit; }
+.lib-item:hover { border-color: rgba(143,176,194,.4); }
+.lib-item .app { width: 36px; height: 36px; }
+.lib-item small { display: block; color: var(--mist); font-size: 12px; }
+.lib-item .state { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 700 15px var(--f-body); background: rgba(255,255,255,0.08); color: var(--frost); transition: background .2s, color .2s; }
+.lib-item[aria-pressed="true"] { border-color: rgba(143,176,194,.55); }
+.lib-item[aria-pressed="true"] .state { background: var(--steel); color: var(--ink); }
+.lib-tag { font: 500 10px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--steel); }
+.lib-sub { margin: 26px 0 10px; }
+
+/* ---------- settings mock */
+.win { display: grid; grid-template-columns: 210px 1fr; border-radius: 20px; border: 1px solid rgba(143,176,194,.3); background: #0f1318; overflow: hidden; }
+.side { background: rgba(0,0,0,.22); padding: 18px 12px; display: grid; align-content: start; gap: 2px; border-right: 1px solid var(--line); }
+.side .brand { display: flex; gap: 10px; align-items: center; font: 600 16px var(--f-display); color: var(--frost); padding: 4px 8px 16px; }
+.side .brand i { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--steel)); }
+.side span { padding: 8px 10px; border-radius: 10px; font-size: 13.5px; color: var(--paper); }
+.side span.on { background: rgba(143,176,194,.2); color: var(--frost); }
+.main { padding: 22px 26px 26px; display: grid; gap: 22px; min-width: 0; }
+.gtitle { font: 500 11px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--mist); margin-bottom: 6px; }
+.srow { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,.06); }
+.srow > div:first-child { min-width: 0; }
+.srow b { display: block; font-weight: 600; color: var(--frost); font-size: 14px; }
+.srow small { color: var(--mist); font-size: 12.5px; }
+.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.06); flex: none; }
+.seg span { padding: 5px 12px; border-radius: 999px; font-size: 12.5px; }
+.seg span.on { background: var(--steel); color: var(--ink); font-weight: 600; }
+.sw { width: 40px; height: 22px; border-radius: 999px; background: var(--steel); position: relative; flex: none; }
+.sw::after { content: ""; position: absolute; right: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); }
+.sw.off { background: rgba(255,255,255,.16); }
+.sw.off::after { right: auto; left: 3px; background: #e8ecf0; }
+.layouts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.lay { border-radius: 12px; border: 1px solid var(--line); padding: 10px; display: grid; gap: 8px; font-size: 12.5px; }
+.lay.on { border-color: var(--steel); box-shadow: 0 0 0 1px var(--steel); }
+.lay .mini { height: 46px; border-radius: 8px; background: linear-gradient(180deg, #121a28, #0a0f18); position: relative; }
+.lay .mini i { position: absolute; top: 6px; height: 7px; border-radius: 4px; background: rgba(233,238,242,.75); }
+.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.col { border-radius: 12px; background: rgba(255,255,255,.03); border: 1px dashed rgba(143,176,194,.35); padding: 10px; display: grid; gap: 6px; align-content: start; }
+.col .h { font: 500 10.5px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mist); }
+.col .m { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 9px; background: rgba(255,255,255,.07); font-size: 12.5px; }
+.col .m::before { content: "⋮⋮"; color: var(--mist); font-size: 10px; letter-spacing: -2px; }
+.col .add { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 9px; color: var(--steel); font-size: 12.5px; }
+
+/* ---------- plan */
+.plan { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.step { background: var(--slate); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 8px; align-content: start; }
+.step .n { font: 500 12px var(--f-mono); color: var(--steel); }
+.step p { margin: 0; color: var(--mist); font-size: 14px; }
+.q { border-left: 2px solid var(--steel); padding: 2px 0 2px 14px; color: var(--paper); max-width: 70ch; }
+.qs { display: grid; gap: 12px; margin-top: 26px; }
+
+@media (max-width: 720px) {
+  .win { grid-template-columns: 1fr; }
+  .side { grid-auto-flow: column; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  .side .brand { display: none; }
+  .layouts, .cols { grid-template-columns: 1fr; }
+  .srow { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) { .pill, .face, .popover { transition: none !important; } .notif-on .ripple { animation: none; } }
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Pillbox · Skizze · Obere Leiste und Hinweise</p>
+  <h1>Islands</h1>
+  <p class="lead">Die drei Pillen oben bleiben ruhig und klein. Wenn etwas passiert, <b>wächst die passende Pille zur Insel</b>: eine Nachricht, Musik, die Lautstärke, ein Download. Ein Klick klappt sie zum Panel auf. Jede Pille lässt sich mit <b>+</b> um Module erweitern, und alles bleibt ein normales Plasma-Panel.</p>
+</header>
+
+<!-- ============================================================ stage -->
+<section aria-labelledby="s-stage">
+  <div class="sec-head">
+    <p class="eyebrow">Live-Bühne</p>
+    <h2 id="s-stage">So verhält sich die Leiste</h2>
+  </div>
+  <div class="switcher" role="group" aria-label="Zustand der Leiste">
+    <button class="chip" data-s="rest" aria-pressed="true">In Ruhe</button>
+    <button class="chip" data-s="notif" aria-pressed="false">Neue Nachricht</button>
+    <button class="chip" data-s="music" aria-pressed="false">Musik läuft</button>
+    <button class="chip" data-s="volume" aria-pressed="false">Lautstärke</button>
+    <button class="chip" data-s="progress" aria-pressed="false">Download</button>
+    <button class="chip" data-s="control" aria-pressed="false">Kontrollzentrum</button>
+    <button class="chip" data-s="calendar" aria-pressed="false">Kalender</button>
+    <button class="chip" data-s="system" aria-pressed="false">System</button>
+    <button class="chip" data-s="edit" aria-pressed="false">Bearbeiten (+)</button>
+  </div>
+  <div class="stage-box" id="stageBox">
+    <div class="stage" id="stage">
+
+      <!-- left pill: launcher + stats -->
+      <div class="pill" id="pl">
+        <div class="face" data-f="rest">
+          <div class="row">
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><g fill="#e9eef2"><rect x="1" y="1" width="6" height="6" rx="2"/><rect x="9" y="1" width="6" height="6" rx="2"/><rect x="1" y="9" width="6" height="6" rx="2"/><rect x="9" y="9" width="6" height="6" rx="2" opacity=".5"/></g></svg>
+            <span class="sep"></span>
+            <span class="dim">CPU</span><span class="num">12 %</span>
+            <span class="dim">GPU</span><span class="num">48°</span>
+            <span class="dim">RAM</span><span class="num">9,4</span>
+          </div>
+        </div>
+        <div class="face" data-f="system">
+          <div class="pad" style="display:grid;gap:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center"><h3>System</h3><span class="dim num">Ryzen · RTX</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="tile"><span class="dim">CPU</span><b class="num">12 %</b><svg class="graph" viewBox="0 0 120 44" preserveAspectRatio="none"><path d="M0 34 L12 30 L24 33 L36 22 L48 26 L60 18 L72 24 L84 14 L96 20 L108 12 L120 16 L120 44 L0 44Z" fill="rgba(143,176,194,.25)"/><path d="M0 34 L12 30 L24 33 L36 22 L48 26 L60 18 L72 24 L84 14 L96 20 L108 12 L120 16" fill="none" stroke="#8fb0c2" stroke-width="1.6"/></svg></div>
+              <div class="tile"><span class="dim">GPU</span><b class="num">31 % · 48°</b><svg class="graph" viewBox="0 0 120 44" preserveAspectRatio="none"><path d="M0 30 L15 28 L30 31 L45 20 L60 22 L75 26 L90 16 L105 19 L120 14 L120 44 L0 44Z" fill="rgba(127,220,176,.2)"/><path d="M0 30 L15 28 L30 31 L45 20 L60 22 L75 26 L90 16 L105 19 L120 14" fill="none" stroke="#7fdcb0" stroke-width="1.6"/></svg></div>
+              <div class="tile"><span class="dim">RAM</span><b class="num">9,4 / 32 GB</b><div class="bar-mini" style="width:100%;height:6px"><i style="width:29%"></i></div></div>
+              <div class="tile"><span class="dim">Netz</span><b class="num">↓ 4,2 · ↑ 0,3 MB/s</b><div class="bar-mini" style="width:100%;height:6px"><i style="width:18%"></i></div></div>
+            </div>
+            <div class="dim" style="font-size:12px">Top: zen 8 % · plasmashell 1 % · kwin 2 %</div>
+          </div>
+        </div>
+        <div class="face" data-f="edit">
+          <div class="row">
+            <span class="mod"><span class="x">–</span>Start</span>
+            <span class="mod"><span class="x">–</span>Auslastung</span>
+            <button class="plus" aria-label="Modul hinzufügen">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- center pill: clock → island -->
+      <div class="pill" id="pc">
+        <div class="face" data-f="rest">
+          <div class="row" style="justify-content:center"><span class="dim">Fr 20. Nov</span><span class="num" style="font-size:13px;color:#e9eef2">19:42</span><span class="dot" id="unreadDot" style="opacity:0"></span></div>
+        </div>
+        <div class="face" data-f="notif">
+          <div class="pad" style="display:grid;gap:10px">
+            <div class="nrow"><div class="app" style="background:#5865f2;color:#fff">D</div><div style="min-width:0"><div class="nt">Discord · Mara</div><div class="nb">Bist du heute Abend noch online?</div></div><span class="nmeta" style="margin-left:auto">jetzt</span></div>
+            <div class="reply"><span>Antworten …</span><button class="btn pri">Öffnen</button></div>
+          </div>
+        </div>
+        <div class="face" data-f="volume">
+          <div class="row" style="height:46px;padding:0 18px;gap:14px">
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10L5 10H2z" fill="#e9eef2"/><path d="M11 5.5a3.5 3.5 0 010 5M12.5 3.5a6 6 0 010 9" stroke="#e9eef2" fill="none" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <div class="slider" style="flex:1"><i style="width:64%"></i></div><span class="num">64</span>
+          </div>
+        </div>
+        <div class="face" data-f="progress">
+          <div class="row" style="height:46px;padding:0 16px;gap:12px">
+            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="9" stroke="rgba(255,255,255,.15)" stroke-width="2.5" fill="none"/><circle cx="11" cy="11" r="9" stroke="#8fb0c2" stroke-width="2.5" fill="none" stroke-dasharray="56.5" stroke-dashoffset="20" transform="rotate(-90 11 11)" stroke-linecap="round"/></svg>
+            <div style="display:grid;line-height:1.25"><span>kubuntu-26.04.iso</span><span class="dim num" style="font-size:11px">3,1 von 4,8 GB · noch 2 Min</span></div>
+          </div>
+        </div>
+        <div class="face" data-f="calendar">
+          <div class="pad" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+            <div style="display:grid;gap:8px">
+              <div style="display:flex;justify-content:space-between"><h3>November 2026</h3><span class="dim">‹ ›</span></div>
+              <div class="cal" id="cal"></div>
+            </div>
+            <div style="display:grid;gap:12px;align-content:start">
+              <div style="display:flex;gap:10px;align-items:center"><span style="font:600 28px var(--f-display);color:#e9eef2">4°</span><span class="dim" style="font-size:12px">klar · Nacht<br>morgen 9° / 2°</span></div>
+              <div class="group-h">Heute</div>
+              <div class="ev"><i></i><div><b style="font-weight:600;color:#e9eef2">Video-Aufnahme Pillbox</b><div class="dim">20:30 – 21:30</div></div></div>
+              <div class="ev"><i style="background:#7fdcb0"></i><div><b style="font-weight:600;color:#e9eef2">Backup NAS</b><div class="dim">23:00</div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="face" data-f="edit">
+          <div class="row" style="justify-content:center"><span class="mod"><span class="x">–</span>Uhr</span><span class="mod"><span class="x">–</span>Wetter</span><button class="plus" aria-label="Modul hinzufügen">+</button></div>
+        </div>
+      </div>
+
+      <!-- right pill: media + tray + power -->
+      <div class="pill" id="pr">
+        <div class="face" data-f="rest">
+          <div class="row">
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 6a9.5 9.5 0 0113 0M4 8.8a6 6 0 018 0M6.5 11.4a2.4 2.4 0 013 0" stroke="#e9eef2" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10L5 10H2z" fill="#e9eef2"/><path d="M11 5.5a3.5 3.5 0 010 5" stroke="#e9eef2" fill="none" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2a4 4 0 00-4 4v3l-1.5 2h11L12 9V6a4 4 0 00-4-4zM6.5 13a1.5 1.5 0 003 0" fill="#e9eef2"/></svg>
+            <span class="sep"></span>
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5v6M4.5 3.8a5.5 5.5 0 107 0" stroke="#e9eef2" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <div class="face" data-f="music">
+          <div class="row" style="gap:10px">
+            <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#1db954,#0b4f2a)"></div>
+            <span>Nils Frahm – Says</span>
+            <svg width="26" height="14" viewBox="0 0 26 14" aria-hidden="true"><g fill="#1db954"><rect x="0" y="5" width="3" height="4" rx="1"/><rect x="5" y="2" width="3" height="10" rx="1"/><rect x="10" y="4" width="3" height="6" rx="1"/><rect x="15" y="1" width="3" height="12" rx="1"/><rect x="20" y="5" width="3" height="4" rx="1"/></g></svg>
+            <span class="sep"></span>
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 6a9.5 9.5 0 0113 0M4 8.8a6 6 0 018 0M6.5 11.4a2.4 2.4 0 013 0" stroke="#e9eef2" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5v6M4.5 3.8a5.5 5.5 0 107 0" stroke="#e9eef2" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <div class="face" data-f="control">
+          <div class="pad" style="display:grid;gap:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="tile on"><b>WLAN</b><span>Heimnetz</span></div>
+              <div class="tile on"><b>Bluetooth</b><span>Kopfhörer</span></div>
+              <div class="tile"><b>Nicht stören</b><span>aus</span></div>
+              <div class="tile"><b>Nachtlicht</b><span>ab 21:00</span></div>
+            </div>
+            <div style="display:grid;gap:8px">
+              <div class="dim" style="font-size:12px">Lautstärke</div><div class="slider"><i style="width:64%"></i></div>
+              <div class="dim" style="font-size:12px">Helligkeit</div><div class="slider"><i style="width:80%"></i></div>
+            </div>
+            <div class="tile" style="grid-template-columns:44px 1fr auto;align-items:center;gap:12px">
+              <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#1db954,#0b4f2a)"></div>
+              <div><b>Says</b><div class="dim">Nils Frahm · Spotify</div></div>
+              <span style="font-size:16px">⏸</span>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn">Sperren</button><button class="btn">Abmelden</button><button class="btn pri">Ausschalten …</button></div>
+          </div>
+        </div>
+        <div class="face" data-f="edit">
+          <div class="row"><span class="mod"><span class="x">–</span>Musik</span><span class="mod"><span class="x">–</span>Tray</span><span class="mod"><span class="x">–</span>Power</span><button class="plus" aria-label="Modul hinzufügen">+</button></div>
+        </div>
+      </div>
+
+      <!-- module popover in edit mode -->
+      <div class="popover" aria-hidden="true">
+        <div style="display:flex;justify-content:space-between;align-items:center"><h3>Modul hinzufügen</h3><span class="dim" style="font-size:12px">rechte Pille</span></div>
+        <div class="pop-grid">
+          <div class="on"><span class="app" style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#1db954,#0b4f2a)"></span>Musik</div>
+          <div><span class="app" style="width:22px;height:22px;border-radius:6px;background:#e0bd6e"></span>Wetter</div>
+          <div><span class="app" style="width:22px;height:22px;border-radius:6px;background:#8fb0c2"></span>Zwischenablage</div>
+          <div><span class="app" style="width:22px;height:22px;border-radius:6px;background:#ff8a4c"></span>Timer</div>
+          <div><span class="app" style="width:22px;height:22px;border-radius:6px;background:#b49cf0"></span>Bildschirmfoto</div>
+          <div><span class="app" style="width:22px;height:22px;border-radius:6px;background:#7fd3f0"></span>Tastatur</div>
+        </div>
+        <div class="dim" style="font-size:12px">… oder <b style="color:#e9eef2">jedes Plasma-Widget</b> aus der Liste</div>
+      </div>
+
+      <div class="ripple"></div>
+      <div class="orb" aria-hidden="true"></div>
+    </div>
+  </div>
+  <p class="caption" id="caption"></p>
+</section>
+
+<!-- ============================================================ notifications -->
+<section aria-labelledby="s-notif">
+  <div class="sec-head">
+    <p class="eyebrow">Benachrichtigungen</p>
+    <h2 id="s-notif">Eine Nachricht kommt aus der Uhr</h2>
+    <p>Die mittlere Pille wird zur Insel, zeigt die Nachricht und wird nach ein paar Sekunden wieder zur Uhr. Ein kleiner Punkt bleibt, bis du hingesehen hast. Gleichzeitig läuft die Lichtwelle in der App-Farbe über den Orb, wie heute schon.</p>
+  </div>
+  <div class="ngrid">
+    <div class="ncard">
+      <div class="nisland"><div class="nrow"><div class="app" style="background:#ff8a4c">Z</div><div><div class="nt">Zen · Download fertig</div><div class="nb">kubuntu-26.04.iso</div></div><span class="nmeta" style="margin-left:auto">jetzt</span></div></div>
+      <h3>Kompakt</h3><p>Standard. Eine Zeile, App-Symbol und Farbe. Verschwindet nach 5 Sekunden; Maus darüber hält sie fest.</p>
+    </div>
+    <div class="ncard">
+      <div class="nisland"><div class="nrow"><div class="app" style="background:#5865f2;color:#fff">D</div><div><div class="nt">Discord · Mara</div><div class="nb">Bist du heute Abend noch online?</div></div><span class="nmeta" style="margin-left:auto">jetzt</span></div><div class="reply"><span>Antworten …</span><button class="btn pri">Öffnen</button></div></div>
+      <h3>Ausgeklappt</h3><p>Bei Nachrichten mit Aktionen oder Antwortfeld. Ein Klick auf die kompakte Insel klappt sie so auf.</p>
+    </div>
+    <div class="ncard">
+      <div class="stack"><div class="nisland"><div class="nrow"><div class="app" style="background:#5865f2;color:#fff">D</div><div><div class="nt">Discord · 3 neue</div><div class="nb">Mara, Jonas und 1 weitere</div></div><span class="nmeta" style="margin-left:auto">2 Min</span></div></div></div>
+      <h3>Gruppe</h3><p>Mehrere Nachrichten derselben App stapeln sich zu einer Insel statt den Bildschirm zu füllen.</p>
+    </div>
+    <div class="ncard">
+      <div class="nisland critical"><div class="nrow"><div class="app" style="background:#ff8a7a">!</div><div><div class="nt">Akku Maus · 5 %</div><div class="nb">Bitte bald aufladen</div></div></div></div>
+      <h3>Wichtig</h3><p>Kritische Hinweise bleiben stehen, bis du sie wegklickst, und kommen auch bei „Nicht stören“ durch.</p>
+    </div>
+  </div>
+
+  <div class="ngrid" style="margin-top:32px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+    <div class="center-panel">
+      <header><h3>Mitteilungen</h3><button class="btn">Alle löschen</button></header>
+      <div class="group-h">Discord</div>
+      <div class="nrow"><div class="app" style="background:#5865f2;color:#fff;width:28px;height:28px">D</div><div><div class="nt" style="font-size:13px">Mara</div><div class="nb">Bist du heute Abend noch online?</div></div><span class="nmeta" style="margin-left:auto">19:41</span></div>
+      <div class="group-h">Zen</div>
+      <div class="nrow"><div class="app" style="background:#ff8a4c;width:28px;height:28px">Z</div><div><div class="nt" style="font-size:13px">Download fertig</div><div class="nb">kubuntu-26.04.iso</div></div><span class="nmeta" style="margin-left:auto">19:12</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:12px"><span>Nicht stören</span><span class="sw off" aria-hidden="true"></span></div>
+    </div>
+    <div class="ncard" style="align-content:center">
+      <h3>Mitteilungszentrale</h3>
+      <p>Ein Klick auf die Uhr öffnet Kalender und Wetter, ein Klick auf den Punkt daneben die Mitteilungen: nach App gruppiert, mit „Nicht stören“ direkt darunter. Am Orb bleibt die Zahl der ungelesenen Nachrichten wie gehabt.</p>
+    </div>
+  </div>
+
+  <div class="rules">
+    <div class="rule"><h3>Im Vollbild</h3><p>Spiele und Videos bleiben ungestört: keine Insel, keine Welle. Die Nachrichten warten in der Mitteilungszentrale.</p></div>
+    <div class="rule"><h3>Nicht stören</h3><p>Per Klick, nach Zeitplan oder automatisch beim Bildschirm-Teilen. Nur „Wichtig“ kommt durch.</p></div>
+    <div class="rule"><h3>Mehrere Monitore</h3><p>Die Insel erscheint dort, wo die Maus gerade ist. Die Leiste selbst kann auf einem oder allen Monitoren liegen.</p></div>
+    <div class="rule"><h3>Pro App</h3><p>Jede App lässt sich einzeln stummschalten oder auf „nur Zahl am Orb“ stellen.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ modules -->
+<section aria-labelledby="s-mod">
+  <div class="sec-head">
+    <p class="eyebrow">Module</p>
+    <h2 id="s-mod">Das Plus an jeder Pille</h2>
+    <p>Im Bearbeiten-Modus bekommt jede Pille ein <b style="color:#e9eef2">+</b>. Dort wählst du aus unseren eigenen Modulen oder aus jedem normalen Plasma-Widget. Module lassen sich zwischen den Pillen ziehen und mit – wieder entfernen. Klick die Kacheln an, um sie ein- oder auszuschalten.</p>
+  </div>
+  <p class="lib-tag lib-sub">Pillbox-Module</p>
+  <div class="lib" id="lib">
+    <button class="lib-item" aria-pressed="true"><span class="app" style="background:linear-gradient(135deg,#1db954,#0b4f2a)"></span><span><b>Musik</b><small>Spotify, Browser, jeder Player</small></span><span class="state">✓</span></button>
+    <button class="lib-item" aria-pressed="true"><span class="app" style="background:#8fb0c2"></span><span><b>Auslastung</b><small>CPU, GPU, RAM, Temperatur</small></span><span class="state">✓</span></button>
+    <button class="lib-item" aria-pressed="false"><span class="app" style="background:#e0bd6e"></span><span><b>Wetter</b><small>neben der Uhr</small></span><span class="state">+</span></button>
+    <button class="lib-item" aria-pressed="false"><span class="app" style="background:#7fd3f0"></span><span><b>Netz</b><small>Up- und Download live</small></span><span class="state">+</span></button>
+    <button class="lib-item" aria-pressed="false"><span class="app" style="background:#ff8a4c"></span><span><b>Timer</b><small>Pomodoro, Eieruhr</small></span><span class="state">+</span></button>
+    <button class="lib-item" aria-pressed="false"><span class="app" style="background:#b49cf0"></span><span><b>Bildschirmfoto</b><small>Bereich, Fenster, Video</small></span><span class="state">+</span></button>
+    <button class="lib-item" aria-pressed="false"><span class="app" style="background:#9aa6b0"></span><span><b>Zwischenablage</b><small>die letzten 20 Einträge</small></span><span class="state">+</span></button>
+    <button class="lib-item" aria-pressed="false"><span class="app" style="background:#e88fa6"></span><span><b>Farbwähler</b><small>Pipette mit Verlauf</small></span><span class="state">+</span></button>
+  </div>
+  <p class="lib-tag lib-sub">Aus Plasma</p>
+  <div class="lib" id="lib2">
+    <button class="lib-item" aria-pressed="true"><span class="app" style="background:#2b3640;color:#e9eef2">≡</span><span><b>Systemabschnitt</b><small>WLAN, Ton, Bluetooth</small></span><span class="state">✓</span></button>
+    <button class="lib-item" aria-pressed="false"><span class="app" style="background:#2b3640;color:#e9eef2">⌨</span><span><b>Tastaturbelegung</b><small>DE / US</small></span><span class="state">+</span></button>
+    <button class="lib-item" aria-pressed="false"><span class="app" style="background:#2b3640;color:#e9eef2">▤</span><span><b>Arbeitsflächen</b><small>virtuelle Desktops</small></span><span class="state">+</span></button>
+    <button class="lib-item" aria-pressed="false"><span class="app" style="background:#2b3640;color:#e9eef2">…</span><span><b>Jedes Widget</b><small>öffnet Plasmas Auswahl</small></span><span class="state">+</span></button>
+  </div>
+</section>
+
+<!-- ============================================================ settings -->
+<section aria-labelledby="s-set">
+  <div class="sec-head">
+    <p class="eyebrow">Einstellungszentrale</p>
+    <h2 id="s-set">Die Seite „Obere Leiste“</h2>
+    <p>Dasselbe Glasfenster wie heute. Oben der Aufbau, darunter der Inhalt jeder Pille zum Ziehen, dann Verhalten. Die Benachrichtigungen bekommen eine eigene Seite „Hinweise“.</p>
+  </div>
+  <div class="win">
+    <nav class="side" aria-label="Seiten">
+      <div class="brand"><i></i>Pillbox</div>
+      <span>Form</span><span>Farbe</span><span>Hintergrund</span><span class="on">Obere Leiste</span><span>Verhalten</span><span>Hinweise</span><span>Über</span>
+    </nav>
+    <div class="main">
+      <div>
+        <div class="gtitle">Aufbau</div>
+        <div class="layouts">
+          <div class="lay on"><div class="mini"><i style="left:6px;width:28%"></i><i style="left:40%;width:20%"></i><i style="right:6px;width:24%"></i></div>Drei Inseln</div>
+          <div class="lay"><div class="mini"><i style="left:6px;right:6px"></i></div>Eine Leiste</div>
+          <div class="lay"><div class="mini"><i style="left:38%;width:24%"></i></div>Nur die Mitte</div>
+        </div>
+      </div>
+      <div>
+        <div class="gtitle">Inhalt</div>
+        <div class="cols">
+          <div class="col"><span class="h">Links</span><span class="m">Start</span><span class="m">Auslastung</span><span class="add">＋ Modul</span></div>
+          <div class="col"><span class="h">Mitte</span><span class="m">Uhr</span><span class="m">Wetter</span><span class="add">＋ Modul</span></div>
+          <div class="col"><span class="h">Rechts</span><span class="m">Musik</span><span class="m">Systemabschnitt</span><span class="m">Ausschalten</span><span class="add">＋ Modul</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="gtitle">Verhalten</div>
+        <div class="srow"><div><b>Inseln bei Ereignissen</b><small>Nachricht, Musik, Lautstärke und Fortschritt lassen die Pillen wachsen.</small></div><span class="sw" aria-hidden="true"></span></div>
+        <div class="srow"><div><b>Monitore</b><small>Wo die Leiste liegt.</small></div><span class="seg"><span class="on">Hauptmonitor</span><span>Alle</span></span></div>
+        <div class="srow"><div><b>Im Vollbild ausblenden</b><small>Spiele und Videos bekommen den ganzen Bildschirm.</small></div><span class="sw" aria-hidden="true"></span></div>
+        <div class="srow"><div><b>Glas</b><small>Wie stark der Hintergrund durchscheint.</small></div><span class="seg"><span>Klar</span><span class="on">Matt</span><span>Dunkel</span></span></div>
+        <div class="srow"><div><b>Plasma-Einstellungen</b><small>Höhe, Abstand, Panel-Optionen wie gewohnt.</small></div><button class="btn">Panel bearbeiten</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ plan -->
+<section aria-labelledby="s-plan">
+  <div class="sec-head">
+    <p class="eyebrow">Plan</p>
+    <h2 id="s-plan">So bauen wir es</h2>
+    <p>Alles bleibt ein echtes Plasma-Panel. Wir tauschen nur, was in den Pillen steckt, und nutzen ausschließlich Plasmas offizielle Schnittstellen.</p>
+  </div>
+  <div class="plan">
+    <div class="step"><span class="n">Schritt 1</span><h3>Insel-Widget</h3><p>Ein eigenes Plasmoid für die Mitte: Uhr, Kalender, Wetter, Lautstärke- und Fortschritts-Insel. Plasmas Lautstärke-Anzeige bleibt als Rückfallebene.</p></div>
+    <div class="step"><span class="n">Schritt 2</span><h3>Benachrichtigungen</h3><p>Das Insel-Widget übernimmt Plasmas Benachrichtigungsdienst, sobald Plasmas eigenes Popup-Widget nicht im Panel steckt. Deinstallieren bringt das alte Verhalten zurück.</p></div>
+    <div class="step"><span class="n">Schritt 3</span><h3>Rechte Pille</h3><p>Musik-Modul mit Mini-Anzeige und Kontrollzentrum: WLAN, Bluetooth, Nicht stören, Nachtlicht, Regler, Ausschalten.</p></div>
+    <div class="step"><span class="n">Schritt 4</span><h3>Module und +</h3><p>Bearbeiten-Modus, Modul-Bibliothek, Ziehen zwischen Pillen und die neue Seite in der Einstellungszentrale.</p></div>
+  </div>
+  <div class="qs">
+    <p class="eyebrow" style="margin:0">Offene Fragen an dich</p>
+    <p class="q">Sollen Nachrichten aus der <b>Uhr in der Mitte</b> wachsen, wie skizziert, oder lieber oben rechts als Stapel erscheinen?</p>
+    <p class="q">Soll die Leiste auf <b>allen Monitoren</b> liegen oder nur auf dem Hauptmonitor, wie heute?</p>
+    <p class="q">Welche Module willst du zuerst? Musik und Auslastung sind gesetzt, Wetter und Timer wären die nächsten.</p>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var stage = document.getElementById('stage'), box = document.getElementById('stageBox');
+  function fit() { var k = box.clientWidth / 1100; stage.style.transform = 'scale(' + k + ')'; box.style.height = (560 * k) + 'px'; }
+  fit(); window.addEventListener('resize', fit);
+
+  // calendar grid (Nov 2026 starts on a Sunday)
+  var cal = document.getElementById('cal'), h = ['Mo','Di','Mi','Do','Fr','Sa','So'], html = '';
+  h.forEach(function (d) { html += '<span class="h">' + d + '</span>'; });
+  for (var i = 0; i < 6; i++) html += '<span></span>';
+  for (var d = 1; d <= 30; d++) html += '<span' + (d === 20 ? ' class="t"' : '') + '>' + d + '</span>';
+  cal.innerHTML = html;
+
+  // size of each pill per state: [width, height, radius]
+  var R = [0, 32, 16];
+  var sizes = {
+    rest:     { pl: [250, 32, 16], pc: [168, 32, 16], pr: [150, 32, 16] },
+    notif:    { pl: [250, 32, 16], pc: [420, 112, 26], pr: [150, 32, 16] },
+    music:    { pl: [250, 32, 16], pc: [168, 32, 16], pr: [300, 32, 16] },
+    volume:   { pl: [250, 32, 16], pc: [300, 46, 23], pr: [150, 32, 16] },
+    progress: { pl: [250, 32, 16], pc: [300, 46, 23], pr: [150, 32, 16] },
+    control:  { pl: [250, 32, 16], pc: [168, 32, 16], pr: [340, 360, 24] },
+    calendar: { pl: [250, 32, 16], pc: [500, 260, 24], pr: [150, 32, 16] },
+    system:   { pl: [380, 250, 24], pc: [168, 32, 16], pr: [150, 32, 16] },
+    edit:     { pl: [270, 32, 16], pc: [230, 32, 16], pr: [270, 32, 16] }
+  };
+  // which face each pill shows per state
+  var faces = {
+    rest: {}, notif: { pc: 'notif' }, music: { pr: 'music' }, volume: { pc: 'volume' }, progress: { pc: 'progress' },
+    control: { pr: 'control' }, calendar: { pc: 'calendar' }, system: { pl: 'system' }, edit: { pl: 'edit', pc: 'edit', pr: 'edit' }
+  };
+  var captions = {
+    rest: '<b>In Ruhe.</b> Drei schmale Glas-Pillen: links Start und Auslastung, in der Mitte die Uhr, rechts Netz, Ton, Mitteilungen und Ausschalten. Sie nehmen kaum Platz weg.',
+    notif: '<b>Neue Nachricht.</b> Die Uhr wächst zur Insel mit App-Farbe, Antwortfeld und Öffnen. Gleichzeitig läuft die Lichtwelle über den Orb. Nach 5 Sekunden wird sie wieder zur Uhr, ein Punkt bleibt bis du hingesehen hast.',
+    music: '<b>Musik läuft.</b> Die rechte Pille wird etwas breiter: Cover, Titel und ein kleiner Equalizer. Ein Klick öffnet den vollen Player im Kontrollzentrum.',
+    volume: '<b>Lautstärke oder Helligkeit.</b> Statt Plasmas Anzeige in der Bildschirmmitte wird die Uhr kurz zum Regler und gleich wieder zur Uhr.',
+    progress: '<b>Download oder Kopieren.</b> Die Uhr zeigt einen Fortschrittsring mit Restzeit. Wenn er fertig ist, folgt eine kompakte Nachricht.',
+    control: '<b>Kontrollzentrum.</b> Ein Klick auf die rechte Pille: WLAN, Bluetooth, Nicht stören, Nachtlicht, Lautstärke, Helligkeit, der Player und Ausschalten an einem Ort.',
+    calendar: '<b>Kalender.</b> Ein Klick auf die Uhr: Monat, Wetter und die Termine von heute.',
+    system: '<b>System.</b> Ein Klick auf die Auslastung: Verläufe für CPU und GPU, Speicher, Netz und die größten Verbraucher.',
+    edit: '<b>Bearbeiten.</b> Jede Pille zeigt ihre Module mit – zum Entfernen und ein + zum Hinzufügen. Hier ist das + der rechten Pille offen.'
+  };
+  var unreadSeen = false;
+  function show(s) {
+    document.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.s === s ? 'true' : 'false'); });
+    ['pl', 'pc', 'pr'].forEach(function (id) {
+      var el = document.getElementById(id), z = sizes[s][id], f = faces[s][id] || 'rest';
+      el.style.width = z[0] + 'px'; el.style.height = z[1] + 'px'; el.style.borderRadius = z[2] + 'px';
+      el.querySelectorAll('.face').forEach(function (x) { x.classList.toggle('on', x.dataset.f === f); });
+    });
+    stage.classList.toggle('edit', s === 'edit');
+    stage.classList.remove('notif-on'); void stage.offsetWidth;
+    if (s === 'notif') { stage.classList.add('notif-on'); unreadSeen = true; }
+    document.getElementById('unreadDot').style.opacity = (unreadSeen && s !== 'notif') ? 1 : 0;
+    document.querySelector('.popover').setAttribute('aria-hidden', s === 'edit' ? 'false' : 'true');
+    document.getElementById('caption').innerHTML = captions[s];
+  }
+  document.querySelectorAll('.chip').forEach(function (c) { c.addEventListener('click', function () { show(c.dataset.s); }); });
+  show('rest');
+
+  document.querySelectorAll('.lib-item').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var on = b.getAttribute('aria-pressed') !== 'true';
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.querySelector('.state').textContent = on ? '✓' : '+';
+    });
+  });
+})();
+</script>

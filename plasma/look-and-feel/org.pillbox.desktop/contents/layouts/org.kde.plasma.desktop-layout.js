@@ -1,6 +1,6 @@
 /*
  * Pillbox desktop layout
- *   top:     three floating "pills" – menu + stats (left) · clock (center) · media/tray/power (right)
+ *   top:     three floating "pills" – menu + stats (left) · island clock (center) · media/tray/power (right)
  *   desktop: the Pillbox Orb replaces the dock (floating, draggable, on the primary screen)
  * SPDX-License-Identifier: MIT
  */
@@ -37,16 +37,8 @@ if (primary && knownWidgetTypes.indexOf("org.pillbox.orb") >= 0) {
 
 pill("left",   ["org.kde.plasma.kickoff", "org.pillbox.stats"]);
 
-var center = pill("center", ["org.kde.plasma.digitalclock"]);
-var clock = center.widgets("org.kde.plasma.digitalclock")[0];
-if (clock) {
-    clock.currentConfigGroup = ["Appearance"];
-    clock.writeConfig("showDate", "true");
-    clock.writeConfig("dateFormat", "custom");
-    clock.writeConfig("customDateFormat", "ddd dd MMM");
-    clock.writeConfig("dateDisplayFormat", "1");
-    clock.writeConfig("use24hFormat", "2");
-}
+// the centre pill: a clock that grows into an island for notifications
+pill("center", ["org.pillbox.island"]);
 
 pill("right",  ["org.kde.plasma.mediacontroller",
                 "org.kde.plasma.systemtray",

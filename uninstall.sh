@@ -23,6 +23,25 @@ say() { printf '\033[38;2;127;151;166m::\033[0m %s\n' "$*"; }
 ORIG="$STATE/original-settings.tar.gz"
 [[ -e "$ORIG" ]] || ORIG="$(ls -1 "$STATE"/backups/settings-*.tar.gz 2>/dev/null | head -1 || true)"
 
+# The island switched Plasma's own notification popups off for the apps it showed.
+# Give them back first, while the list is still in the panel config.
+python3 -I - "$CONF" <<'PY' || true
+import re, subprocess, sys, os
+conf = sys.argv[1]
+src = os.path.join(conf, "plasma-org.kde.plasma.desktop-appletsrc")
+apps, services = set(), set()
+if os.path.exists(src):
+    for line in open(src, encoding="utf-8", errors="replace"):
+        m = re.match(r"(suppressedApps|suppressedServices)=(.*)", line.strip())
+        if m:
+            (apps if m.group(1) == "suppressedApps" else services).update(x for x in m.group(2).split(",") if x)
+for group, names in (("Applications", apps), ("Services", services)):
+    for n in names:
+        subprocess.run(["kwriteconfig6", "--file", "plasmanotifyrc", "--group", group, "--group", n, "--key", "ShowPopups", "--delete"], check=False)
+if apps or services:
+    print(":: Gave Plasma's notification popups back to %d apps" % (len(apps) + len(services)))
+PY
+
 if (( RESTORE )) && [[ -n "$ORIG" && -e "$ORIG" ]]; then
     say "Restoring your desktop from $(basename "$ORIG") …"
     # plasmashell writes its config on exit, so stop it before restoring
@@ -50,6 +69,7 @@ fi
 "$(dirname "$0")/kwin/browser-rule.sh" remove && say "Removed the browser window rule" || true
 kpackagetool6 -t Plasma/LookAndFeel -r org.pillbox.desktop >/dev/null 2>&1 && say "Removed global theme" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.orb     >/dev/null 2>&1 && say "Removed the Orb" || true
+kpackagetool6 -t Plasma/Applet      -r org.pillbox.island  >/dev/null 2>&1 && say "Removed the island clock" || true
 kpackagetool6 -t Plasma/Wallpaper   -r org.pillbox.atmosphere >/dev/null 2>&1 && say "Removed the living wallpaper" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.stats   >/dev/null 2>&1 && say "Removed widget: Pillbox Stats" || true
 rm -rf "$DATA/plasma/desktoptheme/Pillbox"

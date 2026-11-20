@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0">
+  <kcfgfile name=""/>
+  <group name="General">
+    <!-- show notifications as an island growing from the clock -->
+    <entry name="islandNotifications" type="Bool"><default>true</default></entry>
+    <!-- apps / notifyrc services whose Plasma popups we switched off (restored on uninstall) -->
+    <entry name="suppressedApps" type="StringList"><default></default></entry>
+    <entry name="suppressedServices" type="StringList"><default></default></entry>
+    <entry name="showDate" type="Bool"><default>true</default></entry>
+  </group>
+</kcfg>
