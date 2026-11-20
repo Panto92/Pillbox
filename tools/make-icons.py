@@ -111,6 +111,8 @@ I["redshift-status-day"] = (sun, ['<circle cx="12" cy="12" r="4"/>'])
 I["redshift-status-on"] = ([moon], [moon])
 I["redshift-status-off"] = ([moon.replace('/>', DIM + '/>'), '<path d="M4 4l16 16"/>'], [])
 I["view-calendar"] = (['<rect x="3.5" y="5" width="17" height="15.5" rx="3"/>', '<path d="M3.5 10h17M8 3v4M16 3v4"/>', '<path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01" stroke-width="2"/>'], ['<path d="M6.5 5h11a3 3 0 0 1 3 3v2h-17V8a3 3 0 0 1 3-3Z"/>'])
+grid = ['<rect x="4" y="4" width="7" height="7" rx="2"/>', '<rect x="13" y="4" width="7" height="7" rx="2"/>', '<rect x="4" y="13" width="7" height="7" rx="2"/>', '<rect x="13" y="13" width="7" height="7" rx="3.5"/>']
+I["view-app-grid"] = (grid, ['<rect x="4" y="4" width="7" height="7" rx="2"/>'])
 I["application-menu"] = (['<path d="M5 7h14M5 12h14M5 17h14"/>'], [])
 
 HEAD = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
@@ -119,7 +121,7 @@ HEAD = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
 def svg(line, duo, with_duo):
     s = HEAD
     if with_duo and duo:
-        s += '<g class="ColorScheme-Highlight" fill="currentColor" stroke="none" opacity=".42">' + "".join(duo) + "</g>"
+        s += '<g class="ColorScheme-Highlight" fill="currentColor" stroke="none" opacity=".6">' + "".join(duo) + "</g>"
     s += ('<g class="ColorScheme-Text" fill="none" stroke="currentColor" stroke-width="1.7" '
           'stroke-linecap="round" stroke-linejoin="round">' + "".join(line) + "</g></svg>\n")
     return s
