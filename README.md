@@ -5,11 +5,11 @@
 <p align="center">
   <img src="docs/images/logo.svg" alt="" width="72"><br>
   <b>A calm, living desktop for KDE Plasma 6.</b><br>
-  A glowing orb instead of a dock · wallpapers that breathe with your day · notifications that grow out of the clock
+  A glowing orb instead of a dock · wallpapers that breathe with your day · a clock that shows what's running · frosted search
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.8-ff8a4c?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-0.9-ff8a4c?style=flat-square">
   <img alt="KDE Plasma 6" src="https://img.shields.io/badge/KDE%20Plasma-6-8fb0c2?style=flat-square">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-7fdcb0?style=flat-square">
   <img alt="Languages" src="https://img.shields.io/badge/languages-EN%20%C2%B7%20DE-b49cf0?style=flat-square">
@@ -54,7 +54,13 @@ Your settings are backed up to `~/.local/share/pillbox/` first. Requirements: KD
 ./uninstall.sh --keep-layout  # keep your current panels, only remove Pillbox
 ```
 
-Afterwards: right-click the orb → **Customize…** opens the settings centre.
+Afterwards: open **Pillbox OS** from your applications (or right-click the orb → **Customize…**) for the settings centre.
+Pillbox can be switched off and on again at any time – right-click the Pillbox OS icon, or:
+
+```bash
+pillbox off      # back to your usual Plasma desktop, Pillbox is kept
+pillbox on       # and back to Pillbox
+```
 
 ---
 
@@ -111,26 +117,54 @@ time slider – follow the clock or keep it at, say, 14:30.
 Fogline/Horizon ≈ +2 %, Flow ≈ +6 %, and **0** while a maximised or fullscreen window covers the screen.
 All motion shares one slow clock, because for a wallpaper the cost is how often the screen is redrawn.
 
+## The top bar
+
+Three floating pills – or one full bar, or a single capsule. They stay normal Plasma panels:
+right-click → *Enter Edit Mode* to add, move or remove your own widgets.
+
+**Left – load at a glance.** The Pillbox logo opens your applications, a magnifier opens the
+search, and CPU, GPU, memory and temperature say what they are: `RAM 11,6 / 32 GB`, the GPU with
+its own temperature and video memory. Text with bars, rings with numbers or calm chips. A click
+shows the last minute as curves, the processor and graphics card in detail, your drives with free
+space, and a tidy-up for the trash and the thumbnail cache.
+
+**Right – one status pill** for music, sound, Bluetooth, network and power, each with its own
+panel: the cover with a waveform, a volume ring you can drag and every output and app, paired
+devices with their battery, your computer as a little network map with live speeds, power profiles,
+*Stay awake* and the session (lock, sleep, restart – the risky ones ask twice). The system tray keeps
+your apps' own icons; everything Pillbox shows already is taken out of it (`pillbox untidy` gives it back).
+
+**Size and icons.** Normal, large or extra large; Pillbox's own *Lucide* icon theme (clean round
+lines) for the bar, the tray and every panel – or the older line and duotone sets.
+
+## Search
+
+**Meta+Space** frosts the whole screen and puts one large glass search field in the middle –
+apps, files, settings, windows, a calculator: everything KRunner finds. Typing on the desktop opens
+KRunner itself, which now floats in the middle as well.
+
 ## The island clock
 
 <p align="center"><img src="docs/images/island.png" alt="A notification growing out of the clock" width="620"></p>
 
 The clock in the middle **grows into an island** when a notification arrives – with
-reply field and actions – and shrinks back. A dot stays until you've looked. A click
-on the clock opens the calendar, your notifications and *Do Not Disturb*.
+reply field and actions – and shrinks back. A dot stays until you've looked.
 Plasma stays the notification server, so history, sounds and DND keep working.
 
-## Load, icons and the top bar
+**Live activities** sit beside the time while something runs: a ring for downloads and copies,
+the cover and dancing bars for music, a timer counting down, a microphone that is in use,
+a laptop that is charging. A second one waits as a small bubble; hover for a card with the details
+and controls.
 
-<p align="center"><img src="docs/images/load-styles.png" alt="Load shown as rings, curves, bars and numbers" width="560"></p>
+A click opens the **dashboard**: a large clock, the month, the weather for your town (Open-Meteo,
+only after you enter a place), a quick timer and your notifications.
 
-CPU, GPU, memory and temperature as **rings, curves, bars or numbers**; a click
-shows the last minute as large curves.
+## Colour
 
-<p align="center"><img src="docs/images/icons-tray.png" alt="System tray with Breeze, Pillbox line and Pillbox duotone icons" width="560"></p>
-
-Pillbox brings its **own system icons** in two styles – *line* and *duotone*, which
-puts your accent colour underneath. Shown above: Breeze, Pillbox line, Pillbox duotone.
+Pick any colour for the orb – presets or your own – and choose how far it reaches: **only the orb**,
+the **accent** of every KDE app, or the **whole system**, where bars, popups and windows take on a
+light tint of it as well. Very dark colours get a readable accent automatically. Popups are frosted
+glass: KWin blurs what lies behind them.
 
 ## Login screen
 
@@ -142,9 +176,9 @@ Systems with another login manager (GDM, LightDM …) are detected and left alon
 
 ## Settings centre
 
-Right-click the orb or a dock → **Customize…**: a glass window with a sidebar –
-Form, Color, Wallpaper, Login screen, Top bar, Behavior, Alerts, About. Every change
-applies **live**.
+Open **Pillbox OS** from your applications, or right-click the orb or a dock → **Customize…**:
+a glass window with a sidebar – Form, Color, Wallpaper (the atmospheres as slanted strips you flip
+through with the wheel), Login screen, Top bar, Behavior, Alerts, About. Every change applies **live**.
 
 ---
 
@@ -158,10 +192,13 @@ becomes an option you can switch on.
 - [x] Island clock with notification islands
 - [x] Login screen
 - [x] Load pill in four styles, own icon themes
-- [ ] Status pill with own panels (network, sound, bluetooth, session)
+- [x] Status pill with own panels (music, sound, Bluetooth, network, power, session)
+- [x] Live activities in the island, clock dashboard with weather
+- [x] Frosted search, Lucide icons, colour for the whole system
+- [x] Pillbox OS app: settings, switch off and on
 - [ ] Arrangements: islands, one capsule, a rail at the screen edge, corners, a halo around the orb
 - [ ] Click effects: grow, slide in, bloom
-- [ ] Music module and control centre
+- [ ] Equalizer, focus and gaming modes, colours from the album cover
 
 ## Languages
 

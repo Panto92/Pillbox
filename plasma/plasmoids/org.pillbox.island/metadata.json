@@ -12,7 +12,7 @@
         "Id": "org.pillbox.island",
         "License": "MIT",
         "Name": "Pillbox Island",
-        "Version": "0.8.0"
+        "Version": "0.9.0"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }
