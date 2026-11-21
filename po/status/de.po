@@ -1,0 +1,56 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Volume %1 %"
+msgstr "Lautstärke %1 %"
+
+msgid "Music"
+msgstr "Musik"
+
+msgid "Sound"
+msgstr "Ton"
+
+msgid "Network"
+msgstr "Netz"
+
+msgid "Muted"
+msgstr "Stumm"
+
+msgid "Volume"
+msgstr "Lautstärke"
+
+msgid "Output"
+msgstr "Ausgabe"
+
+msgid "Apps"
+msgstr "Apps"
+
+msgid "This computer"
+msgstr "Dieser Rechner"
+
+msgid "Not connected"
+msgstr "Nicht verbunden"
+
+msgid "Internet"
+msgstr "Internet"
+
+msgid "Download"
+msgstr "Download"
+
+msgid "Upload"
+msgstr "Upload"
+
+msgid "Wi-Fi on"
+msgstr "WLAN an"
+
+msgid "Wi-Fi off"
+msgstr "WLAN aus"
+
+msgid "Network settings"
+msgstr "Netzwerk-Einstellungen"

@@ -1,12 +1,433 @@
 /*
- * Pillbox Status – work in progress (roadmap step 3): network, Bluetooth, sound,
- * notifications, tray apps and power in one pill. Not part of the layout yet.
+ * Pillbox Status – music, sound and network in one calm pill, each with its own panel.
+ * Music appears only while a player is open. Built on Plasma's own models (MPRIS,
+ * PulseAudio, NetworkManager, system sensors); nothing here talks to hardware directly.
  * SPDX-License-Identifier: MIT
  */
 import QtQuick
+import QtQuick.Layouts
+import QtQuick.Shapes
+import QtQuick.Effects
+import QtQuick.Controls as QQC2
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.components as PC3
+import org.kde.kirigami as Kirigami
+import org.kde.kcmutils as KCM
+import org.kde.ksysguard.sensors as Sensors
+import org.kde.plasma.private.mpris as Mpris
+import org.kde.plasma.private.volume as Vol
+import org.kde.plasma.networkmanagement as PlasmaNM
 
 PlasmoidItem {
+    id: root
+
+    readonly property color accent: Kirigami.Theme.highlightColor
+    property string page: "sound"                     // music | sound | net
+
+    // ---------------------------------------------------------------- music
+    Mpris.Mpris2Model { id: mpris }
+    Vol.SinkModel { id: sinks }
+    Vol.SinkInputModel { id: sinkInputs }
+    readonly property var player: quitting ? null : mpris.currentPlayer
+    readonly property bool hasPlayer: !!player && (player.track || "") !== ""
+    readonly property bool playing: hasPlayer && player.playbackStatus === Mpris.PlaybackStatus.Playing
+    Timer { interval: 1000; repeat: true; running: root.playing && root.expanded && root.page === "music"; onTriggered: root.player.updatePosition() }
+
+    // ---------------------------------------------------------------- sound
+    // let go of the sound server before the app quits: it is torn down after our items,
+    // and bindings that still follow it would update items that are already gone
+    property bool quitting: false
+    Connections { target: Qt.application; function onAboutToQuit() { root.quitting = true } }
+    readonly property var sink: quitting ? null : Vol.PreferredDevice.sink
+    readonly property real normal: Vol.PulseAudio.NormalVolume
+    readonly property int volume: sink ? Math.round(sink.volume / normal * 100) : 0
+    readonly property bool muted: !sink || sink.muted
+    function setVolume(p) { if (sink) { sink.volume = Math.round(Math.max(0, Math.min(100, p)) / 100 * normal); if (sink.muted && p > 0) sink.muted = false } }
+    function volumeIcon() {
+        if (muted || volume === 0) return "audio-volume-muted"
+        return volume < 34 ? "audio-volume-low" : volume < 67 ? "audio-volume-medium" : "audio-volume-high"
+    }
+
+    // ---------------------------------------------------------------- network
+    PlasmaNM.NetworkStatus { id: netStatus }
+    PlasmaNM.ConnectionIcon { id: netIcon }
+    PlasmaNM.EnabledConnections { id: nmEnabled }
+    PlasmaNM.Handler { id: nmHandler }
+    Sensors.Sensor { id: down; sensorId: "network/all/download"; updateRateLimit: 1000; enabled: root.expanded && root.page === "net" }
+    Sensors.Sensor { id: up;   sensorId: "network/all/upload";   updateRateLimit: 1000; enabled: root.expanded && root.page === "net" }
+    readonly property bool online: netStatus.connectivity === 4 || (netStatus.activeConnections || "").length > 0 && !netIcon.connectionIcon.includes("disconnected")
+    function rate(v) {
+        if (v === undefined || v === null || isNaN(v)) return "–"
+        return v >= 1048576 ? (v / 1048576).toFixed(1) + " MB/s" : (v / 1024).toFixed(0) + " KB/s"
+    }
+
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
+    preferredRepresentation: compactRepresentation
+    toolTipMainText: i18n("Status")
+    toolTipSubText: (hasPlayer ? player.track + " · " : "") + i18n("Volume %1 %", volume)
+
+    // ---------------------------------------------------------------- in the pill
+    compactRepresentation: RowLayout {
+        spacing: Kirigami.Units.largeSpacing
+        Layout.minimumWidth: implicitWidth
+        component PillButton: MouseArea {
+            id: pb
+            property string target
+            property alias icon: ic.source
+            default property alias extra: side.data
+            Layout.fillHeight: true
+            Layout.preferredWidth: lay.implicitWidth
+            hoverEnabled: true
+            acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+            onClicked: ev => {
+                if (ev.button === Qt.MiddleButton) { if (target === "sound" && root.sink) root.sink.muted = !root.sink.muted; else if (target === "music" && root.player) root.player.PlayPause(); return }
+                if (root.expanded && root.page === target) root.expanded = false
+                else { root.page = target; root.expanded = true }
+            }
+            RowLayout {
+                id: lay
+                anchors.centerIn: parent
+                spacing: Kirigami.Units.smallSpacing
+                Kirigami.Icon { id: ic; implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth; opacity: pb.containsMouse || (root.expanded && root.page === pb.target) ? 1 : 0.85 }
+                Row { id: side; spacing: 2 }
+            }
+        }
+        PillButton {
+            visible: root.hasPlayer
+            target: "music"
+            icon: root.player && root.player.iconName ? root.player.iconName : "media-playback-start"
+            // three small bars that dance while music plays
+            Repeater {
+                model: 3
+                Rectangle {
+                    required property int index
+                    width: 2; radius: 1
+                    anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+                    color: root.accent
+                    height: 4
+                    SequentialAnimation on height {
+                        running: root.playing; loops: Animation.Infinite
+                        NumberAnimation { to: 10 - index * 2; duration: 260 + index * 90 }
+                        NumberAnimation { to: 3; duration: 300 + index * 70 }
+                    }
+                }
+            }
+        }
+        PillButton {
+            target: "sound"
+            icon: root.volumeIcon()
+            onWheel: ev => root.setVolume(root.volume + (ev.angleDelta.y > 0 ? 5 : -5))
+        }
+        PillButton { target: "net"; icon: netIcon.connectionIcon || "network-wired" }
+    }
+
+    // ---------------------------------------------------------------- the panels
+    fullRepresentation: Item {
+        Layout.preferredWidth: Kirigami.Units.gridUnit * 21
+        Layout.preferredHeight: pages.implicitHeight + tabs.height + Kirigami.Units.largeSpacing * 3
+        Layout.minimumWidth: Layout.preferredWidth
+        Layout.minimumHeight: Layout.preferredHeight
+        Row {                                                     // small tabs to hop between the panels
+            id: tabs
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: Kirigami.Units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
+            Repeater {
+                model: [{ p: "music", n: i18n("Music"), show: root.hasPlayer }, { p: "sound", n: i18n("Sound"), show: true }, { p: "net", n: i18n("Network"), show: true }]
+                delegate: QQC2.AbstractButton {
+                    id: tab
+                    required property var modelData
+                    visible: modelData.show
+                    readonly property bool on: root.page === modelData.p
+                    width: lbl.implicitWidth + Kirigami.Units.gridUnit * 1.4; height: Kirigami.Units.gridUnit * 1.5
+                    onClicked: root.page = modelData.p
+                    background: Rectangle { radius: height / 2; color: tab.on ? root.accent : tab.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent" }
+                    contentItem: PC3.Label { id: lbl; text: tab.modelData.n; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                        color: tab.on ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor; font.weight: tab.on ? Font.DemiBold : Font.Normal }
+                }
+            }
+        }
+        Loader {
+            id: pages
+            anchors { top: tabs.bottom; topMargin: Kirigami.Units.largeSpacing; left: parent.left; right: parent.right; margins: Kirigami.Units.smallSpacing }
+            sourceComponent: root.page === "music" && root.hasPlayer ? musicPage : root.page === "net" ? netPage : soundPage
+        }
+    }
+
+    component Caption: PC3.Label { font.pixelSize: Kirigami.Theme.smallFont.pixelSize; font.letterSpacing: 1.1; opacity: 0.55; font.capitalization: Font.AllUppercase }
+    component Round: QQC2.AbstractButton {
+        id: rb
+        property string iconName
+        property bool strong: false
+        property real size: Kirigami.Units.gridUnit * 2
+        implicitWidth: size; implicitHeight: size
+        background: Rectangle { radius: width / 2; color: rb.strong ? root.accent : rb.hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
+            scale: rb.pressed ? 0.92 : 1; Behavior on scale { NumberAnimation { duration: 90 } } }
+        contentItem: Item { Kirigami.Icon { anchors.centerIn: parent; source: rb.iconName; width: rb.size * 0.5; height: width
+            color: rb.strong ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor; isMask: rb.strong } }
+    }
+    function clock(us) { const s = Math.max(0, Math.floor((us || 0) / 1e6)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") }
+
+    // ---------------------------------------------------------------- music
+    Component {
+        id: musicPage
+        ColumnLayout {
+            spacing: Kirigami.Units.largeSpacing
+            Item {                                               // the cover, with its own blurred glow behind
+                Layout.fillWidth: true
+                Layout.preferredHeight: width * 0.82
+                Image { id: art; anchors.fill: parent; source: root.player ? root.player.artUrl : ""; fillMode: Image.PreserveAspectCrop; visible: false; asynchronous: true; sourceSize.width: 512 }
+                MultiEffect { anchors.fill: parent; anchors.margins: -Kirigami.Units.gridUnit; source: art; blurEnabled: true; blur: 1; blurMax: 64; opacity: 0.55; visible: art.status === Image.Ready }
+                Rectangle { id: coverMask; anchors.fill: parent; radius: Kirigami.Units.gridUnit; visible: false; layer.enabled: true }
+                MultiEffect { anchors.fill: parent; source: art; maskEnabled: true; maskSource: coverMask; visible: art.status === Image.Ready }
+                Rectangle {
+                    anchors.fill: parent; radius: Kirigami.Units.gridUnit; visible: art.status !== Image.Ready
+                    gradient: Gradient { GradientStop { position: 0; color: Qt.lighter(root.accent, 1.2) } GradientStop { position: 1; color: Qt.darker(root.accent, 2.6) } }
+                    Kirigami.Icon { anchors.centerIn: parent; source: "media-optical-audio"; width: parent.width * 0.3; height: width; opacity: 0.6 }
+                }
+            }
+            ColumnLayout {
+                spacing: 0
+                PC3.Label { Layout.fillWidth: true; text: root.player ? root.player.track : ""; font.pixelSize: Kirigami.Units.gridUnit * 1.15; font.weight: Font.DemiBold; elide: Text.ElideRight }
+                PC3.Label { Layout.fillWidth: true; text: root.player ? [root.player.artist, root.player.album].filter(x => x).join(" · ") : ""; opacity: 0.6; elide: Text.ElideRight }
+            }
+            // progress as a little waveform: bars before the play head are lit
+            Item {
+                id: wave
+                Layout.fillWidth: true
+                Layout.preferredHeight: Kirigami.Units.gridUnit * 1.8
+                readonly property real frac: root.player && root.player.length > 0 ? Math.min(1, root.player.position / root.player.length) : 0
+                readonly property string seed: root.player ? root.player.track : ""
+                Row {
+                    anchors.fill: parent
+                    spacing: 2
+                    Repeater {
+                        model: 44
+                        Rectangle {
+                            required property int index
+                            readonly property real r: { let h = 0; const s = wave.seed + index; for (let i = 0; i < s.length; ++i) h = (h * 31 + s.charCodeAt(i)) % 997; return h / 997 }
+                            width: (wave.width - 43 * 2) / 44
+                            height: wave.height * (0.25 + 0.75 * (0.5 + 0.5 * Math.sin(index * 0.55)) * (0.45 + r * 0.55))
+                            anchors.verticalCenter: parent.verticalCenter
+                            radius: width / 2
+                            color: index / 44 <= wave.frac ? root.accent : Kirigami.Theme.textColor
+                            opacity: index / 44 <= wave.frac ? 1 : 0.22
+                        }
+                    }
+                }
+            }
+            RowLayout {
+                PC3.Label { text: root.clock(root.player ? root.player.position : 0); opacity: 0.6; font.features: { "tnum": 1 } }
+                Item { Layout.fillWidth: true }
+                PC3.Label { text: root.clock(root.player ? root.player.length : 0); opacity: 0.6; font.features: { "tnum": 1 } }
+            }
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: Kirigami.Units.largeSpacing
+                Round { iconName: "media-playlist-shuffle"; opacity: root.player && root.player.shuffle ? 1 : 0.5; onClicked: root.player.shuffle = !root.player.shuffle }
+                Round { iconName: "media-skip-backward"; enabled: root.player && root.player.canGoPrevious; onClicked: root.player.Previous() }
+                Round { iconName: root.playing ? "media-playback-pause" : "media-playback-start"; strong: true; size: Kirigami.Units.gridUnit * 2.8; onClicked: root.player.PlayPause() }
+                Round { iconName: "media-skip-forward"; enabled: root.player && root.player.canGoNext; onClicked: root.player.Next() }
+                Round { iconName: "window"; enabled: root.player && root.player.canRaise; onClicked: { root.player.Raise(); root.expanded = false } }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- sound
+    Component {
+        id: soundPage
+        ColumnLayout {
+            spacing: Kirigami.Units.largeSpacing
+            Item {                                               // the big ring: wheel or drag along it
+                id: ring
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: Kirigami.Units.gridUnit * 11
+                Layout.preferredHeight: Layout.preferredWidth
+                // what the ring shows: follows the pointer at once while dragging, glides otherwise;
+                // the sound server only gets the newest value every few frames
+                property real shown: root.muted ? 0 : root.volume
+                property bool dragging: false
+                property real want: 0
+                Behavior on shown { enabled: !ring.dragging; NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+                Binding on shown { when: ring.dragging; value: ring.want; restoreMode: Binding.RestoreBindingOrValue }
+                Timer { id: settle; interval: 400; onTriggered: ring.dragging = false }
+                Timer { id: push; interval: 40; onTriggered: root.setVolume(Math.round(ring.want)) }
+                function drive(v) { want = Math.max(0, Math.min(100, v)); if (!push.running) push.start() }
+                readonly property real frac: shown / 100
+                readonly property real stroke: Kirigami.Units.gridUnit * 0.75
+                Shape {
+                    anchors.fill: parent
+                    preferredRendererType: Shape.CurveRenderer
+                    ShapePath {
+                        strokeColor: Qt.rgba(1, 1, 1, 0.08); strokeWidth: ring.stroke; fillColor: "transparent"; capStyle: ShapePath.RoundCap
+                        PathAngleArc { centerX: ring.width / 2; centerY: ring.height / 2; radiusX: ring.width / 2 - ring.stroke; radiusY: radiusX; startAngle: 135; sweepAngle: 270 }
+                    }
+                    ShapePath {
+                        strokeColor: root.accent; strokeWidth: ring.stroke; fillColor: "transparent"; capStyle: ShapePath.RoundCap
+                        PathAngleArc { centerX: ring.width / 2; centerY: ring.height / 2; radiusX: ring.width / 2 - ring.stroke; radiusY: radiusX; startAngle: 135; sweepAngle: Math.max(0.5, 270 * ring.frac) }
+                    }
+                }
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    spacing: 0
+                    PC3.Label { Layout.alignment: Qt.AlignHCenter; text: root.muted && !ring.dragging ? "–" : Math.round(ring.shown); font.pixelSize: Kirigami.Units.gridUnit * 3; font.weight: Font.Bold; font.features: { "tnum": 1 } }
+                    Caption { Layout.alignment: Qt.AlignHCenter; text: root.muted ? i18n("Muted") : i18n("Volume") }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    preventStealing: true
+                    // angle on the 270° arc → 0..100; the gap at the bottom snaps to the nearer end
+                    function at(m) {
+                        let a = Math.atan2(m.y - height / 2, m.x - width / 2) * 180 / Math.PI
+                        a = (a - 135 + 720) % 360
+                        if (a > 270) a = a > 315 ? 0 : 270
+                        ring.drive(a / 270 * 100)
+                    }
+                    onPressed: m => { ring.want = ring.shown; ring.dragging = true; at(m) }
+                    onPositionChanged: m => { if (pressed) at(m) }
+                    onReleased: { push.stop(); root.setVolume(Math.round(ring.want)); settle.restart() }   // wait for the server before letting go
+                    onCanceled: ring.dragging = false
+                    onWheel: ev => root.setVolume(root.volume + (ev.angleDelta.y > 0 ? 2 : -2))
+                }
+                Round { anchors { right: parent.right; bottom: parent.bottom } iconName: root.muted ? "audio-volume-muted" : "audio-volume-high"
+                    onClicked: if (root.sink) root.sink.muted = !root.sink.muted }
+            }
+            Caption { text: i18n("Output") }
+            Repeater {
+                model: root.quitting ? null : sinks
+                delegate: QQC2.AbstractButton {
+                    id: dev
+                    required property var model
+                    readonly property bool on: model.PulseObject && model.PulseObject.default
+                    Layout.fillWidth: true
+                    implicitHeight: Kirigami.Units.gridUnit * 2.4
+                    onClicked: model.PulseObject.default = true
+                    background: Rectangle { radius: Kirigami.Units.gridUnit * 0.7
+                        color: dev.on ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.16) : dev.hovered ? Qt.rgba(1, 1, 1, 0.06) : "transparent"
+                        border.width: dev.on ? 1 : 0; border.color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.45) }
+                    contentItem: RowLayout {
+                        spacing: Kirigami.Units.largeSpacing
+                        Kirigami.Icon { Layout.leftMargin: Kirigami.Units.smallSpacing; source: dev.model.IconName || "audio-card"; implicitWidth: Kirigami.Units.iconSizes.smallMedium; implicitHeight: implicitWidth }
+                        PC3.Label { Layout.fillWidth: true; text: dev.model.Description; elide: Text.ElideRight; font.weight: dev.on ? Font.DemiBold : Font.Normal }
+                    }
+                }
+            }
+            Caption { text: i18n("Apps"); visible: streams.count > 0 }
+            Repeater {
+                id: streams
+                model: root.quitting ? null : sinkInputs
+                delegate: RowLayout {
+                    id: st
+                    required property var model
+                    Layout.fillWidth: true
+                    spacing: Kirigami.Units.largeSpacing
+                    Kirigami.Icon { source: st.model.IconName || "audio-x-generic"; implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth; Layout.leftMargin: Kirigami.Units.smallSpacing }
+                    PC3.Label { text: st.model.Client ? st.model.Client.name : st.model.Name; Layout.preferredWidth: Kirigami.Units.gridUnit * 5; elide: Text.ElideRight }
+                    PC3.Slider {
+                        Layout.fillWidth: true
+                        from: 0; to: root.normal; value: st.model.Volume
+                        onMoved: st.model.PulseObject.volume = Math.round(value)
+                    }
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- network
+    Component {
+        id: netPage
+        ColumnLayout {
+            spacing: Kirigami.Units.largeSpacing
+            // the hub: this computer in the middle, the connection above, the internet beyond
+            Item {
+                id: hub
+                Layout.fillWidth: true
+                Layout.preferredHeight: width * 0.78
+                readonly property point me: Qt.point(width / 2, height * 0.62)
+                readonly property point link: Qt.point(width / 2, height * 0.2)
+                readonly property point web: Qt.point(width * 0.86, height * 0.2)
+                readonly property real busy: Math.min(1, ((down.value || 0) + (up.value || 0)) / 2097152)
+                Shape {
+                    anchors.fill: parent
+                    preferredRendererType: Shape.CurveRenderer
+                    ShapePath {                                   // a faint orbit around the computer
+                        strokeColor: Qt.rgba(1, 1, 1, 0.06); strokeWidth: 1; fillColor: "transparent"
+                        PathAngleArc { centerX: hub.me.x; centerY: hub.me.y; radiusX: hub.height * 0.42; radiusY: radiusX; startAngle: 0; sweepAngle: 360 }
+                    }
+                    ShapePath {
+                        strokeColor: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, root.online ? 0.6 : 0.2); strokeWidth: 1.5; fillColor: "transparent"
+                        strokeStyle: root.online ? ShapePath.SolidLine : ShapePath.DashLine
+                        startX: hub.me.x; startY: hub.me.y
+                        PathLine { x: hub.link.x; y: hub.link.y }
+                        PathLine { x: hub.web.x; y: hub.web.y }
+                    }
+                }
+                // packets travelling along the line, faster when more data flows
+                Repeater {
+                    model: root.online ? 3 : 0
+                    Rectangle {
+                        required property int index
+                        property real p: 0
+                        width: 6; height: 6; radius: 3; color: index === 1 ? Kirigami.Theme.textColor : root.accent
+                        x: hub.me.x + (hub.link.x - hub.me.x) * p - 3; y: hub.me.y + (hub.link.y - hub.me.y) * (index === 1 ? 1 - p : p) - 3
+                        NumberAnimation on p { from: 0; to: 1; loops: Animation.Infinite; duration: 2600 - hub.busy * 1900 + index * 400; running: root.expanded }
+                    }
+                }
+                component Node: ColumnLayout {
+                    property point at
+                    property string iconName
+                    property string label
+                    property bool big: false
+                    property bool dim: false
+                    x: at.x - width / 2; y: at.y - (big ? Kirigami.Units.gridUnit * 2 : Kirigami.Units.gridUnit * 1.3)
+                    spacing: 2
+                    Rectangle {
+                        Layout.alignment: Qt.AlignHCenter
+                        implicitWidth: Kirigami.Units.gridUnit * (parent.big ? 4 : 2.6); implicitHeight: implicitWidth; radius: width / 2
+                        opacity: parent.dim ? 0.4 : 1
+                        color: parent.big ? root.accent : Qt.rgba(1, 1, 1, 0.07)
+                        border.width: parent.big ? 0 : 1; border.color: Qt.rgba(1, 1, 1, 0.1)
+                        Kirigami.Icon { anchors.centerIn: parent; source: parent.parent.iconName; width: parent.width * 0.5; height: width
+                            color: Kirigami.Theme.highlightedTextColor; isMask: parent.parent.big }
+                    }
+                    PC3.Label { Layout.alignment: Qt.AlignHCenter; Layout.maximumWidth: hub.width * 0.45; text: parent.label; elide: Text.ElideRight; font: Kirigami.Theme.smallFont; opacity: 0.7 }
+                }
+                Node { at: hub.me; big: true; iconName: "computer"; label: i18n("This computer") }
+                Node { at: hub.link; iconName: netIcon.connectionIcon || "network-wired"; dim: !root.online
+                    label: (netStatus.activeConnections || i18n("Not connected")).split("\n")[0].replace(/<[^>]*>/g, "") }
+                Node { at: hub.web; iconName: "globe"; label: i18n("Internet"); dim: netStatus.connectivity !== 4 }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                component Speed: ColumnLayout {
+                    property string label
+                    property string value
+                    Layout.fillWidth: true
+                    spacing: 0
+                    Caption { text: parent.label }
+                    PC3.Label { text: parent.value; font.pixelSize: Kirigami.Units.gridUnit * 1.1; font.weight: Font.DemiBold; font.features: { "tnum": 1 } }
+                }
+                Speed { label: i18n("Download"); value: root.rate(down.value) }
+                Speed { label: i18n("Upload"); value: root.rate(up.value) }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Kirigami.Units.smallSpacing
+                PC3.Button {
+                    Layout.fillWidth: true
+                    icon.name: nmEnabled.wirelessEnabled ? "network-wireless-on" : "network-wireless-off"
+                    text: nmEnabled.wirelessEnabled ? i18n("Wi-Fi on") : i18n("Wi-Fi off")
+                    checkable: true; checked: nmEnabled.wirelessEnabled
+                    visible: nmEnabled.wirelessHwEnabled
+                    onClicked: nmHandler.enableWireless(checked)
+                }
+                PC3.Button {
+                    Layout.fillWidth: true
+                    icon.name: "configure"; text: i18n("Network settings")
+                    onClicked: { KCM.KCMLauncher.openSystemSettings("kcm_networkmanagement"); root.expanded = false }
+                }
+            }
+        }
+    }
 }
