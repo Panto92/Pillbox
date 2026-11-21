@@ -133,8 +133,22 @@ if (( APPLY )); then
     say "Browsers now come to the front when they receive a link"
 fi
 
+
+# set style, colours and icons directly as well: a look-and-feel package alone does not
+# reliably switch the Plasma style on every distribution / Plasma version
+apply_style() {
+    plasma-apply-desktoptheme Pillbox >/dev/null 2>&1 || kwriteconfig6 --file plasmarc --group Theme --key name Pillbox
+    plasma-apply-colorscheme Pillbox >/dev/null 2>&1 || true
+    local done=0
+    for c in /usr/lib/*/libexec/plasma-changeicons /usr/libexec/plasma-changeicons /usr/lib/libexec/plasma-changeicons; do
+        [[ -x "$c" ]] && "$c" Pillbox-Lucide >/dev/null 2>&1 && { done=1; break; }
+    done
+    (( done )) || kwriteconfig6 --file kdeglobals --group Icons --key Theme Pillbox-Lucide
+    say "Plasma style, colours and Lucide icons are set"
+}
 if (( LAYOUT )); then
     plasma-apply-lookandfeel -a org.pillbox.desktop --resetLayout
+    apply_style
     # Plasma ignores panel alignment set inside a look-and-feel layout script, and
     # live panel views don't move when it is changed later. So: store the
     # alignment via the scripting API, then restart plasmashell so the views are
@@ -171,6 +185,7 @@ if (( LAYOUT )); then
     (sleep 8; "$HOME/.local/bin/pillbox" tidy >/dev/null 2>&1) &
 elif (( APPLY )); then
     plasma-apply-lookandfeel -a org.pillbox.desktop
+    apply_style
     say "Applied Pillbox theme (your panels were kept)"
 fi
 

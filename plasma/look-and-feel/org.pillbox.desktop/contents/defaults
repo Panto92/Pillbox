@@ -6,7 +6,7 @@
 ColorScheme=Pillbox
 
 [kdeglobals][Icons]
-Theme=breeze-dark
+Theme=Pillbox-Lucide
 
 [kdeglobals][KDE]
 widgetStyle=Breeze

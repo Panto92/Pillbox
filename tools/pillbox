@@ -78,6 +78,7 @@ on() {
     snapshot "$USUAL"
     echo on > "$MODE_FILE"
     restore "$PILL"
+    plasma-apply-desktoptheme Pillbox >/dev/null 2>&1 || true
     echo "$(tr_ "Pillbox OS is back." "Pillbox OS ist zurück.")"
 }
 settings() {
