@@ -867,7 +867,13 @@ PlasmoidItem {
             if (item && item.launching !== undefined) item.launching = true   // dock icon bounces until the window is there
             if (orbForm && cfg.notificationRipple !== false) ripple.play(m.decoration)
         }
-        else if (windows > 1) showAppWindows(index)                       // present all its windows
+        else if (windows > 1) {
+            // several windows: show them all at once in the preview; a click on one brings exactly that one
+            slotHovered(item, index, m, windows)
+            previewShow.stop(); previewHide.stop()
+            showPreview()
+            return                                                         // the ring stays open until a window is chosen
+        }
         else if (m.AppId === frontAppId) appsModel.requestToggleMinimized(idx)   // was in front: into the orb
         else appsModel.requestActivate(idx)                                      // background or minimised: bring it back
         closeRing()
