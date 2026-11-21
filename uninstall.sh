@@ -71,7 +71,7 @@ kpackagetool6 -t Plasma/LookAndFeel -r org.pillbox.desktop >/dev/null 2>&1 && sa
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.orb     >/dev/null 2>&1 && say "Removed the Orb" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.island  >/dev/null 2>&1 && say "Removed the island clock" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.status  >/dev/null 2>&1 && say "Removed the status pill" || true
-rm -f "$HOME/.local/bin/pillbox" "$DATA/applications/org.pillbox.os.desktop" "$DATA/icons/hicolor/scalable/apps/pillbox-os.svg" "$STATE/mode"
+rm -f "$HOME/.local/bin/pillbox" "$DATA/applications/org.pillbox.os.desktop" "$DATA"/icons/hicolor/scalable/apps/pillbox-{os,orb,line,line-symbolic}.svg "$STATE/mode"
 kpackagetool6 -t Plasma/Wallpaper   -r org.pillbox.atmosphere >/dev/null 2>&1 && say "Removed the living wallpaper" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.stats   >/dev/null 2>&1 && say "Removed widget: Pillbox Stats" || true
 if [[ -e /usr/share/sddm/themes/pillbox ]]; then

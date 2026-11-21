@@ -986,6 +986,15 @@ PlasmoidItem {
     }
 
     // rebuild the top panels in another arrangement (code/arrange.js), keeping each widget's settings
+    // the menu button in the left pill: which logo, with or without "Pillbox" beside it
+    function applyMenuButton() {
+        const icon = ({ pillbox: "pillbox-os", orb: "pillbox-orb", line: "pillbox-line-symbolic", original: "start-here-kde-symbolic" })[cfg.menuLogo] || "pillbox-os"
+        const label = cfg.menuLabel ? "Pillbox" : ""
+        shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript 'panels().forEach(function(p){ p.widgets().forEach(function(w){ "
+            + "if ([\"org.kde.plasma.kickoff\", \"org.kde.plasma.kicker\", \"org.kde.plasma.kickerdash\"].indexOf(w.type) < 0) return; "
+            + "w.currentConfigGroup = [\"General\"]; w.writeConfig(\"icon\", \"" + icon + "\"); w.writeConfig(\"menuLabel\", \"" + label + "\"); w.reloadConfig(); }); });' # " + Date.now())
+    }
+
     // height of the top bar: every top panel, the pills inside follow it
     function applyBarSize() {
         const h = ({ normal: 42, large: 50, xlarge: 58 })[cfg.barSize] || 42   // Plasma keeps a floating panel at 42 px or more

@@ -1,0 +1,151 @@
+<title>Pillbox Last-Pille</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* One dark look like the desktop: each variant sits on a strip of the real top bar, live values tick every 2 s. */
+:root {
+  --ink:#0b0e12; --glass:rgba(18,23,30,.9); --line:rgba(205,213,219,.1); --mist:#7d8a94; --paper:#cdd5db; --frost:#e9eef2;
+  --accent:#ff8a4c; --cpu:#7fd3f0; --gpu:#7fdcb0; --ram:#b49cf0; --temp:#e0bd6e; --hot:#ff7a6a;
+  --f-display:"Bricolage Grotesque",system-ui,sans-serif; --f-body:"Instrument Sans",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--paper);font:15px/1.55 var(--f-body)}
+.wrap{max-width:1120px;margin:0 auto;padding-block:48px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:40px}
+h1{font:700 clamp(34px,6vw,60px)/.95 var(--f-display);letter-spacing:-.03em;color:var(--frost);margin:0;text-wrap:balance}
+h2{font:700 24px var(--f-display);color:var(--frost);margin:0}
+.lead,.sec p{color:var(--mist);max-width:66ch;margin:10px 0 0}
+.tag{font:500 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.stage{margin-top:16px;padding:18px 16px;border-radius:16px;background:radial-gradient(120% 160% at 20% 0%,#2a2340,#10131a 70%);overflow-x:auto}
+.pill{display:inline-flex;align-items:center;gap:18px;height:42px;padding:0 16px 0 6px;border-radius:99px;background:var(--glass);border:1px solid var(--line);white-space:nowrap}
+.logo{width:32px;height:32px;border-radius:99px;display:grid;place-items:center;transition:background .2s}
+.logo:hover{background:rgba(255,255,255,.08)}
+.logo svg{width:26px;height:26px}
+.sep{width:1px;height:18px;background:var(--line)}
+.k{font:500 10px var(--f-mono);letter-spacing:.1em;color:var(--mist)}
+.v{font:600 13px var(--f-body);color:var(--frost);font-variant-numeric:tabular-nums}
+.u{font:400 11px var(--f-body);color:var(--mist)}
+.m{display:flex;align-items:center;gap:7px}
+/* A: detail */
+.bar{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px;transition:width .6s}
+/* B: rings */
+.ring{position:relative;width:30px;height:30px}
+.ring svg{width:30px;height:30px;transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:600 9.5px var(--f-body);color:var(--frost);font-variant-numeric:tabular-nums}
+.stack{display:grid;line-height:1.15}
+/* C: chips */
+.chip{display:flex;align-items:center;gap:8px;height:28px;padding:0 11px;border-radius:99px;background:rgba(255,255,255,.05)}
+.chip .dot{width:6px;height:6px;border-radius:3px}
+/* D: popup */
+.dash{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px;max-width:760px;padding:18px;border-radius:22px;background:var(--glass);border:1px solid var(--line)}
+.card{padding:14px;border-radius:16px;background:rgba(255,255,255,.04);display:grid;gap:8px;min-width:0}
+.card .top{display:flex;justify-content:space-between;align-items:baseline}
+.card .big{font:700 26px var(--f-display);color:var(--frost);font-variant-numeric:tabular-nums}
+.card .sub{font-size:12px;color:var(--mist)}
+.card canvas{width:100%;height:46px}
+.rows{display:grid;gap:3px;font-size:12px}
+.rows div{display:flex;justify-content:space-between;color:var(--mist)}
+.rows b{color:var(--paper);font-weight:500;font-variant-numeric:tabular-nums}
+.logos{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px}
+.logos .pill{padding:0 14px 0 6px}
+</style>
+<div class="wrap">
+  <header>
+    <p class="tag">Pillbox OS · Skizzen</p>
+    <h1>Die Last-Pille, neu gedacht</h1>
+    <p class="lead">Links in der Leiste: das Pillbox-Logo als Menüknopf und Werte, die man versteht – wie viel RAM von wie viel, welche Temperatur gehört wozu, was die Grafikkarte gerade tut. Werte unten sind Beispiele (deine Hardware: Ryzen 7 2700X, RTX 4070 Ti, 32 GB) und bewegen sich alle 2 s.</p>
+  </header>
+
+  <section class="sec">
+    <p class="tag">Menüknopf</p><h2>Das Logo statt der vier Kästchen</h2>
+    <p>Die kleine Pille mit der glühenden Kugel. Beim Drüberfahren hellt sie auf, beim Öffnen des Menüs glüht die Kugel kurz in deiner Akzentfarbe.</p>
+    <div class="stage logos">
+      <div class="pill"><span class="logo" data-logo></span><span class="u">nur Logo</span></div>
+      <div class="pill"><span class="logo" data-logo></span><span class="v">Pillbox</span></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Variante A</p><h2>Klartext mit Balken</h2>
+    <p>Jeder Wert sagt, was er ist: CPU mit Takt, GPU mit eigener Temperatur, RAM als „belegt / gesamt“. Kleine Balken zeigen die Auslastung.</p>
+    <div class="stage"><div class="pill">
+      <span class="logo" data-logo></span><span class="sep"></span>
+      <span class="m"><span class="k">CPU</span><span class="bar"><i id="a-cpu-b" style="background:var(--cpu)"></i></span><span class="v" id="a-cpu">12%</span><span class="u" id="a-cpu-f">3,9 GHz</span></span>
+      <span class="m"><span class="k">GPU</span><span class="bar"><i id="a-gpu-b" style="background:var(--gpu)"></i></span><span class="v" id="a-gpu">25%</span><span class="u" id="a-gpu-t">48°</span></span>
+      <span class="m"><span class="k">RAM</span><span class="bar"><i id="a-ram-b" style="background:var(--ram)"></i></span><span class="v" id="a-ram">12,4</span><span class="u">/ 32 GB</span></span>
+      <span class="m"><span class="k">CPU</span><span class="v" id="a-tmp">43°</span></span>
+    </div></div>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Variante B</p><h2>Ringe mit Zahl darin</h2>
+    <p>Die Ringe bleiben, tragen aber die Zahl selbst. Darunter steht klein, was gemeint ist – „8 von 16 Kernen“ fällt weg, dafür „12 / 32 GB“ beim RAM.</p>
+    <div class="stage"><div class="pill">
+      <span class="logo" data-logo></span><span class="sep"></span>
+      <span class="m"><span class="ring" data-ring="cpu"></span><span class="stack"><span class="k">CPU</span><span class="u" id="b-cpu">3,9 GHz</span></span></span>
+      <span class="m"><span class="ring" data-ring="gpu"></span><span class="stack"><span class="k">GPU</span><span class="u" id="b-gpu">48° · 3,1 GB</span></span></span>
+      <span class="m"><span class="ring" data-ring="ram"></span><span class="stack"><span class="k">RAM</span><span class="u" id="b-ram">12,4 / 32 GB</span></span></span>
+      <span class="m"><span class="ring" data-ring="temp"></span><span class="stack"><span class="k">TEMP</span><span class="u">CPU</span></span></span>
+    </div></div>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Variante C</p><h2>Kapseln, ruhig und groß</h2>
+    <p>Jeder Wert in seiner eigenen kleinen Kapsel, die Farbe nur als Punkt. Wird etwas heiß oder voll, färbt sich die Kapsel ein.</p>
+    <div class="stage"><div class="pill" style="gap:8px">
+      <span class="logo" data-logo></span><span class="sep" style="margin:0 6px"></span>
+      <span class="chip"><span class="dot" style="background:var(--cpu)"></span><span class="k">CPU</span><span class="v" id="c-cpu">12%</span></span>
+      <span class="chip"><span class="dot" style="background:var(--gpu)"></span><span class="k">GPU</span><span class="v" id="c-gpu">25%</span><span class="u" id="c-gpu-t">48°</span></span>
+      <span class="chip"><span class="dot" style="background:var(--ram)"></span><span class="k">RAM</span><span class="v" id="c-ram">12,4</span><span class="u">/ 32 GB</span></span>
+      <span class="chip" id="c-tmp-chip"><span class="dot" style="background:var(--temp)"></span><span class="k">CPU</span><span class="v" id="c-tmp">43°</span></span>
+    </div></div>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Beim Klick – für alle Varianten</p><h2>Das Panel mit allem</h2>
+    <p>Ein Klick auf die Pille öffnet Karten mit der letzten Minute als Kurve und den Details: Prozessor-Name, Takt, Grafikkarte mit VRAM und Temperatur, RAM mit Cache, Temperaturen aller Sensoren.</p>
+    <div class="stage">
+      <div class="dash">
+        <div class="card"><div class="top"><span class="k">CPU · Ryzen 7 2700X</span></div><div class="big" id="d-cpu">12%</div><canvas data-spark="cpu"></canvas>
+          <div class="rows"><div>Takt <b id="d-cpu-f">3,9 GHz</b></div><div>Kerne <b>8 · 16 Threads</b></div><div>Temperatur <b id="d-cpu-t">43 °C</b></div></div></div>
+        <div class="card"><div class="top"><span class="k">GPU · RTX 4070 Ti</span></div><div class="big" id="d-gpu">25%</div><canvas data-spark="gpu"></canvas>
+          <div class="rows"><div>VRAM <b id="d-vram">3,1 / 12 GB</b></div><div>Temperatur <b id="d-gpu-t">48 °C</b></div><div>Leistung <b id="d-gpu-w">62 W</b></div></div></div>
+        <div class="card"><div class="top"><span class="k">Arbeitsspeicher</span></div><div class="big"><span id="d-ram">12,4</span> <span class="sub">/ 32 GB</span></div><canvas data-spark="ram"></canvas>
+          <div class="rows"><div>Programme <b id="d-ram2">12,4 GB</b></div><div>Cache <b>8,0 GB</b></div><div>Frei <b id="d-free">11,2 GB</b></div></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+const LOGO='<svg viewBox="0 0 128 128"><defs><radialGradient id="o" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#ffb48a"/><stop offset="1" stop-color="#ff8a4c"/></radialGradient><radialGradient id="g" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ff8a4c" stop-opacity=".55"/><stop offset="1" stop-color="#ff8a4c" stop-opacity="0"/></radialGradient><linearGradient id="l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a3440"/><stop offset="1" stop-color="#121820"/></linearGradient></defs><g transform="rotate(-35 64 64)"><rect x="14" y="40" width="100" height="48" rx="24" fill="url(#l)" stroke="#8fb0c2" stroke-opacity=".55" stroke-width="4"/><circle cx="88" cy="64" r="26" fill="url(#g)"/><circle cx="88" cy="64" r="15" fill="url(#o)"/></g></svg>';
+document.querySelectorAll('[data-logo]').forEach(e=>e.innerHTML=LOGO);
+const C={cpu:'#7fd3f0',gpu:'#7fdcb0',ram:'#b49cf0',temp:'#e0bd6e'};
+document.querySelectorAll('[data-ring]').forEach(e=>{const k=e.dataset.ring;e.innerHTML=`<svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="12" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="3"/><circle class="a" cx="15" cy="15" r="12" fill="none" stroke="${C[k]}" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 75.4" style="transition:stroke-dasharray .6s"/></svg><b></b>`});
+const hist={cpu:[],gpu:[],ram:[]};
+let s={cpu:12,gpu:25,ram:12.4,tmp:43,gt:48,f:3.9,vram:3.1,w:62};
+const de=(n,d=1)=>n.toFixed(d).replace('.',',');
+const $=id=>document.getElementById(id);
+function step(){
+  const j=(v,a,lo,hi)=>Math.max(lo,Math.min(hi,v+(Math.random()-.5)*a));
+  s.cpu=j(s.cpu,14,3,92);s.gpu=j(s.gpu,18,2,97);s.ram=j(s.ram,.8,9,22);s.tmp=Math.round(38+s.cpu*.35+Math.random()*2);s.gt=Math.round(40+s.gpu*.35);s.f=3.6+s.cpu/100*.7;s.vram=j(s.vram,.4,1.5,9);s.w=Math.round(30+s.gpu*2.2);
+  for(const k of ['cpu','gpu','ram']){hist[k].push(k==='ram'?s.ram/32*100:s[k]);if(hist[k].length>30)hist[k].shift();}
+  const p=Math.round, ramp=s.ram/32*100;
+  $('a-cpu').textContent=p(s.cpu)+'%';$('a-cpu-b').style.width=s.cpu+'%';$('a-cpu-f').textContent=de(s.f)+' GHz';
+  $('a-gpu').textContent=p(s.gpu)+'%';$('a-gpu-b').style.width=s.gpu+'%';$('a-gpu-t').textContent=s.gt+'°';
+  $('a-ram').textContent=de(s.ram);$('a-ram-b').style.width=ramp+'%';$('a-tmp').textContent=s.tmp+'°';
+  const ring={cpu:[s.cpu,p(s.cpu)+'%'],gpu:[s.gpu,p(s.gpu)+'%'],ram:[ramp,p(ramp)+'%'],temp:[s.tmp,s.tmp+'°']};
+  document.querySelectorAll('[data-ring]').forEach(e=>{const [v,t]=ring[e.dataset.ring];e.querySelector('.a').setAttribute('stroke-dasharray',`${75.4*v/100} 75.4`);e.querySelector('b').textContent=t});
+  $('b-cpu').textContent=de(s.f)+' GHz';$('b-gpu').textContent=s.gt+'° · '+de(s.vram)+' GB';$('b-ram').textContent=de(s.ram)+' / 32 GB';
+  $('c-cpu').textContent=p(s.cpu)+'%';$('c-gpu').textContent=p(s.gpu)+'%';$('c-gpu-t').textContent=s.gt+'°';$('c-ram').textContent=de(s.ram);$('c-tmp').textContent=s.tmp+'°';
+  $('c-tmp-chip').style.background=s.tmp>66?'rgba(255,122,106,.2)':'';
+  $('d-cpu').textContent=p(s.cpu)+'%';$('d-cpu-f').textContent=de(s.f)+' GHz';$('d-cpu-t').textContent=s.tmp+' °C';
+  $('d-gpu').textContent=p(s.gpu)+'%';$('d-vram').textContent=de(s.vram)+' / 12 GB';$('d-gpu-t').textContent=s.gt+' °C';$('d-gpu-w').textContent=s.w+' W';
+  $('d-ram').textContent=de(s.ram);$('d-ram2').textContent=de(s.ram)+' GB';$('d-free').textContent=de(32-s.ram-8)+' GB';
+  document.querySelectorAll('[data-spark]').forEach(cv=>{const k=cv.dataset.spark,h=hist[k],r=devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*r;cv.height=H*r;const g=cv.getContext('2d');g.scale(r,r);if(h.length<2)return;
+    const pts=h.map((v,i)=>[i*W/29,H-2-v/100*(H-4)]);g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.strokeStyle=C[k];g.lineWidth=2;g.lineJoin='round';g.stroke();
+    g.lineTo(pts[pts.length-1][0],H);g.lineTo(0,H);g.closePath();const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,C[k]+'55');gr.addColorStop(1,C[k]+'00');g.fillStyle=gr;g.fill();});
+}
+for(let i=0;i<30;i++)step();
+setInterval(step,2000);
+</script>

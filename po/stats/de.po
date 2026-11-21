@@ -48,3 +48,63 @@ msgstr "Jede Sensor-ID aus „kstatsviewer --list“, z. B. gpu/gpu1/temperature
 
 msgid "Update every (ms):"
 msgstr "Aktualisieren alle (ms):"
+
+msgid "Clock"
+msgstr "Takt"
+
+msgid "Cores"
+msgstr "Kerne"
+
+msgid "%1 · %2 threads"
+msgstr "%1 · %2 Threads"
+
+msgid "Video memory"
+msgstr "Grafikspeicher"
+
+msgid "Power"
+msgstr "Leistung"
+
+msgid "Memory"
+msgstr "Arbeitsspeicher"
+
+msgid "Programs"
+msgstr "Programme"
+
+msgid "Cache"
+msgstr "Cache"
+
+msgid "Free"
+msgstr "Frei"
+
+msgid "Drives"
+msgstr "Laufwerke"
+
+msgid "Measuring…"
+msgstr "Messe …"
+
+msgid "Home"
+msgstr "Persönlich"
+
+msgid "%1 GB free of %2 GB"
+msgstr "%1 GB frei von %2 GB"
+
+msgid "Tidy up"
+msgstr "Aufräumen"
+
+msgid "Trash"
+msgstr "Papierkorb"
+
+msgid "Thumbnail cache"
+msgstr "Vorschaubilder-Cache"
+
+msgid "empty"
+msgstr "leer"
+
+msgid "Sure?"
+msgstr "Sicher?"
+
+msgid "Empty"
+msgstr "Leeren"
+
+msgid "The memory cache needs no emptying: Linux hands it to programs the moment they need it."
+msgstr "Den Arbeitsspeicher-Cache musst du nicht leeren: Linux gibt ihn sofort an Programme ab, sobald sie ihn brauchen."

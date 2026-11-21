@@ -34,7 +34,7 @@
     <!-- login screen: auto (time of day) | desktop (same as the wallpaper) | a scene name -->
     <entry name="loginScene" type="String"><default>auto</default></entry>
     <!-- the load pill (org.pillbox.stats), mirrored here and written into the widget -->
-    <entry name="statsStyle" type="String"><default>rings</default></entry>
+    <entry name="statsStyle" type="String"><default>detail</default></entry>
     <entry name="clockPanel" type="String"><default>dashboard</default></entry>
     <entry name="openSettings" type="String"><default></default></entry>
     <!-- demo mode (tools/demo.sh): "ring" opens the ring, anything else closes it -->
@@ -47,6 +47,8 @@
     <!-- icon theme: keep (whatever was set) | Pillbox | Pillbox-Duo -->
     <entry name="iconTheme" type="String"><default>Pillbox-Lucide</default></entry>
     <entry name="barSize" type="String"><default>normal</default></entry>
+    <entry name="menuLogo" type="String"><default>pillbox</default></entry>
+    <entry name="menuLabel" type="Bool"><default>false</default></entry>
     <entry name="iconThemeBefore" type="String"><default>breeze-dark</default></entry>
     <entry name="statsCpu" type="Bool"><default>true</default></entry>
     <entry name="statsGpu" type="Bool"><default>true</default></entry>

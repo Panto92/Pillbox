@@ -35,7 +35,9 @@ if (primary && knownWidgetTypes.indexOf("org.pillbox.orb") >= 0) {
     orb.writeConfig("wallScene", "flow");          // the settings centre shows the same choice
 }
 
-pill("left",   ["org.kde.plasma.kickoff", "org.pillbox.stats"]);
+var left = pill("left",   ["org.kde.plasma.kickoff", "org.pillbox.stats"]);
+// the menu button shows the Pillbox logo
+left.widgets("org.kde.plasma.kickoff").forEach(function (w) { w.currentConfigGroup = ["General"]; w.writeConfig("icon", "pillbox-os"); });
 
 // the centre pill: a clock that grows into an island for notifications
 pill("center", ["org.pillbox.island"]);

@@ -97,7 +97,7 @@ install_pkg Plasma/LookAndFeel "$SRC/plasma/look-and-feel/org.pillbox.desktop"
 mkdir -p "$HOME/.local/bin" "$DATA/applications" "$DATA/icons/hicolor/scalable/apps"
 install -m 755 "$SRC/tools/pillbox" "$HOME/.local/bin/pillbox"
 cp "$SRC/apps/org.pillbox.os.desktop" "$DATA/applications/"
-cp "$SRC/docs/images/logo.svg" "$DATA/icons/hicolor/scalable/apps/pillbox-os.svg"
+cp "$SRC"/apps/icons/*.svg "$DATA/icons/hicolor/scalable/apps/"     # pillbox-os, -orb, -line: app icon and menu button
 update-desktop-database "$DATA/applications" >/dev/null 2>&1 || true
 say "Installed the Pillbox OS app (menu entry and 'pillbox' command)"
 

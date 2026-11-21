@@ -907,3 +907,27 @@ msgstr "Die Leiste bleibt eine normale Plasma-Leiste: Rechtsklick → Bearbeitun
 
 msgid "Extra large"
 msgstr "Sehr groß"
+
+msgid "Menu button"
+msgstr "Menüknopf"
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "Show “Pillbox” beside it"
+msgstr "„Pillbox“ daneben anzeigen"
+
+msgid "The button that opens your applications, at the left of the bar."
+msgstr "Der Knopf links in der Leiste, der deine Programme öffnet."
+
+msgid "Text with bars"
+msgstr "Text mit Balken"
+
+msgid "Rings with numbers"
+msgstr "Ringe mit Zahlen"
+
+msgid "Chips"
+msgstr "Kapseln"
+
+msgid "How CPU, GPU, memory and temperature appear in the left pill. A click on it opens the details, your drives and a tidy-up."
+msgstr "Wie CPU, GPU, Arbeitsspeicher und Temperatur in der linken Pille erscheinen. Ein Klick darauf öffnet die Details, deine Laufwerke und das Aufräumen."

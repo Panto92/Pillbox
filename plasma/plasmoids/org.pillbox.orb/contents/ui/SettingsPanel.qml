@@ -1085,10 +1085,23 @@ GradientStop { position: 0; color: tr.at(0) }
                                onPicked: panel.orb.setWidget("org.pillbox.island", "panelStyle", panel.cfg.clockPanel) } }
             }
             Group {
+                title: i18n("Menu button")
+                SettingRow { label: i18n("Logo"); hint: i18n("The button that opens your applications, at the left of the bar.")
+                    Segments { key: "menuLogo"; options: [["pillbox", "Pillbox"], ["orb", i18n("Orb")], ["line", i18n("Line")], ["original", i18n("Original")]]
+                               onPicked: panel.orb.applyMenuButton() } }
+                SettingRow { label: i18n("Show “Pillbox” beside it")
+                    Toggle { key: "menuLabel"; onPicked: panel.orb.applyMenuButton() } }
+            }
+            Group {
                 title: i18n("Load")
-                SettingRow { label: i18n("Look"); hint: i18n("How CPU, GPU, memory and temperature appear in the left pill.")
-                    Segments { key: "statsStyle"; options: [["rings", i18n("Rings")], ["spark", i18n("Curves")], ["bars", i18n("Bars")], ["numbers", i18n("Numbers")]]
-                               onPicked: panel.orb.setWidget("org.pillbox.stats", "style", panel.cfg.statsStyle) } }
+                SettingRow { label: i18n("Look"); hint: i18n("How CPU, GPU, memory and temperature appear in the left pill. A click on it opens the details, your drives and a tidy-up.")
+                    QQC2.ComboBox {
+                        textRole: "text"; valueRole: "value"
+                        model: [{ value: "detail", text: i18n("Text with bars") }, { value: "ringtext", text: i18n("Rings with numbers") }, { value: "chips", text: i18n("Chips") },
+                                { value: "rings", text: i18n("Rings") }, { value: "spark", text: i18n("Curves") }, { value: "bars", text: i18n("Bars") }, { value: "numbers", text: i18n("Numbers") }]
+                        currentIndex: Math.max(0, indexOfValue(panel.cfg.statsStyle))
+                        onActivated: { panel.cfg.statsStyle = currentValue; panel.orb.setWidget("org.pillbox.stats", "style", currentValue) }
+                    } }
                 SettingRow { label: "CPU"; Toggle { key: "statsCpu"; onPicked: panel.orb.setWidget("org.pillbox.stats", "showCpu", panel.cfg.statsCpu) } }
                 SettingRow { label: "GPU"; Toggle { key: "statsGpu"; onPicked: panel.orb.setWidget("org.pillbox.stats", "showGpu", panel.cfg.statsGpu) } }
                 SettingRow { label: i18n("Memory"); Toggle { key: "statsRam"; onPicked: panel.orb.setWidget("org.pillbox.stats", "showRam", panel.cfg.statsRam) } }
