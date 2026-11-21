@@ -2,7 +2,7 @@
 // Run through plasmashell's evaluateScript with MODE replaced by islands | bar | capsule.
 // SPDX-License-Identifier: MIT
 var mode = "MODE";
-var LEFT = ["org.kde.plasma.kickoff", "org.kde.plasma.kicker", "org.kde.plasma.kickerdash", "org.pillbox.stats"];
+var LEFT = ["org.kde.plasma.kickoff", "org.kde.plasma.kicker", "org.kde.plasma.kickerdash", "org.pillbox.search", "org.pillbox.stats"];
 var CENTER = ["org.pillbox.island", "org.kde.plasma.digitalclock"];
 var SKIP = ["org.kde.plasma.panelspacer", "org.kde.plasma.marginsseparator"];
 

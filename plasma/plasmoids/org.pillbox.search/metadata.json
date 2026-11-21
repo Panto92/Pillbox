@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [ { "Name": "Pillbox contributors" } ],
+        "Category": "Utilities",
+        "Description": "Search apps, files, settings and more in a frosted overlay in the middle of the screen.",
+        "Icon": "search",
+        "Id": "org.pillbox.search",
+        "License": "MIT",
+        "Name": "Pillbox Search",
+        "Version": "0.9.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

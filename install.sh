@@ -84,6 +84,7 @@ install_pkg Plasma/Applet      "$SRC/plasma/plasmoids/org.pillbox.stats"
 install_pkg Plasma/Applet      "$SRC/plasma/plasmoids/org.pillbox.orb"
 install_pkg Plasma/Applet      "$SRC/plasma/plasmoids/org.pillbox.island"
 install_pkg Plasma/Applet      "$SRC/plasma/plasmoids/org.pillbox.status"
+install_pkg Plasma/Applet      "$SRC/plasma/plasmoids/org.pillbox.search"
 install_pkg Plasma/Wallpaper   "$SRC/plasma/wallpapers/org.pillbox.atmosphere"
 # translations (also shipped inside the package; this copy is what KDE's i18n looks up first)
 for mo in "$SRC"/plasma/{plasmoids,wallpapers}/*/contents/locale/*/LC_MESSAGES/*.mo; do

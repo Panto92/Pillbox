@@ -1,0 +1,17 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Search"
+msgstr "Suche"
+
+msgid "Apps, files, settings and more – Meta+Space"
+msgstr "Apps, Dateien, Einstellungen und mehr – Meta+Leertaste"
+
+msgid "Search apps, files, settings…"
+msgstr "Apps, Dateien, Einstellungen suchen …"
+
+msgid "↑ ↓ choose · Enter opens · Esc closes"
+msgstr "↑ ↓ auswählen · Enter öffnet · Esc schließt"

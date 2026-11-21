@@ -98,6 +98,8 @@ to("vault", "plasmavault")
 to("calendar", "view-calendar")
 to("layout-grid", "view-app-grid")
 to("menu", "application-menu", "open-menu")
+to("search", "search", "system-search", "edit-find")
+to("x", "edit-clear")
 to("chevron-up", "arrow-up", "go-up")
 to("chevron-down", "arrow-down", "go-down")
 # panel and window controls used by Pillbox
