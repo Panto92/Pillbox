@@ -1143,6 +1143,26 @@ GradientStop { position: 0; color: tr.at(0) }
             spacing: Kirigami.Units.largeSpacing
             QQC2.Label { text: i18n("A calm, modern desktop for KDE Plasma 6 – only official Plasma interfaces, nothing compiled, measured to cost next to nothing."); wrapMode: Text.WordWrap; Layout.fillWidth: true }
             Group {
+                title: i18n("Pillbox OS")
+                SettingRow {
+                    label: i18n("Switch off Pillbox OS")
+                    hint: i18n("Back to your usual Plasma desktop. Pillbox stays installed and remembers everything – start it again from the Pillbox OS icon in your applications.")
+                    QQC2.Button {
+                        id: quitBtn
+                        property bool armed: false
+                        text: armed ? i18n("Click again to switch off") : i18n("Switch off…")
+                        icon.name: "system-shutdown"
+                        palette.button: armed ? Kirigami.Theme.negativeBackgroundColor : undefined
+                        onClicked: {
+                            if (!armed) { armed = true; quitDisarm.restart(); return }
+                            panel.closeRequested()
+                            panel.orb.switchOff()
+                        }
+                        Timer { id: quitDisarm; interval: 3500; onTriggered: quitBtn.armed = false }
+                    }
+                }
+            }
+            Group {
                 title: i18n("Project")
                 SettingRow { label: i18n("Source code and issues"); hint: "github.com/Panto92/Pillbox"
                     QQC2.Button { text: i18n("Open"); icon.name: "internet-web-browser"; onClicked: Qt.openUrlExternally("https://github.com/Panto92/Pillbox") } }

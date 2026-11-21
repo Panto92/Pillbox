@@ -1,0 +1,23 @@
+[Desktop Entry]
+Type=Application
+Name=Pillbox OS
+GenericName=Desktop settings
+GenericName[de]=Desktop-Einstellungen
+Comment=Settings for Pillbox OS – switch it on or off
+Comment[de]=Einstellungen für Pillbox OS – ein- und ausschalten
+Exec=pillbox settings
+Icon=pillbox-os
+Categories=Settings;DesktopSettings;Qt;KDE;
+Keywords=pillbox;desktop;orb;dock;wallpaper;theme;
+Keywords[de]=pillbox;desktop;orb;dock;hintergrund;design;
+Actions=on;off;
+
+[Desktop Action on]
+Name=Start Pillbox OS
+Name[de]=Pillbox OS starten
+Exec=pillbox on
+
+[Desktop Action off]
+Name=Switch off Pillbox OS
+Name[de]=Pillbox OS beenden
+Exec=pillbox off

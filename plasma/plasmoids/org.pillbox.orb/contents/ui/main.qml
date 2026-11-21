@@ -138,6 +138,7 @@ PlasmoidItem {
         }
     }
     Component.onCompleted: {
+        tokenArmed = true
         try { seenByApp = JSON.parse(Plasmoid.configuration.notificationsSeen || "{}") } catch (e) { seenByApp = {} }
         countTimer.restart()
         envTimer.restart()
@@ -961,6 +962,12 @@ PlasmoidItem {
         shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '" + js + "' # " + Date.now())
     }
 
+    // back to the usual desktop: tools/pillbox restarts Plasma, so it runs in its own unit
+    // (a child of plasmashell would be stopped together with it)
+    function switchOff() {
+        shell.connectSource("systemd-run --user --collect --quiet \"$HOME/.local/bin/pillbox\" off # " + Date.now())
+    }
+
     // icon theme: remember what was there before, so "Original" brings it back
     function applyIconTheme() {
         const want = cfg.iconTheme === "Pillbox" || cfg.iconTheme === "Pillbox-Duo" ? cfg.iconTheme : String(cfg.iconThemeBefore || "breeze-dark").replace(/[^A-Za-z0-9_.-]/g, "")
@@ -1067,7 +1074,14 @@ PlasmoidItem {
     onAccentChanged: { if (loginState === "ready") applyLogin(); if (cfg.systemAccent) applySystemAccent() }
 
     property bool settingsOpen: false
+    // the "Pillbox OS" app icon (tools/pillbox) asks for the settings by writing a fresh value here
+    // (the value saved from last time does not count: only a change while running opens it)
+    property string openToken: cfg.openSettings || ""
+    property bool tokenArmed: false
+    onOpenTokenChanged: if (tokenArmed && openToken !== "") { settingsOpen = true; settingsRaise.restart() }
+    property Timer settingsRaise: Timer { interval: 150; onTriggered: { settingsWin.raise(); settingsWin.requestActivate() } }
     SettingsPanel {
+        id: settingsWin
         orb: root
         open: root.settingsOpen
         onCloseRequested: root.settingsOpen = false

@@ -93,6 +93,13 @@ for mo in "$SRC"/plasma/{plasmoids,wallpapers}/*/contents/locale/*/LC_MESSAGES/*
     cp "$mo" "$DATA/locale/$lang/LC_MESSAGES/"
 done
 install_pkg Plasma/LookAndFeel "$SRC/plasma/look-and-feel/org.pillbox.desktop"
+# the "Pillbox OS" app: settings, switch on/off (tools/pillbox)
+mkdir -p "$HOME/.local/bin" "$DATA/applications" "$DATA/icons/hicolor/scalable/apps"
+install -m 755 "$SRC/tools/pillbox" "$HOME/.local/bin/pillbox"
+cp "$SRC/apps/org.pillbox.os.desktop" "$DATA/applications/"
+cp "$SRC/docs/images/logo.svg" "$DATA/icons/hicolor/scalable/apps/pillbox-os.svg"
+update-desktop-database "$DATA/applications" >/dev/null 2>&1 || true
+say "Installed the Pillbox OS app (menu entry and 'pillbox' command)"
 
 # Pillbox icon themes (line and duotone); chosen in the settings centre
 mkdir -p "$DATA/icons"
@@ -159,6 +166,7 @@ if (( LAYOUT )); then
         (kstart plasmashell >/dev/null 2>&1 &)
     fi
     say "Applied Pillbox theme and layout"
+    echo on > "$STATE/mode"
 elif (( APPLY )); then
     plasma-apply-lookandfeel -a org.pillbox.desktop
     say "Applied Pillbox theme (your panels were kept)"

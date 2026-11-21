@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# pillbox – switch between Pillbox OS and your usual Plasma desktop, open the settings.
+#
+#   pillbox settings   open the Pillbox settings centre (asks to start Pillbox if it is off)
+#   pillbox off        back to your usual desktop; the Pillbox desktop is kept for later
+#   pillbox on         back to Pillbox; your usual desktop is kept for later
+#   pillbox status     prints "on" or "off"
+#
+# Both sides are saved on every switch, so changes you make on either side survive.
+# Only Plasma's own config files are swapped (panels, theme, colours, window manager,
+# notifications, lock screen) – the same list install.sh backs up.
+# SPDX-License-Identifier: MIT
+set -euo pipefail
+
+DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
+CONF="${XDG_CONFIG_HOME:-$HOME/.config}"
+STATE="$DATA/pillbox"
+MODE_FILE="$STATE/mode"
+PILL="$STATE/desktop-pillbox.tar.gz"      # the Pillbox side, saved when switching off
+USUAL="$STATE/desktop-usual.tar.gz"       # your usual desktop, saved when switching on
+FILES=(kdeglobals kwinrc plasmarc kcminputrc plasmashellrc plasma-org.kde.plasma.desktop-appletsrc plasmanotifyrc kscreenlockerrc)
+
+tr_() {   # English text, German if the system speaks German
+    case "${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}" in de*) printf '%s' "$2" ;; *) printf '%s' "$1" ;; esac
+}
+mode() { [[ -e "$MODE_FILE" ]] && cat "$MODE_FILE" || echo on; }
+
+snapshot() {   # save the current desktop to $1
+    local files=()
+    for f in "${FILES[@]}"; do [[ -e "$CONF/$f" ]] && files+=("$f"); done
+    mkdir -p "$STATE"
+    tar -czf "$1.tmp" -C "$CONF" "${files[@]}" && mv "$1.tmp" "$1"
+}
+restore() {    # swap in the desktop saved in $1, with Plasma stopped
+    if systemctl --user is-active --quiet plasma-plasmashell 2>/dev/null; then
+        systemctl --user stop plasma-plasmashell
+        tar -xzf "$1" -C "$CONF"
+        systemctl --user start plasma-plasmashell
+    else
+        kquitapp6 plasmashell >/dev/null 2>&1 || true
+        tar -xzf "$1" -C "$CONF"
+        (kstart plasmashell >/dev/null 2>&1 &)
+    fi
+    qdbus6 org.kde.KWin /KWin reconfigure >/dev/null 2>&1 || true
+    # running apps pick up the colours
+    local scheme; scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null || true)"
+    [[ -n "$scheme" ]] && plasma-apply-colorscheme "$scheme" >/dev/null 2>&1 || true
+}
+usual_source() {   # where the usual desktop comes from: the last saved one, else the one from before Pillbox
+    if [[ -e "$USUAL" ]]; then echo "$USUAL"
+    elif [[ -e "$STATE/original-settings.tar.gz" ]]; then echo "$STATE/original-settings.tar.gz"
+    else ls -1 "$STATE"/backups/settings-*.tar.gz 2>/dev/null | head -1; fi
+}
+
+off() {
+    [[ "$(mode)" == off ]] && { echo "$(tr_ "Pillbox OS is already off." "Pillbox OS ist schon aus.")"; return; }
+    local src; src="$(usual_source)"
+    if [[ -z "$src" || ! -e "$src" ]]; then
+        echo "$(tr_ "No saved usual desktop found – nothing changed." "Kein gespeicherter normaler Desktop gefunden – nichts geändert.")" >&2
+        exit 1
+    fi
+    snapshot "$PILL"
+    echo off > "$MODE_FILE"
+    restore "$src"
+    echo "$(tr_ "Your usual desktop is back. 'pillbox on' or the Pillbox OS icon brings Pillbox back." \
+                "Dein normaler Desktop ist zurück. 'pillbox on' oder das Pillbox-OS-Symbol holt Pillbox zurück.")"
+}
+on() {
+    [[ "$(mode)" == on ]] && { echo "$(tr_ "Pillbox OS is already on." "Pillbox OS ist schon an.")"; return; }
+    if [[ ! -e "$PILL" ]]; then
+        echo "$(tr_ "No saved Pillbox desktop – run ./install.sh --layout once." "Kein gespeicherter Pillbox-Desktop – einmal ./install.sh --layout ausführen.")" >&2
+        exit 1
+    fi
+    snapshot "$USUAL"
+    echo on > "$MODE_FILE"
+    restore "$PILL"
+    echo "$(tr_ "Pillbox OS is back." "Pillbox OS ist zurück.")"
+}
+settings() {
+    if [[ "$(mode)" == off ]]; then
+        if kdialog --title "Pillbox OS" --yesno "$(tr_ "Pillbox OS is switched off. Start it now?" "Pillbox OS ist ausgeschaltet. Jetzt starten?")"; then
+            on; sleep 4
+        else
+            return 0
+        fi
+    fi
+    # ask the orb (or dock) to open its settings window: a new value in its config is the signal
+    qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \
+        "var done = false; panels().concat(desktops()).forEach(function(c){ c.widgets(\"org.pillbox.orb\").forEach(function(w){ if (done) return; done = true; w.currentConfigGroup = [\"General\"]; w.writeConfig(\"openSettings\", \"$(date +%s%N)\"); w.reloadConfig(); }); });" >/dev/null
+}
+
+case "${1:-settings}" in
+    settings) settings ;;
+    off)      off ;;
+    on)       on ;;
+    status)   mode ;;
+    -h|--help|help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) echo "Usage: pillbox [settings|on|off|status]" >&2; exit 1 ;;
+esac

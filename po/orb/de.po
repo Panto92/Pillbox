@@ -874,3 +874,18 @@ msgstr "Maximieren"
 
 msgid "Restore"
 msgstr "Wiederherstellen"
+
+msgid "Pillbox OS"
+msgstr "Pillbox OS"
+
+msgid "Switch off Pillbox OS"
+msgstr "Pillbox OS beenden"
+
+msgid "Back to your usual Plasma desktop. Pillbox stays installed and remembers everything – start it again from the Pillbox OS icon in your applications."
+msgstr "Zurück zu deinem normalen Plasma-Desktop. Pillbox bleibt installiert und merkt sich alles – starte es wieder über das Pillbox-OS-Symbol in deinen Programmen."
+
+msgid "Click again to switch off"
+msgstr "Nochmal klicken zum Beenden"
+
+msgid "Switch off…"
+msgstr "Beenden …"
