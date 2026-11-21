@@ -116,3 +116,42 @@ msgstr "Ausschalten"
 
 msgid "Click again"
 msgstr "Nochmal klicken"
+
+msgid "Power"
+msgstr "Energie"
+
+msgid "Fully charged"
+msgstr "Voll geladen"
+
+msgid "Charging"
+msgstr "Lädt"
+
+msgid "On battery"
+msgstr "Im Akkubetrieb"
+
+msgid "Power profile"
+msgstr "Energieprofil"
+
+msgid "Power saver"
+msgstr "Sparen"
+
+msgid "Performance"
+msgstr "Leistung"
+
+msgid "Balanced"
+msgstr "Ausgewogen"
+
+msgid "Performance is limited right now."
+msgstr "Die Leistung ist gerade eingeschränkt."
+
+msgid "Stay awake"
+msgstr "Wach bleiben"
+
+msgid "No sleep and no screen lock until you switch it off"
+msgstr "Kein Ruhezustand und keine Bildschirmsperre, bis du es ausschaltest"
+
+msgid "Sleep and screen lock as usual"
+msgstr "Ruhezustand und Sperre wie gewohnt"
+
+msgid "Stay awake was switched on in Pillbox"
+msgstr "Wach bleiben wurde in Pillbox eingeschaltet"

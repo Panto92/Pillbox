@@ -1,5 +1,5 @@
 /*
- * Pillbox Status – music, sound, Bluetooth, network and the session in one calm pill, each with its own panel.
+ * Pillbox Status – music, sound, Bluetooth, network, power and the session in one calm pill, each with its own panel.
  * Music appears only while a player is open. Built on Plasma's own models (MPRIS,
  * PulseAudio, NetworkManager, system sensors); nothing here talks to hardware directly.
  * SPDX-License-Identifier: MIT
@@ -21,6 +21,8 @@ import org.kde.plasma.networkmanagement as PlasmaNM
 import org.kde.bluezqt as BluezQt
 import org.kde.plasma.private.sessions as Sessions
 import org.kde.coreaddons as KCoreAddons
+import org.kde.plasma.private.batterymonitor as BatteryMonitor
+import org.kde.plasma.plasma5support as P5Support
 
 PlasmoidItem {
     id: root
@@ -66,6 +68,19 @@ PlasmoidItem {
 
     // ---------------------------------------------------------------- session
     Sessions.SessionManagement { id: sm }
+
+    // ---------------------------------------------------------------- power
+    BatteryMonitor.PowerProfilesControl { id: profiles }
+    BatteryMonitor.InhibitionControl { id: inhibit }
+    P5Support.DataSource { id: pm; engine: "powermanagement"; connectedSources: ["Battery"]; interval: 0 }
+    readonly property var battery: pm.data["Battery"] || ({})
+    readonly property bool hasBattery: !!battery["Has Battery"]
+    readonly property int batteryPct: battery["Percent"] || 0
+    readonly property bool charging: battery["State"] === "Charging" || battery["State"] === "FullyCharged"
+    function batteryIcon() {
+        const lvl = Math.round(batteryPct / 10) * 10
+        return "battery-" + String(lvl).padStart(3, "0") + (charging ? "-charging" : "")
+    }
     KCoreAddons.KUser { id: me }
 
     // ---------------------------------------------------------------- network
@@ -140,6 +155,13 @@ PlasmoidItem {
         }
         PillButton { visible: root.btPresent; target: "bt"; icon: root.btIcon() }
         PillButton { target: "net"; icon: netIcon.connectionIcon || "network-wired" }
+        PillButton {
+            visible: root.hasBattery
+            target: "session"
+            icon: root.batteryIcon()
+            PC3.Label { text: root.batteryPct + "%"; font.pixelSize: Kirigami.Theme.smallFont.pixelSize; font.features: { "tnum": 1 }
+                color: root.batteryPct <= 15 && !root.charging ? Kirigami.Theme.negativeTextColor : Kirigami.Theme.textColor }
+        }
         PillButton { target: "session"; icon: "system-shutdown" }
     }
 
@@ -155,7 +177,7 @@ PlasmoidItem {
             y: Kirigami.Units.smallSpacing
             spacing: Kirigami.Units.smallSpacing
             Repeater {
-                model: [{ p: "music", n: i18n("Music"), show: root.hasPlayer }, { p: "sound", n: i18n("Sound"), show: true }, { p: "bt", n: i18n("Bluetooth"), show: root.btPresent }, { p: "net", n: i18n("Network"), show: true }, { p: "session", n: i18n("Session"), show: true }]
+                model: [{ p: "music", n: i18n("Music"), show: root.hasPlayer }, { p: "sound", n: i18n("Sound"), show: true }, { p: "bt", n: i18n("Bluetooth"), show: root.btPresent }, { p: "net", n: i18n("Network"), show: true }, { p: "session", n: i18n("Power"), show: true }]
                 delegate: QQC2.AbstractButton {
                     id: tab
                     required property var modelData
@@ -429,7 +451,7 @@ PlasmoidItem {
                                 Rectangle { width: Math.max(height, parent.width * parent.parent.pct / 100); height: parent.height; radius: height / 2
                                     color: parent.parent.pct <= 15 ? Kirigami.Theme.negativeTextColor : root.accent }
                             }
-                            PC3.Label { text: parent.pct + " %"; font: Kirigami.Theme.smallFont; font.features: { "tnum": 1 } }
+                            PC3.Label { text: parent.pct + " %"; font.pixelSize: Kirigami.Theme.smallFont.pixelSize; font.features: { "tnum": 1 } }
                         }
                         PC3.BusyIndicator { visible: bdev.busy; running: visible; implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth }
                     }
@@ -468,6 +490,84 @@ PlasmoidItem {
                 else if (a === "off") sm.requestShutdown(skip)
                 root.expanded = false
             }
+            // battery (laptops only)
+            RowLayout {
+                visible: root.hasBattery
+                spacing: Kirigami.Units.largeSpacing
+                Item {
+                    implicitWidth: Kirigami.Units.gridUnit * 4.2; implicitHeight: Kirigami.Units.gridUnit * 2
+                    Rectangle {                                   // a pill-shaped battery gauge
+                        anchors.fill: parent; radius: height / 2; color: Qt.rgba(1, 1, 1, 0.08)
+                        Rectangle {
+                            width: Math.max(height, parent.width * root.batteryPct / 100); height: parent.height; radius: height / 2
+                            color: root.batteryPct <= 15 && !root.charging ? Kirigami.Theme.negativeTextColor : root.accent
+                            Behavior on width { NumberAnimation { duration: Kirigami.Units.longDuration } }
+                        }
+                        Kirigami.Icon { visible: root.charging; anchors.centerIn: parent; source: "battery-charging-symbolic"; width: parent.height * 0.6; height: width }
+                    }
+                }
+                ColumnLayout {
+                    spacing: 0
+                    PC3.Label { text: root.batteryPct + " %"; font.pixelSize: Kirigami.Units.gridUnit * 1.4; font.weight: Font.Bold; font.features: { "tnum": 1 } }
+                    PC3.Label { opacity: 0.6; font: Kirigami.Theme.smallFont
+                        text: root.battery["State"] === "FullyCharged" ? i18n("Fully charged") : root.charging ? i18n("Charging") : i18n("On battery") }
+                }
+            }
+            // power profile, as three big segments
+            ColumnLayout {
+                visible: profiles.isPowerProfileDaemonInstalled && profiles.profiles.length > 0
+                Layout.fillWidth: true
+                spacing: Kirigami.Units.smallSpacing
+                Caption { text: i18n("Power profile") }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Kirigami.Units.smallSpacing
+                    Repeater {
+                        model: ["power-saver", "balanced", "performance"].filter(p => profiles.profiles.indexOf(p) >= 0)
+                        delegate: QQC2.AbstractButton {
+                            id: prof
+                            required property string modelData
+                            readonly property bool on: profiles.activeProfile === modelData
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
+                            implicitHeight: Kirigami.Units.gridUnit * 3.4
+                            hoverEnabled: true
+                            onClicked: profiles.setProfile(modelData)
+                            background: Rectangle { radius: Kirigami.Units.gridUnit * 0.8
+                                color: prof.on ? root.accent : prof.hovered ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(1, 1, 1, 0.05)
+                                Behavior on color { ColorAnimation { duration: Kirigami.Units.shortDuration } } }
+                            contentItem: ColumnLayout {
+                                spacing: 2
+                                Kirigami.Icon { Layout.alignment: Qt.AlignHCenter; source: "power-profile-" + prof.modelData + "-symbolic"
+                                    implicitWidth: Kirigami.Units.iconSizes.smallMedium; implicitHeight: implicitWidth
+                                    color: prof.on ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor; isMask: true }
+                                PC3.Label { Layout.alignment: Qt.AlignHCenter; font: Kirigami.Theme.smallFont
+                                    color: prof.on ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor
+                                    text: prof.modelData === "power-saver" ? i18n("Power saver") : prof.modelData === "performance" ? i18n("Performance") : i18n("Balanced") }
+                            }
+                        }
+                    }
+                }
+                PC3.Label { visible: profiles.degradationReason !== "" || profiles.inhibitionReason !== ""; Layout.fillWidth: true; wrapMode: Text.Wrap
+                    font: Kirigami.Theme.smallFont; opacity: 0.6; text: i18n("Performance is limited right now.") }
+            }
+            // keep the screen awake
+            RowLayout {
+                Layout.fillWidth: true
+                Kirigami.Icon { source: "system-suspend-uninhibited"; implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+                    PC3.Label { text: i18n("Stay awake") }
+                    PC3.Label { Layout.fillWidth: true; elide: Text.ElideRight; font: Kirigami.Theme.smallFont; opacity: 0.6
+                        text: inhibit.isManuallyInhibited ? i18n("No sleep and no screen lock until you switch it off") : i18n("Sleep and screen lock as usual") }
+                }
+                PC3.Switch {
+                    checked: inhibit.isManuallyInhibited
+                    onToggled: checked ? inhibit.inhibit(i18n("Stay awake was switched on in Pillbox")) : inhibit.uninhibit()
+                }
+            }
+            Kirigami.Separator { Layout.fillWidth: true }
             RowLayout {                                         // who is logged in
                 spacing: Kirigami.Units.largeSpacing
                 Rectangle {
