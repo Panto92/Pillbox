@@ -970,9 +970,9 @@ PlasmoidItem {
 
     // icon theme: remember what was there before, so "Original" brings it back
     function applyIconTheme() {
-        const want = cfg.iconTheme === "Pillbox" || cfg.iconTheme === "Pillbox-Duo" ? cfg.iconTheme : String(cfg.iconThemeBefore || "breeze-dark").replace(/[^A-Za-z0-9_.-]/g, "")
+        const want = ["Pillbox", "Pillbox-Duo", "Pillbox-Lucide"].indexOf(cfg.iconTheme) >= 0 ? cfg.iconTheme : String(cfg.iconThemeBefore || "breeze-dark").replace(/[^A-Za-z0-9_.-]/g, "")
         iconProbe.connectSource("cur=$(kreadconfig6 --file kdeglobals --group Icons --key Theme); "
-            + "case \"$cur\" in Pillbox|Pillbox-Duo) ;; *) [ -n \"$cur\" ] && echo PBICON=$cur ;; esac; "
+            + "case \"$cur\" in Pillbox|Pillbox-Duo|Pillbox-Lucide) ;; *) [ -n \"$cur\" ] && echo PBICON=$cur ;; esac; "
             + "for c in /usr/lib/*/libexec/plasma-changeicons /usr/libexec/plasma-changeicons; do [ -x \"$c\" ] && exec \"$c\" " + want + "; done # " + Date.now())
     }
 
@@ -986,6 +986,12 @@ PlasmoidItem {
     }
 
     // rebuild the top panels in another arrangement (code/arrange.js), keeping each widget's settings
+    // height of the top bar: every top panel, the pills inside follow it
+    function applyBarSize() {
+        const h = ({ small: 26, normal: 32, large: 40 })[cfg.barSize] || 32
+        shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript 'panels().forEach(function(p){ if (p.location === \"top\") p.height = " + h + "; });' # " + Date.now())
+    }
+
     function applyArrangement() {
         const mode = String(cfg.arrangement || "islands").replace(/[^a-z]/g, "")
         const file = String(Qt.resolvedUrl("../code/arrange.js")).replace("file://", "")

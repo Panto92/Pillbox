@@ -768,8 +768,8 @@ msgstr "Symbole"
 msgid "System icons"
 msgstr "Systemsymbole"
 
-msgid "Pillbox's own icons for network, sound, notifications and session. Duotone puts your accent colour underneath."
-msgstr "Pillbox-eigene Symbole für Netz, Ton, Mitteilungen und Sitzung. Duoton legt deine Akzentfarbe darunter."
+msgid "Pillbox's own icons for network, sound, notifications and session. Lucide: clean round lines. Duotone puts your accent colour underneath."
+msgstr "Pillbox' eigene Symbole für Netz, Ton, Benachrichtigungen und Sitzung. Lucide: klare runde Linien. Duoton legt deine Akzentfarbe darunter."
 
 msgid "Original"
 msgstr "Original"
@@ -889,3 +889,18 @@ msgstr "Nochmal klicken zum Beenden"
 
 msgid "Switch off…"
 msgstr "Beenden …"
+
+msgid "Large"
+msgstr "Groß"
+
+msgid "Size"
+msgstr "Größe"
+
+msgid "Height of the top bar. Icons and pills grow and shrink with it."
+msgstr "Höhe der oberen Leiste. Symbole und Pillen wachsen und schrumpfen mit."
+
+msgid "Your own widgets"
+msgstr "Eigene Widgets"
+
+msgid "The bar stays a normal Plasma panel: right-click it → Enter Edit Mode to add, move or remove widgets. Switching the arrangement keeps them."
+msgstr "Die Leiste bleibt eine normale Plasma-Leiste: Rechtsklick → Bearbeitungsmodus, um Widgets hinzuzufügen, zu verschieben oder zu entfernen. Beim Wechsel der Anordnung bleiben sie erhalten."

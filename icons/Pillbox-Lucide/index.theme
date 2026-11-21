@@ -1,0 +1,12 @@
+[Icon Theme]
+Name=Pillbox Lucide
+Comment=Lucide line icons for the panel, the system tray and the Pillbox panels; everything else comes from Breeze.
+Inherits=breeze-dark,breeze,hicolor
+Directories=symbolic
+
+[symbolic]
+Size=24
+MinSize=8
+MaxSize=512
+Type=Scalable
+Context=Status

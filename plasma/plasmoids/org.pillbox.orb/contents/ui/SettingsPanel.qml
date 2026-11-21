@@ -1072,6 +1072,11 @@ GradientStop { position: 0; color: tr.at(0) }
                 SettingRow { label: i18n("Top bar"); hint: i18n("Three floating islands, one bar across the whole width, or everything in one capsule. Widgets keep their settings.")
                     Segments { key: "arrangement"; options: [["islands", i18n("Islands")], ["bar", i18n("Full bar")], ["capsule", i18n("Capsule")]]
                                onPicked: panel.orb.applyArrangement() } }
+                SettingRow { label: i18n("Size"); hint: i18n("Height of the top bar. Icons and pills grow and shrink with it.")
+                    Segments { key: "barSize"; options: [["small", i18n("Small")], ["normal", i18n("Normal")], ["large", i18n("Large")]]
+                               onPicked: panel.orb.applyBarSize() } }
+                SettingRow { label: i18n("Your own widgets"); hint: i18n("The bar stays a normal Plasma panel: right-click it → Enter Edit Mode to add, move or remove widgets. Switching the arrangement keeps them.")
+                    Item { width: 1; height: 1 } }
             }
             Group {
                 title: i18n("Clock")
@@ -1091,8 +1096,8 @@ GradientStop { position: 0; color: tr.at(0) }
             }
             Group {
                 title: i18n("Icons")
-                SettingRow { label: i18n("System icons"); hint: i18n("Pillbox's own icons for network, sound, notifications and session. Duotone puts your accent colour underneath.")
-                    Segments { key: "iconTheme"; options: [["keep", i18n("Original")], ["Pillbox", i18n("Line")], ["Pillbox-Duo", i18n("Duotone")]]
+                SettingRow { label: i18n("System icons"); hint: i18n("Pillbox's own icons for network, sound, notifications and session. Lucide: clean round lines. Duotone puts your accent colour underneath.")
+                    Segments { key: "iconTheme"; options: [["keep", i18n("Original")], ["Pillbox-Lucide", "Lucide"], ["Pillbox", i18n("Line")], ["Pillbox-Duo", i18n("Duotone")]]
                                onPicked: panel.orb.applyIconTheme() } }
             }
             Group {

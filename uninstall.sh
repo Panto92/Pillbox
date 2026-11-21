@@ -79,9 +79,9 @@ if [[ -e /usr/share/sddm/themes/pillbox ]]; then
     say "    sudo $STATE/login/install-login.sh --remove"
 fi
 case "$(kreadconfig6 --file kdeglobals --group Icons --key Theme 2>/dev/null)" in
-    Pillbox|Pillbox-Duo) /usr/lib/*/libexec/plasma-changeicons breeze-dark >/dev/null 2>&1 || kwriteconfig6 --file kdeglobals --group Icons --key Theme breeze-dark ;;
+    Pillbox|Pillbox-Duo|Pillbox-Lucide) /usr/lib/*/libexec/plasma-changeicons breeze-dark >/dev/null 2>&1 || kwriteconfig6 --file kdeglobals --group Icons --key Theme breeze-dark ;;
 esac
-rm -rf "$DATA/icons/Pillbox" "$DATA/icons/Pillbox-Duo"
+rm -rf "$DATA/icons/Pillbox" "$DATA/icons/Pillbox-Duo" "$DATA/icons/Pillbox-Lucide"
 if [[ "$(kreadconfig6 --file kscreenlockerrc --group Greeter --key WallpaperPlugin 2>/dev/null)" == "org.pillbox.atmosphere" ]]; then
     kwriteconfig6 --file kscreenlockerrc --group Greeter --key WallpaperPlugin --delete    # back to Plasma's image
 fi

@@ -103,8 +103,8 @@ say "Installed the Pillbox OS app (menu entry and 'pillbox' command)"
 
 # Pillbox icon themes (line and duotone); chosen in the settings centre
 mkdir -p "$DATA/icons"
-rm -rf "$DATA/icons/Pillbox" "$DATA/icons/Pillbox-Duo"
-cp -r "$SRC/icons/Pillbox" "$SRC/icons/Pillbox-Duo" "$DATA/icons/"
+rm -rf "$DATA/icons/Pillbox" "$DATA/icons/Pillbox-Duo" "$DATA/icons/Pillbox-Lucide"
+cp -r "$SRC/icons/Pillbox" "$SRC/icons/Pillbox-Duo" "$SRC/icons/Pillbox-Lucide" "$DATA/icons/"
 
 # login screen files, ready for the settings centre's "Set up" button (that step needs root)
 LOGIN="$STATE/login"
