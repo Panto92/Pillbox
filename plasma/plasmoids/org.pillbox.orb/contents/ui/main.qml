@@ -958,7 +958,7 @@ PlasmoidItem {
     function setWidget(type, key, value) {
         const t = String(type).replace(/[^a-z.]/g, ""), k = String(key).replace(/[^A-Za-z]/g, "")
         const v = typeof value === "boolean" ? (value ? "true" : "false") : "\"" + String(value).replace(/[^a-z]/g, "") + "\""
-        const js = "panels().forEach(function(p){ p.widgets(\"" + t + "\").forEach(function(w){ w.currentConfigGroup = [\"General\"]; w.writeConfig(\"" + k + "\", " + v + "); }); });"
+        const js = "panels().forEach(function(p){ p.widgets(\"" + t + "\").forEach(function(w){ w.currentConfigGroup = [\"General\"]; w.writeConfig(\"" + k + "\", " + v + "); w.reloadConfig(); }); });"
         shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '" + js + "' # " + Date.now())
     }
 
@@ -988,7 +988,7 @@ PlasmoidItem {
     // rebuild the top panels in another arrangement (code/arrange.js), keeping each widget's settings
     // height of the top bar: every top panel, the pills inside follow it
     function applyBarSize() {
-        const h = ({ small: 26, normal: 32, large: 40 })[cfg.barSize] || 32
+        const h = ({ normal: 42, large: 50, xlarge: 58 })[cfg.barSize] || 42   // Plasma keeps a floating panel at 42 px or more
         shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript 'panels().forEach(function(p){ if (p.location === \"top\") p.height = " + h + "; });' # " + Date.now())
     }
 

@@ -23,20 +23,37 @@ import org.kde.taskmanager as TaskManager
 WallpaperItem {
     id: root
 
-    readonly property var cfg: root.configuration
+    // The settings centre writes this wallpaper's config through Plasma's scripting API.
+    // Those writes reach root.configuration, but without change signals – so bindings would
+    // only notice on the next scene load. cfg is therefore a plain copy, refreshed once a
+    // second when anything differs (a cheap string compare).
+    property var cfg: snapshot()
+    property string cfgText: JSON.stringify(cfg)
+    function snapshot() {
+        const c = root.configuration, o = {}
+        for (const k of c.keys()) o[k] = c[k]
+        return o
+    }
+    Timer {
+        interval: 1000; repeat: true; running: true
+        onTriggered: {
+            const s = root.snapshot(), t = JSON.stringify(s)
+            if (t === root.cfgText) return
+            const before = root.cfg
+            root.cfgText = t
+            root.cfg = s
+            if (s.FollowTime !== before.FollowTime || s.FixedHour !== before.FixedHour) root.hour = root.currentHour()
+            if (s.Preview !== before.Preview) { boostAnim.restart(); root.newNotification() }
+        }
+    }
 
     // ---- time of day (once a minute)
     function clockHour() { const d = new Date(); return d.getHours() + d.getMinutes() / 60 }
-    property real hour: cfg.FollowTime ? clockHour() : cfg.FixedHour
+    function currentHour() { return root.cfg.FollowTime ? clockHour() : Number(root.cfg.FixedHour) }
+    property real hour: currentHour()
     Timer {
         interval: 60000; repeat: true; running: true
-        onTriggered: root.hour = root.cfg.FollowTime ? root.clockHour() : root.cfg.FixedHour
-    }
-    Connections {
-        target: root.cfg
-        function onFollowTimeChanged() { root.hour = root.cfg.FollowTime ? root.clockHour() : root.cfg.FixedHour }
-        function onFixedHourChanged() { if (!root.cfg.FollowTime) root.hour = root.cfg.FixedHour }
-        function onPreviewChanged() { boostAnim.restart(); root.newNotification() }
+        onTriggered: root.hour = root.currentHour()
     }
 
     // ---- how much the computer shows through

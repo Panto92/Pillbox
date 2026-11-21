@@ -1073,7 +1073,7 @@ GradientStop { position: 0; color: tr.at(0) }
                     Segments { key: "arrangement"; options: [["islands", i18n("Islands")], ["bar", i18n("Full bar")], ["capsule", i18n("Capsule")]]
                                onPicked: panel.orb.applyArrangement() } }
                 SettingRow { label: i18n("Size"); hint: i18n("Height of the top bar. Icons and pills grow and shrink with it.")
-                    Segments { key: "barSize"; options: [["small", i18n("Small")], ["normal", i18n("Normal")], ["large", i18n("Large")]]
+                    Segments { key: "barSize"; options: [["normal", i18n("Normal")], ["large", i18n("Large")], ["xlarge", i18n("Extra large")]]
                                onPicked: panel.orb.applyBarSize() } }
                 SettingRow { label: i18n("Your own widgets"); hint: i18n("The bar stays a normal Plasma panel: right-click it → Enter Edit Mode to add, move or remove widgets. Switching the arrangement keeps them.")
                     Item { width: 1; height: 1 } }

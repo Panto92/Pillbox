@@ -904,3 +904,6 @@ msgstr "Eigene Widgets"
 
 msgid "The bar stays a normal Plasma panel: right-click it → Enter Edit Mode to add, move or remove widgets. Switching the arrangement keeps them."
 msgstr "Die Leiste bleibt eine normale Plasma-Leiste: Rechtsklick → Bearbeitungsmodus, um Widgets hinzuzufügen, zu verschieben oder zu entfernen. Beim Wechsel der Anordnung bleiben sie erhalten."
+
+msgid "Extra large"
+msgstr "Sehr groß"
