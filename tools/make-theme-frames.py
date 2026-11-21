@@ -63,7 +63,7 @@ def lineedit():
     # one quiet capsule; no separate hover / focus ring (nested fields such as KRunner's
     # would show it twice) – the cursor shows where you type
     R = 12
-    body = frame("base", 0, R, "ColorScheme-ViewBackground", 0.92, 0.16, 1.0, "ColorScheme-Text")
+    body = frame("base", 0, R, "ColorScheme-ViewBackground", 1.0, 0)      # opaque and borderless: nested fields merge into one
     body += margins("base", 0, 10, 6, 10, 6)
     return svg("Pillbox: text fields as soft, opaque capsules.", 40, body)
 
