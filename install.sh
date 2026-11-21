@@ -145,6 +145,9 @@ apply_style() {
         [[ -x "$c" ]] && "$c" Pillbox-Lucide >/dev/null 2>&1 && { done=1; break; }
     done
     (( done )) || kwriteconfig6 --file kdeglobals --group Icons --key Theme Pillbox-Lucide
+    # KRunner (typing on the desktop) floats in the middle of the screen, like Pillbox Search
+    kwriteconfig6 --file krunnerrc --group General --key FreeFloating true
+    kquitapp6 krunner >/dev/null 2>&1 || true
     say "Plasma style, colours and Lucide icons are set"
 }
 if (( LAYOUT )); then
