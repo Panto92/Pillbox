@@ -824,13 +824,22 @@ PlasmoidItem {
     }
     Timer { id: previewShow; interval: 350; onTriggered: root.showPreview() }
     Timer { id: previewHide; interval: 320; onTriggered: if (!preview.hovered) preview.close() }
+    // the preview belongs to the ring (orb) or to a hovered dock slot: never let it outlive them
+    Timer {
+        interval: 300; repeat: true; running: preview.visible
+        onTriggered: {
+            const owner = root.orbForm ? root.ringOpen : true
+            if (!owner && !preview.hovered) { previewShow.stop(); preview.close() }
+        }
+    }
+    onRingOpenChanged: if (!ringOpen) { previewShow.stop(); previewHide.stop(); preview.close() }
 
     PreviewPopup {
         id: preview
         visible: false
         tasksModel: appsModel
         accent: root.accent
-        onActivated: { close(); root.closeRing() }
+        onActivated: { previewShow.stop(); previewHide.stop(); close(); root.closeRing() }
         onHoveredChanged: hovered ? previewHide.stop() : previewHide.restart()
     }
 
