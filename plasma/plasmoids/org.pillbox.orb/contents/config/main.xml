@@ -35,6 +35,7 @@
     <entry name="loginScene" type="String"><default>auto</default></entry>
     <!-- the load pill (org.pillbox.stats), mirrored here and written into the widget -->
     <entry name="statsStyle" type="String"><default>rings</default></entry>
+    <entry name="clockPanel" type="String"><default>dashboard</default></entry>
     <!-- demo mode (tools/demo.sh): "ring" opens the ring, anything else closes it -->
     <entry name="demo" type="String"><default></default></entry>
     <!-- use the orb's colour as Plasma's accent colour for the whole system -->

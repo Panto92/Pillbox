@@ -850,3 +850,18 @@ msgstr "Abstrakt"
 
 msgid "Scroll or use ← → to flip through"
 msgstr "Mit Mausrad oder ← → durchblättern"
+
+msgid "Clock"
+msgstr "Uhr"
+
+msgid "Click on the clock"
+msgstr "Klick auf die Uhr"
+
+msgid "Dashboard: large clock, month, weather and notifications. Classic: month and notifications."
+msgstr "Dashboard: große Uhr, Monat, Wetter und Benachrichtigungen. Klassisch: Monat und Benachrichtigungen."
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Classic"
+msgstr "Klassisch"

@@ -1049,6 +1049,12 @@ GradientStop { position: 0; color: tr.at(0) }
                                onPicked: panel.orb.applyArrangement() } }
             }
             Group {
+                title: i18n("Clock")
+                SettingRow { label: i18n("Click on the clock"); hint: i18n("Dashboard: large clock, month, weather and notifications. Classic: month and notifications.")
+                    Segments { key: "clockPanel"; options: [["dashboard", i18n("Dashboard")], ["classic", i18n("Classic")]]
+                               onPicked: panel.orb.setWidget("org.pillbox.island", "panelStyle", panel.cfg.clockPanel) } }
+            }
+            Group {
                 title: i18n("Load")
                 SettingRow { label: i18n("Look"); hint: i18n("How CPU, GPU, memory and temperature appear in the left pill.")
                     Segments { key: "statsStyle"; options: [["rings", i18n("Rings")], ["spark", i18n("Curves")], ["bars", i18n("Bars")], ["numbers", i18n("Numbers")]]

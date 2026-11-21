@@ -29,3 +29,54 @@ msgid "%1 unread notification"
 msgid_plural "%1 unread notifications"
 msgstr[0] "%1 ungelesene Mitteilung"
 msgstr[1] "%1 ungelesene Mitteilungen"
+
+msgid "Clear"
+msgstr "Klar"
+
+msgid "Partly cloudy"
+msgstr "Leicht bewölkt"
+
+msgid "Overcast"
+msgstr "Bedeckt"
+
+msgid "Fog"
+msgstr "Nebel"
+
+msgid "Drizzle"
+msgstr "Niesel"
+
+msgid "Rain"
+msgstr "Regen"
+
+msgid "Snow"
+msgstr "Schnee"
+
+msgid "Thunderstorm"
+msgstr "Gewitter"
+
+msgid "Weather unavailable"
+msgstr "Wetter nicht verfügbar"
+
+msgid "Place not found"
+msgstr "Ort nicht gefunden"
+
+msgid "Weather"
+msgstr "Wetter"
+
+msgid "Enter your town to see the weather. It is looked up at open-meteo.com; nothing else is sent."
+msgstr "Gib deinen Ort ein, um das Wetter zu sehen. Es wird bei open-meteo.com abgefragt; sonst wird nichts gesendet."
+
+msgid "Town, e.g. Hamburg"
+msgstr "Ort, z. B. Hamburg"
+
+msgid "%1 · feels like %2°"
+msgstr "%1 · gefühlt %2°"
+
+msgid "Loading…"
+msgstr "Lädt …"
+
+msgid "Change place"
+msgstr "Ort ändern"
+
+msgid "Today"
+msgstr "Heute"

@@ -8,5 +8,9 @@
     <entry name="suppressedApps" type="StringList"><default></default></entry>
     <entry name="suppressedServices" type="StringList"><default></default></entry>
     <entry name="showDate" type="Bool"><default>true</default></entry>
+    <entry name="panelStyle" type="String"><default>dashboard</default></entry>
+    <entry name="weatherPlace" type="String"><default></default></entry>
+    <entry name="weatherLat" type="Double"><default>0</default></entry>
+    <entry name="weatherLon" type="Double"><default>0</default></entry>
   </group>
 </kcfg>
