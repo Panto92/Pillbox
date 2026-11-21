@@ -66,7 +66,7 @@ orb Appearance form "'orb'"; sleep 2
 
 say "Wallpaper: a day at the lake"
 wall Scene "'fogline'"; wall FixedHour 5.5; sleep 2
-for h in $(seq 5.5 0.25 22.5); do wall FixedHour "$h"; sleep 0.12; done
+for h in $(LC_ALL=C seq 5.5 0.25 22.5); do wall FixedHour "$h"; sleep 0.12; done
 sleep 2
 wall Scene "'aurora'"; wall FixedHour 23; sleep 3
 
