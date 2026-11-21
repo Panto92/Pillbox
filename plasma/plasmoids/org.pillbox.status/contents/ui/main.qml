@@ -1,5 +1,5 @@
 /*
- * Pillbox Status – music, sound, Bluetooth and network in one calm pill, each with its own panel.
+ * Pillbox Status – music, sound, Bluetooth, network and the session in one calm pill, each with its own panel.
  * Music appears only while a player is open. Built on Plasma's own models (MPRIS,
  * PulseAudio, NetworkManager, system sensors); nothing here talks to hardware directly.
  * SPDX-License-Identifier: MIT
@@ -19,12 +19,14 @@ import org.kde.plasma.private.mpris as Mpris
 import org.kde.plasma.private.volume as Vol
 import org.kde.plasma.networkmanagement as PlasmaNM
 import org.kde.bluezqt as BluezQt
+import org.kde.plasma.private.sessions as Sessions
+import org.kde.coreaddons as KCoreAddons
 
 PlasmoidItem {
     id: root
 
     readonly property color accent: Kirigami.Theme.highlightColor
-    property string page: "sound"                     // music | sound | bt | net
+    property string page: "sound"                     // music | sound | bt | net | session
 
     // ---------------------------------------------------------------- music
     Mpris.Mpris2Model { id: mpris }
@@ -61,6 +63,10 @@ PlasmoidItem {
         if (!on) bt.bluetoothBlocked = true
     }
     function btIcon() { return !btOn ? "network-bluetooth-inactive" : btConnected.length ? "network-bluetooth-activated" : "network-bluetooth" }
+
+    // ---------------------------------------------------------------- session
+    Sessions.SessionManagement { id: sm }
+    KCoreAddons.KUser { id: me }
 
     // ---------------------------------------------------------------- network
     PlasmaNM.NetworkStatus { id: netStatus }
@@ -134,6 +140,7 @@ PlasmoidItem {
         }
         PillButton { visible: root.btPresent; target: "bt"; icon: root.btIcon() }
         PillButton { target: "net"; icon: netIcon.connectionIcon || "network-wired" }
+        PillButton { target: "session"; icon: "system-shutdown" }
     }
 
     // ---------------------------------------------------------------- the panels
@@ -148,7 +155,7 @@ PlasmoidItem {
             y: Kirigami.Units.smallSpacing
             spacing: Kirigami.Units.smallSpacing
             Repeater {
-                model: [{ p: "music", n: i18n("Music"), show: root.hasPlayer }, { p: "sound", n: i18n("Sound"), show: true }, { p: "bt", n: i18n("Bluetooth"), show: root.btPresent }, { p: "net", n: i18n("Network"), show: true }]
+                model: [{ p: "music", n: i18n("Music"), show: root.hasPlayer }, { p: "sound", n: i18n("Sound"), show: true }, { p: "bt", n: i18n("Bluetooth"), show: root.btPresent }, { p: "net", n: i18n("Network"), show: true }, { p: "session", n: i18n("Session"), show: true }]
                 delegate: QQC2.AbstractButton {
                     id: tab
                     required property var modelData
@@ -165,7 +172,7 @@ PlasmoidItem {
         Loader {
             id: pages
             anchors { top: tabs.bottom; topMargin: Kirigami.Units.largeSpacing; left: parent.left; right: parent.right; margins: Kirigami.Units.smallSpacing }
-            sourceComponent: root.page === "music" && root.hasPlayer ? musicPage : root.page === "net" ? netPage : root.page === "bt" && root.btPresent ? btPage : soundPage
+            sourceComponent: root.page === "music" && root.hasPlayer ? musicPage : root.page === "net" ? netPage : root.page === "session" ? sessionPage : root.page === "bt" && root.btPresent ? btPage : soundPage
         }
     }
 
@@ -437,6 +444,99 @@ PlasmoidItem {
                 Layout.fillWidth: true
                 icon.name: "list-add"; text: i18n("Add a device…")
                 onClicked: { KCM.KCMLauncher.openSystemSettings("kcm_bluetooth"); root.expanded = false }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- session
+    Component {
+        id: sessionPage
+        ColumnLayout {
+            id: sess
+            spacing: Kirigami.Units.largeSpacing
+            // the action waiting for a second click, and how long it waits
+            property string armed: ""
+            Timer { id: disarm; interval: 3500; onTriggered: sess.armed = "" }
+            function run(a) {
+                const skip = Sessions.SessionManagement.Skip
+                if (a === "lock") sm.lock()
+                else if (a === "sleep") sm.suspend()
+                else if (a === "hibernate") sm.hibernate()
+                else if (a === "switch") sm.switchUser()
+                else if (a === "logout") sm.requestLogout(skip)
+                else if (a === "reboot") sm.requestReboot(skip)
+                else if (a === "off") sm.requestShutdown(skip)
+                root.expanded = false
+            }
+            RowLayout {                                         // who is logged in
+                spacing: Kirigami.Units.largeSpacing
+                Rectangle {
+                    implicitWidth: Kirigami.Units.gridUnit * 3; implicitHeight: implicitWidth; radius: width / 2
+                    color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.25)
+                    clip: true
+                    Image { id: face; anchors.fill: parent; source: me.faceIconUrl; fillMode: Image.PreserveAspectCrop; visible: false; sourceSize.width: 128 }
+                    Rectangle { id: faceMask; anchors.fill: parent; radius: width / 2; visible: false; layer.enabled: true }
+                    MultiEffect { anchors.fill: parent; source: face; maskEnabled: true; maskSource: faceMask; visible: face.status === Image.Ready }
+                    PC3.Label { anchors.centerIn: parent; visible: face.status !== Image.Ready; text: (me.fullName || me.loginName || "?").charAt(0).toUpperCase()
+                        font.pixelSize: Kirigami.Units.gridUnit * 1.4; font.weight: Font.Bold }
+                }
+                ColumnLayout {
+                    spacing: 0
+                    PC3.Label { text: me.fullName || me.loginName; font.weight: Font.DemiBold; font.pixelSize: Kirigami.Units.gridUnit * 1.1 }
+                    PC3.Label { text: me.loginName + "@" + me.host; opacity: 0.6; font: Kirigami.Theme.smallFont }
+                }
+            }
+            GridLayout {
+                Layout.fillWidth: true
+                columns: 3
+                rowSpacing: Kirigami.Units.smallSpacing; columnSpacing: Kirigami.Units.smallSpacing
+                uniformCellWidths: true
+                Repeater {
+                    model: [
+                        { a: "lock", n: i18n("Lock"), i: "system-lock-screen", ok: sm.canLock },
+                        { a: "sleep", n: i18n("Sleep"), i: "system-suspend", ok: sm.canSuspend },
+                        { a: "hibernate", n: i18n("Hibernate"), i: "system-suspend-hibernate", ok: sm.canHibernate },
+                        { a: "switch", n: i18n("Switch user"), i: "system-switch-user", ok: sm.canSwitchUser },
+                        { a: "logout", n: i18n("Log out"), i: "system-log-out", ok: sm.canLogout, ask: true },
+                        { a: "reboot", n: i18n("Restart"), i: "system-reboot", ok: sm.canReboot, ask: true },
+                        { a: "off", n: i18n("Shut down"), i: "system-shutdown", ok: sm.canShutdown, ask: true }
+                    ].filter(e => e.ok)
+                    delegate: QQC2.AbstractButton {
+                        id: act
+                        required property var modelData
+                        readonly property bool armed: sess.armed === modelData.a
+                        Layout.fillWidth: true
+                        implicitHeight: Kirigami.Units.gridUnit * 4.6
+                        hoverEnabled: true
+                        onClicked: {
+                            if (modelData.ask && !armed) { sess.armed = modelData.a; disarm.restart(); return }
+                            sess.run(modelData.a)
+                        }
+                        background: Rectangle {
+                            radius: Kirigami.Units.gridUnit * 0.9
+                            color: act.armed ? (act.modelData.a === "off" ? Kirigami.Theme.negativeTextColor : root.accent)
+                                 : act.hovered ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(1, 1, 1, 0.05)
+                            Behavior on color { ColorAnimation { duration: Kirigami.Units.shortDuration } }
+                            scale: act.pressed ? 0.96 : 1
+                            Behavior on scale { NumberAnimation { duration: 90 } }
+                            // the remaining time to confirm, as a thin line along the bottom
+                            Rectangle {
+                                visible: act.armed
+                                anchors { left: parent.left; bottom: parent.bottom; margins: Kirigami.Units.smallSpacing * 1.5 }
+                                height: 3; radius: 1.5; color: Kirigami.Theme.highlightedTextColor; opacity: 0.7
+                                NumberAnimation on width { running: act.armed; from: act.width - Kirigami.Units.smallSpacing * 3; to: 0; duration: disarm.interval }
+                            }
+                        }
+                        contentItem: ColumnLayout {
+                            spacing: Kirigami.Units.smallSpacing
+                            Kirigami.Icon { Layout.alignment: Qt.AlignHCenter; source: act.modelData.i; implicitWidth: Kirigami.Units.iconSizes.medium; implicitHeight: implicitWidth
+                                color: act.armed ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor; isMask: act.armed }
+                            PC3.Label { Layout.alignment: Qt.AlignHCenter; Layout.maximumWidth: act.width - Kirigami.Units.smallSpacing * 2; elide: Text.ElideRight
+                                text: act.armed ? i18n("Click again") : act.modelData.n; font: Kirigami.Theme.smallFont
+                                color: act.armed ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor }
+                        }
+                    }
+                }
             }
         }
     }

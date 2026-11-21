@@ -89,3 +89,30 @@ msgstr "Noch keine Geräte gekoppelt"
 
 msgid "Add a device…"
 msgstr "Gerät hinzufügen …"
+
+msgid "Session"
+msgstr "Sitzung"
+
+msgid "Lock"
+msgstr "Sperren"
+
+msgid "Sleep"
+msgstr "Bereitschaft"
+
+msgid "Hibernate"
+msgstr "Ruhezustand"
+
+msgid "Switch user"
+msgstr "Benutzer wechseln"
+
+msgid "Log out"
+msgstr "Abmelden"
+
+msgid "Restart"
+msgstr "Neustart"
+
+msgid "Shut down"
+msgstr "Ausschalten"
+
+msgid "Click again"
+msgstr "Nochmal klicken"

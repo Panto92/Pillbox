@@ -171,7 +171,7 @@ Window {
                         Layout.leftMargin: Kirigami.Units.gridUnit * 1.5
                         Layout.rightMargin: Kirigami.Units.largeSpacing
                         Kirigami.Heading { level: 2; text: panel.pages.find(p => p.id === panel.page).name; Layout.fillWidth: true }
-                        QQC2.ToolButton { icon.name: "window-close"; display: QQC2.AbstractButton.IconOnly; text: i18n("Close"); onClicked: panel.closeRequested() }
+                        Item { implicitWidth: winCtl.width; implicitHeight: 1 }    // room for the window buttons
                     }
 
                     Loader {
@@ -216,6 +216,30 @@ Window {
     // a group: small caps title + rows
     // the atmospheres as slanted strips: the chosen one opens wide, the wheel or the arrow
     // keys flip through, colour dots filter by mood
+    // minimise, maximise and close – fixed in the top right corner, above everything
+    Row {
+        id: winCtl
+        z: 100
+        parent: panel.contentItem
+        anchors { top: parent.top; right: parent.right; margins: Kirigami.Units.largeSpacing }
+        spacing: Kirigami.Units.smallSpacing
+        component WinButton: QQC2.AbstractButton {
+            id: wb
+            property string iconName
+            property color tint: Qt.rgba(1, 1, 1, 0.12)
+            width: Kirigami.Units.gridUnit * 1.6; height: width
+            hoverEnabled: true
+            QQC2.ToolTip.visible: hovered; QQC2.ToolTip.text: text; QQC2.ToolTip.delay: 600
+            background: Rectangle { radius: width / 2; color: wb.hovered ? wb.tint : Qt.rgba(1, 1, 1, 0.05)
+                Behavior on color { ColorAnimation { duration: Kirigami.Units.shortDuration } } }
+            contentItem: Item { Kirigami.Icon { anchors.centerIn: parent; source: wb.iconName; width: wb.width * 0.55; height: width } }
+        }
+        WinButton { iconName: "window-minimize"; text: i18n("Minimize"); onClicked: panel.showMinimized() }
+        WinButton { iconName: panel.visibility === Window.Maximized ? "window-restore" : "window-maximize"; text: panel.visibility === Window.Maximized ? i18n("Restore") : i18n("Maximize")
+            onClicked: panel.visibility === Window.Maximized ? panel.showNormal() : panel.showMaximized() }
+        WinButton { iconName: "window-close"; text: i18n("Close"); tint: Qt.rgba(0.9, 0.3, 0.3, 0.7); onClicked: panel.closeRequested() }
+    }
+
     component WallStrips: FocusScope {
         id: ws
         readonly property var all: [
@@ -238,8 +262,8 @@ Window {
         readonly property real gap: Kirigami.Units.smallSpacing * 1.5
         readonly property real stripsH: Kirigami.Units.gridUnit * 13
         // the open strip takes about half, the rest share what is left
-        readonly property real openW: Math.max(Kirigami.Units.gridUnit * 10, (width - slant) * (list.length > 1 ? 0.46 : 1))
-        readonly property real narrowW: list.length > 1 ? Math.max(Kirigami.Units.gridUnit * 1.4, (width - slant - openW - gap * (list.length - 1)) / (list.length - 1)) : 0
+        readonly property real openW: Math.max(Math.min(Kirigami.Units.gridUnit * 10, (width - slant) * 0.6), (width - slant) * (list.length > 1 ? 0.46 : 1))
+        readonly property real narrowW: list.length > 1 ? Math.max(Kirigami.Units.gridUnit * 0.5, (width - slant - openW - gap * (list.length - 1)) / (list.length - 1)) : 0
         implicitHeight: col.implicitHeight
         Layout.topMargin: Kirigami.Units.smallSpacing
         function pick(i) {
@@ -283,6 +307,7 @@ Window {
             Item {
                 id: stage
                 width: parent.width; height: ws.stripsH
+                clip: true
                 WheelHandler {
                     acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
                     property real acc: 0

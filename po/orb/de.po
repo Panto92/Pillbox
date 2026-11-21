@@ -865,3 +865,12 @@ msgstr "Dashboard"
 
 msgid "Classic"
 msgstr "Klassisch"
+
+msgid "Minimize"
+msgstr "Minimieren"
+
+msgid "Maximize"
+msgstr "Maximieren"
+
+msgid "Restore"
+msgstr "Wiederherstellen"
