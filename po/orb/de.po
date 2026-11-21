@@ -931,3 +931,9 @@ msgstr "Kapseln"
 
 msgid "How CPU, GPU, memory and temperature appear in the left pill. A click on it opens the details, your drives and a tidy-up."
 msgstr "Wie CPU, GPU, Arbeitsspeicher und Temperatur in der linken Pille erscheinen. Ein Klick darauf öffnet die Details, deine Laufwerke und das Aufräumen."
+
+msgid "Live activities"
+msgstr "Live-Aktivitäten"
+
+msgid "Downloads, music, a timer, a microphone in use and charging appear beside the time. Hover for details."
+msgstr "Downloads, Musik, ein Timer, ein benutztes Mikrofon und das Laden erscheinen neben der Uhrzeit. Mit der Maus darüber siehst du Details."

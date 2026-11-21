@@ -1083,6 +1083,8 @@ GradientStop { position: 0; color: tr.at(0) }
                 SettingRow { label: i18n("Click on the clock"); hint: i18n("Dashboard: large clock, month, weather and notifications. Classic: month and notifications.")
                     Segments { key: "clockPanel"; options: [["dashboard", i18n("Dashboard")], ["classic", i18n("Classic")]]
                                onPicked: panel.orb.setWidget("org.pillbox.island", "panelStyle", panel.cfg.clockPanel) } }
+                SettingRow { label: i18n("Live activities"); hint: i18n("Downloads, music, a timer, a microphone in use and charging appear beside the time. Hover for details.")
+                    Toggle { key: "islandLive"; onPicked: panel.orb.setWidget("org.pillbox.island", "liveActivities", panel.cfg.islandLive) } }
             }
             Group {
                 title: i18n("Menu button")

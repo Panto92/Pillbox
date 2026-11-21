@@ -221,6 +221,37 @@ Item {
                     }
                 }
             }
+            // a quick timer: it runs as a live activity beside the clock
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Kirigami.Units.smallSpacing
+                Kirigami.Icon { source: "chronometer-symbolic"; isMask: true; color: Kirigami.Theme.textColor; implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth }
+                PC3.Label { text: i18n("Timer"); Layout.rightMargin: Kirigami.Units.smallSpacing }
+                Repeater {
+                    model: panel.host.liveSrc && panel.host.liveSrc.timerEnd > 0 ? [] : [1, 5, 10, 25]
+                    delegate: QQC2.AbstractButton {
+                        id: tchip
+                        required property int modelData
+                        hoverEnabled: true
+                        implicitWidth: tl.implicitWidth + Kirigami.Units.gridUnit
+                        implicitHeight: Kirigami.Units.gridUnit * 1.5
+                        onClicked: panel.host.liveSrc.startTimer(modelData)
+                        background: Rectangle { radius: height / 2; color: tchip.hovered ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(1, 1, 1, 0.07) }
+                        contentItem: PC3.Label { id: tl; text: i18n("%1 min", tchip.modelData); horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    }
+                }
+                PC3.Label {
+                    visible: !!panel.host.liveSrc && panel.host.liveSrc.timerEnd > 0
+                    text: panel.host.liveSrc ? panel.host.liveSrc.clock(panel.host.liveSrc.timerLeft) : ""
+                    font.weight: Font.DemiBold; font.features: { "tnum": 1 }; color: "#7fdcb0"
+                }
+                PC3.ToolButton {
+                    visible: !!panel.host.liveSrc && panel.host.liveSrc.timerEnd > 0
+                    icon.name: "window-close"; text: i18n("Stop"); display: QQC2.AbstractButton.TextBesideIcon
+                    onClicked: panel.host.liveSrc.stopTimer()
+                }
+                Item { Layout.fillWidth: true }
+            }
             NotesColumn {}
         }
     }

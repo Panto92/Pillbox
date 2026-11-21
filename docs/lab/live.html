@@ -1,0 +1,176 @@
+<title>Pillbox Live-Aktivitäten</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* One dark look like the desktop: a live top bar on a wallpaper; buttons start activities, the island reacts. Detail sketches below. */
+:root{
+  --ink:#0b0e12;--glass:rgba(16,20,27,.94);--line:rgba(205,213,219,.1);--mist:#7d8a94;--paper:#cdd5db;--frost:#e9eef2;
+  --accent:#ff8a4c;--steel:#8fb0c2;--mint:#7fdcb0;--rec:#ff5a5a;--violet:#b49cf0;
+  --f-display:"Bricolage Grotesque",system-ui,sans-serif;--f-body:"Instrument Sans",system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--paper);font:15px/1.55 var(--f-body)}
+.wrap{max-width:1120px;margin:0 auto;padding-block:48px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:44px}
+.tag{font:500 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font:700 clamp(34px,6vw,62px)/.95 var(--f-display);letter-spacing:-.03em;color:var(--frost);margin:0;text-wrap:balance}
+h2{font:700 24px var(--f-display);color:var(--frost);margin:0}
+.lead,.sec>p{color:var(--mist);max-width:66ch;margin:10px 0 0}
+/* stage */
+.stage{position:relative;height:380px;border-radius:22px;overflow:hidden;border:1px solid var(--line);
+  background:radial-gradient(90% 70% at 70% 110%,#2f6f8f 0%,transparent 60%),linear-gradient(#1b2433,#2b3a4c 55%,#1a2e3c)}
+.topbar{position:absolute;inset:14px 14px auto;display:flex;justify-content:space-between;align-items:flex-start}
+.side{height:38px;display:flex;align-items:center;gap:14px;padding:0 16px;border-radius:99px;background:var(--glass);border:1px solid var(--line);font:500 12px var(--f-mono);color:var(--mist)}
+.island-zone{position:absolute;left:50%;top:14px;transform:translateX(-50%);display:flex;gap:8px;align-items:flex-start}
+.island{position:relative;background:var(--glass);border:1px solid var(--line);border-radius:22px;min-height:38px;
+  transition:width .55s cubic-bezier(.2,.9,.25,1.15),height .55s cubic-bezier(.2,.9,.25,1.15),border-radius .55s;overflow:hidden;cursor:pointer;
+  box-shadow:0 14px 40px rgba(0,0,0,.35)}
+.island .row{height:38px;display:flex;align-items:center;gap:12px;padding:0 16px;white-space:nowrap}
+.clock{font:600 14px var(--f-body);color:var(--frost);font-variant-numeric:tabular-nums}
+.bubble{width:38px;height:38px;border-radius:99px;background:var(--glass);border:1px solid var(--line);display:grid;place-items:center;
+  transform:scale(0);transition:transform .45s cubic-bezier(.2,.9,.25,1.3);box-shadow:0 14px 40px rgba(0,0,0,.35)}
+.bubble.on{transform:scale(1)}
+.ring{width:22px;height:22px}
+.ring circle{fill:none;stroke-width:3}
+.cover{width:24px;height:24px;border-radius:7px;background:conic-gradient(from 200deg,#ff8a4c,#c3487a,#4b3a9a,#1d6b86,#ff8a4c);flex:none}
+.eq{display:flex;gap:2px;align-items:center;height:14px}
+.eq i{width:3px;border-radius:2px;background:var(--accent);animation:eq .9s ease-in-out infinite alternate}
+.eq i:nth-child(2){animation-delay:-.3s}.eq i:nth-child(3){animation-delay:-.6s}
+@keyframes eq{from{height:3px}to{height:14px}}
+.dot{width:9px;height:9px;border-radius:5px;background:var(--rec);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+.mini{font:500 12px var(--f-body);color:var(--mist);font-variant-numeric:tabular-nums}
+.big{font:600 13px var(--f-body);color:var(--frost)}
+.bar{height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden;flex:1;min-width:80px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
+.detail{padding:4px 16px 16px;display:grid;gap:10px;opacity:0;transition:opacity .3s .15s}
+.island.open .detail{opacity:1}
+.controls{display:flex;gap:14px;justify-content:center;font-size:16px;color:var(--frost)}
+.controls span{width:32px;height:32px;display:grid;place-items:center;border-radius:99px;background:rgba(255,255,255,.07)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btns button{all:unset;cursor:pointer;padding:8px 14px;border-radius:99px;background:rgba(255,255,255,.06);border:1px solid var(--line);font:500 13px var(--f-body);color:var(--paper)}
+.btns button:hover{background:rgba(255,255,255,.1)}
+.btns button.on{background:var(--accent);color:#1a0f08;border-color:transparent}
+.btns button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hint{font-size:13px;color:var(--mist);margin-top:8px}
+/* catalogue */
+.cat{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:18px;padding:16px;background:linear-gradient(160deg,#141a22,#0e1217);display:grid;gap:12px;min-width:0}
+.card h3{margin:0;font:600 15px var(--f-body);color:var(--frost)}
+.card p{margin:0;font-size:13px;color:var(--mist)}
+.shelf{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px;border-radius:14px;background:linear-gradient(#1b2433,#22303f)}
+.shelf .island{cursor:default}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="tag">Pillbox OS · Skizzen</p>
+    <h1>Live-Aktivitäten in der Insel</h1>
+    <p class="lead">Die Uhr in der Mitte zeigt, was gerade läuft, und verändert dabei ihre Form. Starte unten Aktivitäten, auch mehrere gleichzeitig. Fahr mit der Maus über die Insel oder klick darauf, dann klappt sie auf.</p>
+  </header>
+
+  <section class="sec">
+    <div class="stage" id="stage">
+      <div class="topbar">
+        <div class="side">◉&nbsp; CPU 7% · GPU 24% · RAM 11,6 / 32 GB</div>
+        <div class="side">♪ &nbsp;🔊 &nbsp;⌁ &nbsp;⏻</div>
+      </div>
+      <div class="island-zone">
+        <div class="island" id="island"><div id="islandBody"></div></div>
+        <div class="bubble" id="bubble"></div>
+      </div>
+    </div>
+    <div class="btns" id="btns">
+      <button data-a="download">⬇ Download</button>
+      <button data-a="music">♪ Musik</button>
+      <button data-a="timer">⏱ Timer 5 min</button>
+      <button data-a="record">● Bildschirmaufnahme</button>
+      <button data-a="mic">🎙 Mikrofon in Benutzung</button>
+      <button data-a="charge">⚡ Akku lädt</button>
+    </div>
+    <p class="hint">Mehrere gleichzeitig: Die wichtigste Aktivität bekommt die Insel, die zweite sitzt als kleine Blase daneben. Ein Klick auf die Blase tauscht die beiden.</p>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Die Formen</p>
+    <h2>Jede Aktivität im Ruhezustand und aufgeklappt</h2>
+    <p>Klein bleibt die Uhr immer sichtbar, die Aktivität sitzt rechts davon. Aufgeklappt zeigt die Insel alles, was man braucht, ohne die App zu öffnen.</p>
+    <div class="cat" id="cat"></div>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Regeln</p>
+    <h2>Wie sich die Insel verhält</h2>
+    <p>Benachrichtigungen haben Vorrang: Sie klappen kurz auf, danach kehrt die Aktivität zurück. Aufnahme, Mikrofon und Kamera werden immer gezeigt, aus Datenschutzgründen. Fertige Vorgänge melden sich mit einem kurzen Leuchten und verschwinden nach fünf Sekunden. In den Einstellungen lässt sich jede Art einzeln abschalten.</p>
+  </section>
+</div>
+
+<script>
+const A={
+  download:{prio:3,small:s=>`<svg class="ring" viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" stroke="rgba(255,255,255,.12)"/><circle cx="11" cy="11" r="8" stroke="#ff8a4c" stroke-linecap="round" stroke-dasharray="${50.3*s.p} 50.3" transform="rotate(-90 11 11)"/></svg><span class="mini">${Math.round(s.p*100)}%</span>`,
+    open:s=>`<div class="row" style="padding-top:6px"><span class="big">ubuntu-26.04-desktop.iso</span></div><div class="detail"><div style="display:flex;gap:10px;align-items:center"><div class="bar"><i style="width:${s.p*100}%"></i></div><span class="mini">${(s.p*6.1).toFixed(1).replace('.',',')} / 6,1 GB</span></div><div class="mini">48 MB/s · noch ${Math.max(0,Math.round((1-s.p)*130))} s · Firefox</div></div>`,
+    bubble:s=>`<svg class="ring" viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" stroke="rgba(255,255,255,.12)"/><circle cx="11" cy="11" r="8" stroke="#ff8a4c" stroke-linecap="round" stroke-dasharray="${50.3*s.p} 50.3" transform="rotate(-90 11 11)"/></svg>`},
+  music:{prio:2,small:()=>`<span class="cover"></span><span class="eq"><i></i><i></i><i></i></span>`,
+    open:s=>`<div class="row" style="padding-top:6px"><span class="cover" style="width:44px;height:44px;border-radius:11px"></span><span style="display:grid;line-height:1.3"><span class="big">Slow Light</span><span class="mini">Aurel Vane · Northern Rooms</span></span></div><div class="detail"><div style="display:flex;gap:10px;align-items:center"><span class="mini">1:42</span><div class="bar"><i style="width:${s.p*100}%"></i></div><span class="mini">4:05</span></div><div class="controls"><span>⏮</span><span style="background:var(--accent);color:#1a0f08">❚❚</span><span>⏭</span></div></div>`,
+    bubble:()=>`<span class="eq"><i></i><i></i><i></i></span>`},
+  timer:{prio:4,small:s=>`<span style="color:var(--mint)">⏱</span><span class="mini" style="color:var(--mint)">${fmt(s.left)}</span>`,
+    open:s=>`<div class="row" style="padding-top:6px"><span class="big">Timer</span><span class="mini">Tee</span></div><div class="detail"><div style="font:700 34px var(--f-display);color:var(--mint);text-align:center;font-variant-numeric:tabular-nums">${fmt(s.left)}</div><div class="controls"><span>＋1</span><span>❚❚</span><span>✕</span></div></div>`,
+    bubble:s=>`<span class="mini" style="color:var(--mint);font-size:10px">${Math.ceil(s.left/60)}′</span>`},
+  record:{prio:9,small:s=>`<span class="dot"></span><span class="mini" style="color:var(--rec)">${fmt(s.t)}</span>`,
+    open:s=>`<div class="row" style="padding-top:6px"><span class="dot"></span><span class="big">Bildschirm wird aufgenommen</span></div><div class="detail"><div class="mini">Ganzer Bildschirm · Spectacle · ${fmt(s.t)}</div><div class="controls"><span style="background:var(--rec);color:#fff">■</span><span>❚❚</span></div></div>`,
+    bubble:()=>`<span class="dot"></span>`},
+  mic:{prio:8,small:()=>`<span style="color:#ffb36b">🎙</span><span class="mini" style="color:#ffb36b">Discord</span>`,
+    open:()=>`<div class="row" style="padding-top:6px"><span style="color:#ffb36b">🎙</span><span class="big">Mikrofon in Benutzung</span></div><div class="detail"><div class="mini">Discord hört zu · seit 12 min</div><div class="controls"><span>🔇</span></div></div>`,
+    bubble:()=>`<span style="color:#ffb36b;font-size:14px">🎙</span>`},
+  charge:{prio:1,small:s=>`<span style="color:var(--mint)">⚡</span><span class="mini">${Math.round(s.p*100)}%</span>`,
+    open:s=>`<div class="row" style="padding-top:6px"><span style="color:var(--mint)">⚡</span><span class="big">Lädt</span></div><div class="detail"><div style="display:flex;gap:10px;align-items:center"><div class="bar"><i style="width:${s.p*100}%;background:var(--mint)"></i></div><span class="mini">${Math.round(s.p*100)}%</span></div><div class="mini">Voll in etwa 40 min · 65 W</div></div>`,
+    bubble:s=>`<span class="mini" style="color:var(--mint);font-size:10px">${Math.round(s.p*100)}</span>`}
+};
+const fmt=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
+const state={download:{p:.12},music:{p:.42},timer:{left:300},record:{t:0},mic:{},charge:{p:.64}};
+let active=[],open=false,swapped=false;
+const island=document.getElementById('island'),body=document.getElementById('islandBody'),bubble=document.getElementById('bubble');
+function now(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function order(){const l=[...active].sort((a,b)=>A[b].prio-A[a].prio);if(swapped&&l.length>1)[l[0],l[1]]=[l[1],l[0]];return l}
+function render(){
+  const l=order(),main=l[0],second=l[1];
+  let html;
+  if(!main) html=`<div class="row"><span class="clock">${now()}</span></div>`;
+  else if(open) html=A[main].open(state[main]);
+  else html=`<div class="row"><span class="clock">${now()}</span>${A[main].small(state[main])}</div>`;
+  body.innerHTML=html;
+  island.classList.toggle('open',open&&!!main);
+  const w=body.firstElementChild.scrollWidth;
+  island.style.width=(open&&main?Math.max(330,w):w+2)+'px';
+  island.style.height=(open&&main?body.scrollHeight:38)+'px';
+  island.style.borderRadius=open&&main?'24px':'22px';
+  bubble.classList.toggle('on',!!second);
+  if(second)bubble.innerHTML=A[second].bubble(state[second]);
+}
+island.addEventListener('mouseenter',()=>{open=true;render()});
+island.addEventListener('mouseleave',()=>{open=false;render()});
+island.addEventListener('click',()=>{open=!open;render()});
+bubble.addEventListener('click',()=>{swapped=!swapped;render()});
+document.querySelectorAll('#btns button').forEach(b=>b.onclick=()=>{
+  const a=b.dataset.a,i=active.indexOf(a);
+  if(i>=0)active.splice(i,1);else{active.push(a);if(a==='download')state.download.p=.05;if(a==='timer')state.timer.left=300;if(a==='record')state.record.t=0}
+  b.classList.toggle('on',i<0);swapped=false;render();
+});
+setInterval(()=>{
+  state.download.p=Math.min(1,state.download.p+.012);state.music.p=(state.music.p+.004)%1;
+  state.timer.left=Math.max(0,state.timer.left-1);state.record.t+=1;state.charge.p=Math.min(1,state.charge.p+.001);
+  if(state.download.p>=1&&active.includes('download')){setTimeout(()=>{active=active.filter(x=>x!=='download');document.querySelector('[data-a=download]').classList.remove('on');render()},5000);state.download.p=.999}
+  render();renderCat();
+},1000);
+// start with music + download, so the first view shows something
+active=['music','download'];document.querySelector('[data-a=music]').classList.add('on');document.querySelector('[data-a=download]').classList.add('on');
+const names={download:'Download / Kopieren',music:'Musik',timer:'Timer',record:'Bildschirmaufnahme',mic:'Mikrofon / Kamera',charge:'Akku lädt'};
+const notes={download:'Ring um die Prozent-Zahl. Aufgeklappt: Datei, Größe, Tempo, Restzeit. Kopieren in Dolphin genauso.',music:'Cover und tanzende Balken. Aufgeklappt: Titel, Fortschritt, Steuerung. Farbe aus dem Cover.',timer:'Restzeit läuft rückwärts. Am Ende leuchtet die Insel und klingelt leise.',record:'Roter Punkt und Laufzeit, immer sichtbar. Ein Klick stoppt.',mic:'Zeigt, welche App gerade hört oder filmt. Ein Klick schaltet stumm.',charge:'Nur beim Laptop, beim Einstecken für ein paar Sekunden.'};
+function renderCat(){
+  document.getElementById('cat').innerHTML=Object.keys(A).map(k=>`<div class="card"><h3>${names[k]}</h3>
+    <div class="shelf"><div class="island" style="width:auto"><div class="row"><span class="clock">${now()}</span>${A[k].small(state[k])}</div></div>
+    <div class="island open" style="width:330px">${A[k].open(state[k])}</div></div><p>${notes[k]}</p></div>`).join('');
+}
+render();renderCat();
+</script>

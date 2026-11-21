@@ -80,3 +80,27 @@ msgstr "Ort ändern"
 
 msgid "Today"
 msgstr "Heute"
+
+msgid "Timer"
+msgstr "Timer"
+
+msgid "Time is up."
+msgstr "Die Zeit ist um."
+
+msgid "Done"
+msgstr "Fertig"
+
+msgid "One minute more"
+msgstr "Eine Minute mehr"
+
+msgid "Microphone in use"
+msgstr "Mikrofon in Benutzung"
+
+msgid "Charging"
+msgstr "Lädt"
+
+msgid "%1 min"
+msgstr "%1 min"
+
+msgid "Stop"
+msgstr "Stopp"

@@ -1,6 +1,7 @@
 /*
  * Pillbox Island – the centre pill. A calm clock that grows into an island when a
- * notification arrives; a click opens calendar and notification history.
+ * notification arrives and shows live activities beside the time (downloads, music,
+ * timer, microphone in use, charging); a click opens calendar and notification history.
  *
  * Notifications: Plasma stays the notification server (history, Do Not Disturb,
  * sounds). For every app whose notification the island shows, Plasma's own popup is
@@ -134,6 +135,21 @@ PlasmoidItem {
     }
     readonly property bool inhibited: NotificationManager.Server.inhibited
 
+    // ---------------------------------------------------------------- live activities
+    LiveSources { id: live; cfg: root.cfg }
+    readonly property var liveSrc: live
+    property bool swapped: false                       // the bubble was clicked: second goes first
+    readonly property var acts: swapped && live.acts.length > 1 ? [live.acts[1], live.acts[0]].concat(live.acts.slice(2)) : live.acts
+    onActsChanged: if (live.acts.length < 2) swapped = false
+    property bool faceHovered: false
+    LiveCard {
+        id: liveCard
+        live: root.liveSrc
+        kind: root.acts.length ? root.acts[0] : ""
+        anchorItem: root.compactRepresentationItem
+        wanted: root.faceHovered && !island.showing && !root.expanded
+    }
+
     Island {
         id: island
         host: root
@@ -155,6 +171,7 @@ PlasmoidItem {
         Layout.fillHeight: true
         hoverEnabled: true
         onClicked: root.expanded = !root.expanded
+        onContainsMouseChanged: root.faceHovered = containsMouse
         // while the island is out, the clock steps back so the island reads as the same object
         opacity: island.showing ? 0 : 1
         Behavior on opacity { NumberAnimation { duration: Kirigami.Units.shortDuration } }
@@ -176,6 +193,30 @@ PlasmoidItem {
                 visible: root.unread > 0
                 Layout.preferredWidth: 6; Layout.preferredHeight: 6; radius: 3
                 color: Kirigami.Theme.highlightColor
+            }
+            // the running activity beside the time …
+            LiveFace {
+                visible: root.acts.length > 0
+                live: root.liveSrc
+                kind: root.acts[0] || ""
+                size: Math.round(face.height * 0.48)
+                Layout.leftMargin: Kirigami.Units.smallSpacing
+                Layout.preferredHeight: face.height
+            }
+            // … and the second one as a small round bubble; a click swaps them
+            Rectangle {
+                visible: root.acts.length > 1
+                Layout.preferredWidth: Math.round(face.height * 0.72); Layout.preferredHeight: Layout.preferredWidth
+                radius: width / 2
+                color: Qt.rgba(1, 1, 1, 0.08)
+                LiveFace {
+                    anchors.centerIn: parent
+                    live: root.liveSrc
+                    kind: root.acts[1] || ""
+                    mode: "bubble"
+                    size: Math.round(parent.width * 0.62)
+                }
+                MouseArea { anchors.fill: parent; onClicked: root.swapped = !root.swapped }
             }
         }
     }
