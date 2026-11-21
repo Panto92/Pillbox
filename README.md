@@ -62,6 +62,8 @@ Afterwards: right-click the orb → **Customize…** opens the settings centre.
 
 A glowing ball instead of a dock. Put it anywhere, on any monitor.
 
+<p align="center"><img src="docs/images/orb.jpg" alt="The orb's ring free on the desktop and as arcs near the screen edge" width="100%"></p>
+
 | | |
 |---|---|
 | **Click** | a ring of your pinned and running apps |
@@ -71,13 +73,20 @@ A glowing ball instead of a dock. Put it anywhere, on any monitor.
 | **Satellites** | your open windows orbit the ball |
 | **All applications** | a full-screen launcher with search |
 
+Any colour you like – pick a preset or mix your own; it can become the accent of the whole system, too.
+
+<p align="center"><img src="docs/images/orb-colours.jpg" alt="The orb in steel, orange, violet and mint" width="100%"></p>
+
 Not a fan of floating balls? Pick another **form** with the same behaviour:
 **Ember** (a seam of glowing dots that unfolds), **Shelf** (icons on a glass ledge) or
-**Liquid** (a dock of liquid glass). Docks go bottom, left or right, on one or all monitors.
+**Liquid** (a dock of liquid glass). Docks go bottom, left or right, on one or all monitors,
+and *smart hiding* slides them away only while a window needs the space.
+
+<p align="center"><img src="docs/images/docks.jpg" alt="The three docks: Ember, Shelf and Liquid" width="100%"></p>
 
 ## Living wallpapers
 
-<p align="center"><img src="docs/images/atmospheres.jpg" alt="The ten Pillbox atmospheres" width="100%"></p>
+<p align="center"><img src="docs/images/atmospheres.jpg" alt="Aurora, Fogline, Tide and Dune" width="100%"></p>
 
 Ten **atmospheres** follow the time of day – blue hour, noon, evening glow, stars –
 and quietly show what your computer is doing, without a single number:
