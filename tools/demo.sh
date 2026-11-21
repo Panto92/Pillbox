@@ -23,12 +23,13 @@ say() { printf '\033[38;2;127;151;166m::\033[0m %s\n' "$*"; }
 
 # ---- remember
 F=$(orbget Appearance form); H=$(orbget Appearance dockHide); X=$(orbget General orbX); Y=$(orbget General orbY)
-A=$(orbget Appearance arrangement); S=$(wallget Scene); FT=$(wallget FollowTime); FH=$(wallget FixedHour)
+A=$(orbget Appearance arrangement); CM=$(orbget Appearance colorMode); CC=$(orbget Appearance customColor); S=$(wallget Scene); FT=$(wallget FollowTime); FH=$(wallget FixedHour)
 restore() {
     say "Restoring your settings …"
     orb Appearance demo "''"
     orb Appearance form "'${F:-orb}'"; orb Appearance dockHide "'${H:-never}'"
     orb General orbX "${X:--1}"; orb General orbY "${Y:--1}"
+    orb Appearance colorMode "'${CM:-custom}'"; [[ -n "$CC" ]] && orb Appearance customColor "'$CC'"
     wall Scene "'${S:-aurora}'"; wall FollowTime "${FT:-true}"; wall FixedHour "${FH:-17.5}"
     [[ "${A:-islands}" != "islands" ]] || true
     qdbus6 org.kde.KWin /KWin org.kde.KWin.showDesktop false >/dev/null 2>&1
@@ -48,6 +49,12 @@ orb Appearance demo "'ring'"; sleep 4.5; orb Appearance demo "''"; sleep 1.5
 say "Orb at the edge: the arc"
 orb General orbX -1; orb General orbY -1; sleep 2
 orb Appearance demo "'ring'"; sleep 4.5; orb Appearance demo "''"; sleep 1.5
+
+say "Colours"
+orb Appearance colorMode "'custom'"; orb General orbX 1560; orb General orbY 760; sleep 1.5
+orb Appearance demo "'ring'"; sleep 1
+for c in '#8fb0c2' '#e0bd6e' '#ff8a4c' '#e88fa6' '#b49cf0' '#7fd3f0' '#7fdcb0'; do orb Appearance customColor "'$c'"; sleep 1.1; done
+orb Appearance demo "''"; [[ -n "$CC" ]] && orb Appearance customColor "'$CC'"; sleep 1.5
 
 say "A notification grows out of the clock"
 notify-send -a "Konsole" -h string:desktop-entry:org.kde.konsole "Build finished" "pillbox – all tests passed"; sleep 5
