@@ -76,7 +76,6 @@ say "Installed color scheme: Pillbox"
 mkdir -p "$DATA/plasma/desktoptheme"
 rm -rf "$DATA/plasma/desktoptheme/Pillbox"
 cp -r "$SRC/plasma/desktoptheme/Pillbox" "$DATA/plasma/desktoptheme/"
-cp "$SRC/color-schemes/Pillbox.colors" "$DATA/plasma/desktoptheme/Pillbox/colors"
 say "Installed Plasma style: Pillbox"
 
 # 3. Widgets and global theme

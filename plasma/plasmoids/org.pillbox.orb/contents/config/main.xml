@@ -46,6 +46,7 @@
     <!-- top bar arrangement: islands | bar | capsule -->
     <entry name="arrangement" type="String"><default>islands</default></entry>
     <!-- icon theme: keep (whatever was set) | Pillbox | Pillbox-Duo -->
+    <entry name="colorReach" type="String"><default>orb</default></entry>
     <entry name="iconTheme" type="String"><default>Pillbox-Lucide</default></entry>
     <entry name="barSize" type="String"><default>normal</default></entry>
     <entry name="menuLogo" type="String"><default>pillbox</default></entry>

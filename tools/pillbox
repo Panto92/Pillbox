@@ -9,6 +9,9 @@
 #                      the Pillbox pills: removes them from the system tray (remembered) and takes
 #                      the media and logout widgets off the top bar
 #   pillbox untidy     gives the system tray its items back
+#   pillbox tint HEX   the whole system in one colour: accent (made readable if too dark) and
+#                      glass, bars and windows lightly tinted ("Pillbox tinted" colour scheme)
+#   pillbox tint off   back to the plain Pillbox colours
 #
 # Both sides are saved on every switch, so changes you make on either side survive.
 # Only Plasma's own config files are swapped (panels, theme, colours, window manager,
@@ -134,7 +137,47 @@ untidy() {
     echo "$(tr_ "The system tray has its items back." "Die Systemleiste hat ihre Symbole zurück.")"
 }
 
+tint() {
+    local want="${1:-}"
+    if [[ "$want" == off ]]; then
+        plasma-apply-colorscheme Pillbox >/dev/null 2>&1 || true
+        echo "$(tr_ "Plain Pillbox colours." "Normale Pillbox-Farben.")"; return
+    fi
+    [[ "$want" =~ ^#?[0-9a-fA-F]{6}$ ]] || { echo "Usage: pillbox tint '#rrggbb' | off" >&2; exit 1; }
+    local src="$DATA/color-schemes/Pillbox.colors"
+    [[ -e "$src" ]] || src="/usr/share/color-schemes/Pillbox.colors"
+    [[ -e "$src" ]] || { echo "Pillbox colour scheme not installed" >&2; exit 1; }
+    local accent
+    accent="$(python3 -I - "$src" "$DATA/color-schemes/PillboxTinted.colors" "${want#\#}" <<'PY'
+import colorsys, re, sys
+src, out, hexv = sys.argv[1], sys.argv[2], sys.argv[3]
+r, g, b = (int(hexv[i:i+2], 16) / 255 for i in (0, 2, 4))
+h, l, s = colorsys.rgb_to_hls(r, g, b)
+# an accent you can read on dark glass: lift very dark colours, keep the hue
+if s < 0.12:
+    acc = (0.66, 0.77, 0.83) if l < 0.45 else (r, g, b)      # grey/black orb: a light steel blue
+else:
+    acc = colorsys.hls_to_rgb(h, max(l, 0.58), min(1, max(s, 0.45)))
+tint = colorsys.hls_to_rgb(h, 0.5, min(1, s * 1.2)) if s >= 0.12 else (0.55, 0.62, 0.68)
+def mix(c, amount):
+    return [round(c[i] * (1 - amount) + tint[i] * 255 * amount) for i in range(3)]
+text = open(src, encoding="utf-8").read()
+def fix(m):
+    key, vals = m.group(1), [int(v) for v in m.group(2).split(",")]
+    return f"{key}=" + ",".join(str(v) for v in mix(vals, 0.10))
+text = re.sub(r"^(BackgroundNormal|BackgroundAlternate)=(\d+,\d+,\d+)$", fix, text, flags=re.M)
+text = re.sub(r"^Name=.*$", "Name=Pillbox (tinted)", text, flags=re.M)
+open(out, "w", encoding="utf-8").write(text)
+print("#" + "".join(f"{round(v * 255):02x}" for v in acc))
+PY
+)"
+    plasma-apply-colorscheme PillboxTinted >/dev/null 2>&1 || true
+    plasma-apply-colorscheme --accent-color "$accent" >/dev/null 2>&1 || true
+    echo "$(tr_ "Tinted with $want, accent $accent." "Getönt mit $want, Akzent $accent.")"
+}
+
 case "${1:-settings}" in
+    tint)     tint "${2:-}" ;;
     tidy)     tidy ;;
     untidy)   untidy ;;
     settings) settings ;;

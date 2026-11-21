@@ -747,9 +747,13 @@ GradientStop { position: 0; color: tr.at(0) }
                         }
                     }
                 }
-                SettingRow { label: i18n("Use for the whole system"); hint: i18n("Selections, highlights and switches in Dolphin, System Settings and every KDE app get the same colour. Switched off, the previous accent comes back.")
-                    PillSwitch { enabled: panel.cfg.colorMode !== "system"; checked: panel.cfg.systemAccent
-                                 onToggled: { panel.cfg.systemAccent = checked; panel.orb.applySystemAccent() } } }
+                SettingRow { label: i18n("Colour reaches"); hint: panel.cfg.colorReach === "system"
+                        ? i18n("Everything: the accent in every app, and bars, popups and windows take on a light tint of the colour. Very dark colours get a readable accent.")
+                        : panel.cfg.colorReach === "accent" ? i18n("Selections, highlights and switches in every KDE app get the colour.")
+                        : i18n("Only the orb and its docks.")
+                    Segments { enabled: panel.cfg.colorMode !== "system"; key: "colorReach"
+                        options: [["orb", i18n("Only the orb")], ["accent", i18n("Accent")], ["system", i18n("Whole system")]]
+                        onPicked: { panel.cfg.systemAccent = panel.cfg.colorReach !== "orb"; panel.orb.applySystemAccent() } } }
                 SettingRow { label: i18n("Use the color scheme's accent"); hint: i18n("Follows System Settings → Colors.")
                     PillSwitch { checked: panel.cfg.colorMode === "system"; onToggled: panel.cfg.colorMode = checked ? "system" : "custom" } }
             }

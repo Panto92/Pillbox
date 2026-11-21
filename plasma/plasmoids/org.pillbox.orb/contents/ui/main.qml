@@ -1017,11 +1017,24 @@ PlasmoidItem {
     // Plasma's own tool sets the accent of the colour scheme for every KDE app.
     // accentBefore: ""  = not remembered yet, "none" = the scheme's own accent, else the old colour.
     function accentHex() { const a = accent; return "#" + [a.r, a.g, a.b].map(v => ("0" + Math.round(v * 255).toString(16)).slice(-2)).join("") }
+    property bool tinted: cfg.colorReach === "system"
     function applySystemAccent() { sysAccentTimer.restart() }
     property Timer sysAccentTimer: Timer {
         interval: 700                          // the whole system repaints: wait until the slider rests
         onTriggered: {
             const c = root.cfg
+            // "whole system": a tinted Pillbox colour scheme plus a readable accent (tools/pillbox)
+            if (c.colorReach === "system") {
+                shell.connectSource("\"$HOME/.local/bin/pillbox\" tint '" + root.accentHex() + "' # " + Date.now())
+                root.tinted = true
+                return
+            }
+            if (root.tinted) {
+                // leaving "whole system": plain scheme first, then (if wanted) the accent, in one go
+                root.tinted = false
+                shell.connectSource("\"$HOME/.local/bin/pillbox\" tint off" + (c.systemAccent ? "; plasma-apply-colorscheme --accent-color '" + root.accentHex() + "'" : "") + " # " + Date.now())
+                return
+            }
             if (c.systemAccent) {
                 const remember = c.accentBefore ? "" : "prev=$(kreadconfig6 --file kdeglobals --group General --key AccentColor); echo PBACC=${prev:-none}; "
                 accentProbe.connectSource(remember + "plasma-apply-colorscheme --accent-color '" + root.accentHex() + "' # " + Date.now())

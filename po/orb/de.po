@@ -937,3 +937,21 @@ msgstr "Live-Aktivitäten"
 
 msgid "Downloads, music, a timer, a microphone in use and charging appear beside the time. Hover for details."
 msgstr "Downloads, Musik, ein Timer, ein benutztes Mikrofon und das Laden erscheinen neben der Uhrzeit. Mit der Maus darüber siehst du Details."
+
+msgid "Colour reaches"
+msgstr "Farbe gilt für"
+
+msgid "Only the orb"
+msgstr "Nur den Orb"
+
+msgid "Whole system"
+msgstr "Ganzes System"
+
+msgid "Everything: the accent in every app, and bars, popups and windows take on a light tint of the colour. Very dark colours get a readable accent."
+msgstr "Alles: der Akzent in jeder App, dazu nehmen Leisten, Popups und Fenster einen leichten Schimmer der Farbe an. Sehr dunkle Farben bekommen einen lesbaren Akzent."
+
+msgid "Selections, highlights and switches in every KDE app get the colour."
+msgstr "Markierungen, Hervorhebungen und Schalter in jeder KDE-App bekommen die Farbe."
+
+msgid "Only the orb and its docks."
+msgstr "Nur der Orb und seine Docks."
