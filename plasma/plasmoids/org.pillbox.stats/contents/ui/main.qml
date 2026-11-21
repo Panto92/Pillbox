@@ -86,7 +86,10 @@ PlasmoidItem {
         engine: "executable"
         onNewData: (source, data) => {
             disconnectSource(source)
-            if (source.indexOf("PBTRASH") < 0) return           // a tidy-up command finished: measure again
+            if (source.indexOf("PBTRASH") < 0) {                // a tidy-up command finished: measure again
+                root.measure(); tidyAgain.restart(); return
+            }
+            root.tidying = ""
             const out = String(data.stdout || "").split("\n"), list = []
             for (const l of out) {
                 const f = l.trim().split(/\s+/)
@@ -100,12 +103,16 @@ PlasmoidItem {
     }
     function measure() { probe.connectSource(probeCmd + " # " + Date.now()) }
     Timer { interval: 30000; repeat: true; triggeredOnStart: true; running: root.expanded; onTriggered: root.measure() }
+    property string tidying: ""           // what is being emptied right now
     function tidy(what) {
-        const cmd = what === "trash" ? "ktrash6 --empty" : "rm -rf -- \"$HOME/.cache/thumbnails\"/*"
-        probe.connectSource(cmd + "; sleep 0.3 # " + Date.now())
-        tidyAgain.restart()
+        // ktrash6 hands the work to KIO; wait until the trash folder is really empty (max. 20 s)
+        const cmd = what === "trash"
+            ? "ktrash6 --empty; for i in $(seq 1 40); do [ -z \"$(ls -A \"$HOME/.local/share/Trash/files\" 2>/dev/null)\" ] && break; sleep 0.5; done"
+            : "rm -rf -- \"$HOME/.cache/thumbnails\"/*"
+        tidying = what
+        probe.connectSource(cmd + " # " + Date.now())
     }
-    Timer { id: tidyAgain; interval: 1200; onTriggered: root.measure() }
+    Timer { id: tidyAgain; interval: 3000; onTriggered: root.measure() }
     function diskName(m) { return m === "/" ? i18n("System") : m === "/home" ? i18n("Home") : m.split("/").pop() }
 
     readonly property real ramTotalB: num(ramTotal)
@@ -385,7 +392,8 @@ PlasmoidItem {
             Item {
                 id: bigBox
                 Layout.fillWidth: true
-                Layout.preferredHeight: Kirigami.Units.gridUnit * 2.6
+                Layout.fillHeight: true
+                Layout.minimumHeight: Kirigami.Units.gridUnit * 2.2
                 Shape {
                     id: big
                     anchors.fill: parent
@@ -411,24 +419,30 @@ PlasmoidItem {
                 }
             }
             ColumnLayout { id: rowsCol; Layout.fillWidth: true; spacing: 2 }
-            Item { Layout.fillHeight: true }
         }
     }
 
-    fullRepresentation: Item {
+    // the popup can be resized: cards, curves and drives follow; when narrow they stack
+    fullRepresentation: PC3.ScrollView {
+        id: dashView
         Layout.preferredWidth: Kirigami.Units.gridUnit * 40
-        Layout.preferredHeight: dashCol.implicitHeight + Kirigami.Units.smallSpacing * 2
-        Layout.minimumWidth: Kirigami.Units.gridUnit * 32
-        Layout.minimumHeight: Layout.preferredHeight
+        Layout.preferredHeight: Kirigami.Units.gridUnit * 27
+        Layout.minimumWidth: Kirigami.Units.gridUnit * 18
+        Layout.minimumHeight: Kirigami.Units.gridUnit * 14
+        contentWidth: availableWidth
+        readonly property bool wide: availableWidth > Kirigami.Units.gridUnit * 30
         ColumnLayout {
           id: dashCol
-          anchors.fill: parent
-          anchors.margins: Kirigami.Units.smallSpacing
+          width: dashView.availableWidth
+          height: Math.max(implicitHeight, dashView.availableHeight)
           spacing: Kirigami.Units.largeSpacing
-          RowLayout {
+          GridLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: Kirigami.Units.gridUnit * 13
-            spacing: Kirigami.Units.largeSpacing
+            Layout.fillHeight: true
+            Layout.minimumHeight: Kirigami.Units.gridUnit * (dashView.wide ? 11 : 30)
+            columns: dashView.wide ? 3 : 1
+            rowSpacing: Kirigami.Units.largeSpacing
+            columnSpacing: Kirigami.Units.largeSpacing
             Card {
                 m: cpuM
                 title: "CPU" + (cpuName.value ? " · " + String(cpuName.value).replace(/ ?(\d+-Core|Eight-Core|Six-Core|Quad-Core|Twelve-Core|Sixteen-Core) Processor/, "").replace(/\(R\)|\(TM\)/g, "") : "")
@@ -455,9 +469,11 @@ PlasmoidItem {
                 Row2 { k: i18n("Free"); v: isNaN(root.num(ramFree)) ? "" : root.gb(root.num(ramFree)) + " GB" }
             }
           }
-          RowLayout {
+          GridLayout {
             Layout.fillWidth: true
-            spacing: Kirigami.Units.largeSpacing
+            columns: dashView.wide ? 2 : 1
+            rowSpacing: Kirigami.Units.largeSpacing
+            columnSpacing: Kirigami.Units.largeSpacing
             // disks: free space per drive
             Rectangle {
                 Layout.fillWidth: true
@@ -524,11 +540,11 @@ PlasmoidItem {
                             Layout.fillWidth: true
                             spacing: 0
                             PC3.Label { text: tr.label }
-                            PC3.Label { text: isNaN(tr.bytes) ? "…" : tr.bytes < 1048576 ? i18n("empty") : (tr.bytes / 1048576).toLocaleString(Qt.locale(), "f", 0) + " MB"
+                            PC3.Label { text: root.tidying === tr.what ? i18n("Emptying…") : isNaN(tr.bytes) ? "…" : tr.bytes < 1048576 ? i18n("empty") : (tr.bytes / 1048576).toLocaleString(Qt.locale(), "f", 0) + " MB"
                                 opacity: 0.6; font: Kirigami.Theme.smallFont }
                         }
                         PC3.Button {
-                            enabled: !isNaN(tr.bytes) && tr.bytes >= 1048576
+                            enabled: !isNaN(tr.bytes) && tr.bytes >= 1048576 && root.tidying === ""
                             text: tr.armed ? i18n("Sure?") : i18n("Empty")
                             onClicked: { if (!tr.armed) { tr.armed = true; disarm.restart(); return } tr.armed = false; root.tidy(tr.what) }
                         }

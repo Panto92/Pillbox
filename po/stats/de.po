@@ -108,3 +108,6 @@ msgstr "Leeren"
 
 msgid "The memory cache needs no emptying: Linux hands it to programs the moment they need it."
 msgstr "Den Arbeitsspeicher-Cache musst du nicht leeren: Linux gibt ihn sofort an Programme ab, sobald sie ihn brauchen."
+
+msgid "Emptying…"
+msgstr "Wird geleert …"
