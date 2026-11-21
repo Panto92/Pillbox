@@ -70,10 +70,14 @@ def lineedit():
 def main(out):
     d = os.path.join(out, "widgets")
     os.makedirs(d, exist_ok=True)
-    for name, text in (("viewitem.svg", viewitem()), ("lineedit.svg", lineedit())):
+    # viewitem: Pillbox's own list highlight drew stray "ears" in KRunner's result list, so
+    # Breeze's (already rounded) highlight is used until that is solved – see viewitem()
+    old = os.path.join(d, "viewitem.svg")
+    if os.path.exists(old): os.remove(old)
+    for name, text in (("lineedit.svg", lineedit()),):
         with open(os.path.join(d, name), "w") as f:
             f.write(text)
-    print("wrote viewitem.svg and lineedit.svg to", d)
+    print("wrote lineedit.svg to", d)
 
 if __name__ == "__main__":
     main(sys.argv[1])
