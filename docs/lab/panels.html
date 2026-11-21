@@ -1,0 +1,279 @@
+<title>Pillbox Panels</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Sketches for the status pill panels (music, sound, network), the clock dashboard and the slanted wallpaper picker. Single dark look, like the desktop. */
+:root {
+  --ink: #0b0e12; --slate: #141a20; --glass: rgba(18, 22, 29, 0.82);
+  --line: rgba(205, 213, 219, 0.1); --mist: #7d8a94; --paper: #cdd5db; --frost: #e9eef2;
+  --accent: #ff8a4c; --steel: #8fb0c2; --mint: #7fdcb0;
+  --f-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --f-body: "Instrument Sans", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ink); color: var(--paper); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 56px max(16px, env(safe-area-inset-right, 0px)) 96px max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 84px; }
+.eyebrow { font: 500 12px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+h1 { font: 800 clamp(44px, 7.5vw, 92px)/.92 var(--f-display); letter-spacing: -.035em; margin: 0; color: var(--frost); }
+h2 { font: 600 clamp(26px, 3.4vw, 36px)/1.05 var(--f-display); letter-spacing: -.02em; margin: 0; color: var(--frost); }
+.lead { margin: 18px 0 0; max-width: 64ch; color: var(--mist); font-size: 17px; }
+.sec-head p { margin: 10px 0 0; max-width: 66ch; color: var(--mist); }
+.sec-head { margin-bottom: 26px; }
+.desk { position: relative; border-radius: 22px; overflow: hidden; padding: 26px; min-height: 420px;
+  background: radial-gradient(120% 90% at 20% 0%, #2a2340 0%, #15161f 55%, #0c0e13 100%); border: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 22px; justify-content: center; align-items: flex-start; }
+.bar { width: 100%; display: flex; justify-content: flex-end; gap: 8px; }
+.pill { display: flex; gap: 12px; align-items: center; padding: 7px 14px; border-radius: 99px; background: var(--glass); border: 1px solid var(--line); font: 500 13px var(--f-mono); color: var(--paper); }
+.pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+.panel { background: var(--glass); backdrop-filter: blur(18px); border: 1px solid var(--line); border-radius: 26px; padding: 22px; width: 360px; max-width: 100%; box-shadow: 0 30px 60px rgba(0,0,0,.45); }
+.panel h3 { margin: 0; font: 600 13px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mist); display: flex; justify-content: space-between; }
+.note { color: var(--mist); font-size: 13px; margin: 12px 0 0; max-width: 360px; }
+.seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: 99px; background: rgba(255,255,255,.05); }
+.seg button { all: unset; cursor: pointer; padding: 5px 12px; border-radius: 99px; font: 500 12px var(--f-mono); color: var(--mist); }
+.seg button.on { background: var(--accent); color: #1a0f08; }
+
+/* music */
+.cover { position: relative; aspect-ratio: 1; border-radius: 20px; margin: 16px 0; overflow: hidden;
+  background: conic-gradient(from 210deg at 35% 60%, #ff8a4c, #c3487a, #4b3a9a, #1d6b86, #ff8a4c); }
+.cover::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 60% at 70% 30%, rgba(255,255,255,.25), transparent 60%); }
+.vinyl { position: absolute; right: -40px; bottom: -40px; width: 150px; height: 150px; border-radius: 50%; background: repeating-radial-gradient(#111 0 2px, #1b1b1b 2px 4px); box-shadow: 0 0 0 8px rgba(0,0,0,.3); animation: spin 6s linear infinite; }
+.vinyl::after { content:""; position:absolute; inset: 55px; border-radius: 50%; background: var(--accent); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.track b { display: block; color: var(--frost); font: 600 20px var(--f-display); }
+.track span { color: var(--mist); }
+.wave { display: flex; gap: 3px; align-items: center; height: 36px; margin: 14px 0 6px; }
+.wave s { flex: 1; border-radius: 2px; background: var(--paper); opacity: .25; text-decoration: none; }
+.wave s.p { background: var(--accent); opacity: 1; }
+.times { display: flex; justify-content: space-between; font: 12px var(--f-mono); color: var(--mist); }
+.ctrls { display: flex; justify-content: center; gap: 26px; align-items: center; margin: 12px 0; font-size: 20px; color: var(--paper); }
+.ctrls .play { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #1a0f08; display: grid; place-items: center; }
+.eq { display: flex; gap: 6px; align-items: flex-end; height: 70px; margin-top: 10px; }
+.eq div { flex: 1; display: grid; gap: 4px; justify-items: center; font: 10px var(--f-mono); color: var(--mist); }
+.eq span { width: 8px; border-radius: 4px; background: linear-gradient(var(--accent), #c3487a); }
+
+/* sound */
+.ring { position: relative; width: 200px; height: 200px; margin: 18px auto; }
+.ring svg { width: 100%; height: 100%; transform: rotate(135deg); }
+.ring .v { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.ring .v b { font: 800 52px/1 var(--f-display); color: var(--frost); }
+.ring .v span { font: 12px var(--f-mono); color: var(--mist); }
+.dev { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 16px; margin-top: 6px; cursor: pointer; }
+.dev.on { background: rgba(255,138,76,.12); outline: 1px solid rgba(255,138,76,.35); }
+.dev em { font-style: normal; width: 34px; height: 34px; border-radius: 12px; background: rgba(255,255,255,.06); display: grid; place-items: center; }
+.dev small { display: block; color: var(--mist); font-size: 12px; }
+.apps { margin-top: 14px; display: grid; gap: 8px; }
+.app { display: grid; grid-template-columns: 70px 1fr 36px; gap: 10px; align-items: center; font-size: 13px; }
+.app .t { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+.app .t i { display: block; height: 100%; background: var(--steel); }
+.app small { font: 11px var(--f-mono); color: var(--mist); text-align: right; }
+
+/* network */
+.hub { position: relative; width: 100%; aspect-ratio: 1; margin: 10px 0; }
+.hub svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.node { position: absolute; transform: translate(-50%, -50%); text-align: center; font: 11px var(--f-mono); color: var(--mist); }
+.node b { display: grid; place-items: center; width: 46px; height: 46px; margin: 0 auto 4px; border-radius: 50%; background: var(--slate); border: 1px solid var(--line); color: var(--frost); font-size: 18px; }
+.node.c b { width: 74px; height: 74px; background: radial-gradient(circle at 35% 30%, #ffb38a, var(--accent) 55%, #9b3d12); border: none; box-shadow: 0 0 40px rgba(255,138,76,.5); color: #1a0f08; }
+.node.off b { opacity: .35; }
+.speed { display: flex; justify-content: space-between; font: 12px var(--f-mono); color: var(--mist); }
+.speed b { color: var(--frost); font-size: 15px; }
+
+/* dashboard */
+.dash { width: 860px; max-width: 100%; display: grid; grid-template-columns: 1.15fr 1fr; gap: 22px; }
+.dash .clock { font: 800 clamp(60px, 9vw, 104px)/.9 var(--f-display); letter-spacing: -.04em; color: var(--frost); }
+.dash .clock small { font-size: .4em; color: var(--accent); }
+.dash .date { color: var(--mist); margin: 8px 0 18px; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font: 12px var(--f-mono); }
+.cal span { padding: 7px 0; border-radius: 10px; color: var(--paper); }
+.cal .h { color: var(--mist); }
+.cal .o { color: #3d454d; }
+.cal .t { background: var(--accent); color: #1a0f08; font-weight: 600; }
+.cal .e { box-shadow: inset 0 -2px 0 var(--steel); }
+.wx { border-radius: 20px; padding: 18px; background: linear-gradient(160deg, rgba(143,176,194,.18), rgba(255,138,76,.08)); }
+.wx .now { display: flex; align-items: center; gap: 14px; }
+.wx .now b { font: 800 54px/1 var(--f-display); color: var(--frost); }
+.days { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 16px; text-align: center; font: 12px var(--f-mono); color: var(--mist); }
+.days b { display: block; color: var(--frost); font-size: 18px; margin: 4px 0; }
+.agenda { margin-top: 14px; display: grid; gap: 8px; }
+.agenda div { display: grid; grid-template-columns: 4px 50px 1fr; gap: 10px; align-items: center; font-size: 13px; }
+.agenda i { height: 28px; border-radius: 2px; background: var(--steel); }
+.agenda small { font: 12px var(--f-mono); color: var(--mist); }
+
+/* wallpaper picker */
+.picker { width: 100%; }
+.filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+.sw { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+.sw.on { border-color: var(--frost); }
+.strips { display: flex; gap: 10px; justify-content: center; height: 300px; overflow: hidden; padding: 0 40px; }
+.strip { position: relative; flex: 0 0 70px; transform: skewX(-14deg); border-radius: 18px; overflow: hidden; cursor: pointer; transition: flex-basis .45s cubic-bezier(.2,.8,.2,1), opacity .3s; border: 1px solid var(--line); }
+.strip.on { flex-basis: 380px; }
+.strip.dim { opacity: .25; }
+.strip .img { position: absolute; inset: 0 -60px; transform: skewX(14deg); }
+.strip .lbl { position: absolute; left: 22px; bottom: 16px; transform: skewX(14deg); font: 600 20px var(--f-display); color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.6); opacity: 0; transition: opacity .3s; white-space: nowrap; }
+.strip.on .lbl { opacity: 1; }
+.strip .lbl small { display: block; font: 11px var(--f-mono); opacity: .8; }
+@media (max-width: 700px) { .dash { grid-template-columns: 1fr; } .strip { flex-basis: 34px; } .strip.on { flex-basis: 220px; } .strips { height: 220px; padding: 0; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Pillbox OS · Skizzen</p>
+    <h1>Panels &amp; Picker</h1>
+    <p class="lead">Fünf neue Oberflächen im Pillbox-Stil: Musik, Ton und Netz als Panels der Status-Pille, ein Dashboard hinter der Uhr-Insel und ein neuer Hintergrund-Wähler aus schrägen Streifen. Alles ist anklickbar.</p>
+  </header>
+
+  <section>
+    <div class="sec-head"><p class="eyebrow">01 · Status-Pille</p><h2>Musik, Ton, Netz</h2>
+      <p>Ein Klick auf das jeweilige Symbol in der rechten Pille öffnet das Panel, darunter direkt angedockt. Musik nimmt die Farbe des Covers an (hier simuliert); bei Ton und Netz kommt die Farbe aus deinem Akzent.</p></div>
+    <div class="desk">
+      <div class="bar"><div class="pill">♪ &nbsp;🔊 &nbsp;⌁ &nbsp;<i></i> 12:49</div></div>
+
+      <div>
+        <div class="panel">
+          <h3><span>Spielt gerade</span><span>Spotify</span></h3>
+          <div class="cover"><div class="vinyl"></div></div>
+          <div class="track"><b>Slow Light</b><span>Aurel Vane · Northern Rooms</span></div>
+          <div class="wave" id="wave"></div>
+          <div class="times"><span>1:42</span><span>4:05</span></div>
+          <div class="ctrls"><span>⇄</span><span>⏮</span><span class="play" id="play">❚❚</span><span>⏭</span><span>↻</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="seg" id="eqseg"><button class="on">Flat</button><button>Bass</button><button>Vocal</button><button>Night</button></div>
+          </div>
+          <div class="eq" id="eq"></div>
+        </div>
+        <p class="note">Wellenform statt Balken als Fortschritt. Die Equalizer-Voreinstellungen laufen über PipeWire – das ist die einzige Stelle, die etwas Neues braucht und optional wäre.</p>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3><span>Ton</span><span id="mute" style="cursor:pointer">🔇</span></h3>
+          <div class="ring" id="ring">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="7" stroke-linecap="round" stroke-dasharray="197.9 263.9"/>
+              <circle id="arc" cx="50" cy="50" r="42" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="140 263.9"/></svg>
+            <div class="v"><b id="vol">72</b><span>Mausrad dreht</span></div>
+          </div>
+          <div id="devs">
+            <div class="dev on"><em>🎧</em><div>Kopfhörer<small>Bluetooth · 80 %</small></div></div>
+            <div class="dev"><em>🔈</em><div>Lautsprecher<small>Analog</small></div></div>
+            <div class="dev"><em>🖥</em><div>Monitor<small>HDMI</small></div></div>
+          </div>
+          <div class="apps">
+            <div class="app"><span>Firefox</span><div class="t"><i style="width:60%"></i></div><small>60</small></div>
+            <div class="app"><span>Spotify</span><div class="t"><i style="width:85%"></i></div><small>85</small></div>
+          </div>
+        </div>
+        <p class="note">Großer Ring wie bei der Last-Pille. Mausrad über dem Ring ändert die Lautstärke (probier's). Darunter Ausgabegeräte und die Lautstärke pro App.</p>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3><span>Netz</span><span style="color:var(--mint)">● online</span></h3>
+          <div class="hub">
+            <svg viewBox="0 0 100 100"><g stroke="rgba(255,138,76,.5)" stroke-width=".6" fill="none">
+              <circle cx="50" cy="50" r="34" stroke="rgba(255,255,255,.06)"/>
+              <line x1="50" y1="50" x2="50" y2="16"/><line x1="50" y1="50" x2="80" y2="66" stroke-dasharray="2 2"/>
+              <line x1="50" y1="50" x2="20" y2="66"/></g>
+              <circle r="1.4" fill="var(--accent)"><animateMotion dur="2s" repeatCount="indefinite" path="M50,16 L50,50"/></circle>
+              <circle r="1.4" fill="var(--steel)"><animateMotion dur="2.6s" repeatCount="indefinite" path="M50,50 L20,66"/></circle>
+            </svg>
+            <div class="node c" style="left:50%;top:50%"><b>⌂</b>dieser PC</div>
+            <div class="node" style="left:50%;top:16%"><b>📶</b>FRITZ!Box · 5 GHz</div>
+            <div class="node" style="left:20%;top:66%"><b>🗄</b>NAS</div>
+            <div class="node off" style="left:80%;top:66%"><b>🔒</b>VPN aus</div>
+          </div>
+          <div class="speed"><span>↓ <b>48.2</b> MB/s</span><span>↑ <b>3.1</b> MB/s</span><span>12 ms</span></div>
+        </div>
+        <p class="note">Dein Rechner in der Mitte, um ihn herum, was gerade verbunden ist: WLAN/LAN, Geräte im Netz, VPN. Punkte laufen entlang der Leitungen, so schnell wie gerade Daten fließen.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><p class="eyebrow">02 · Uhr-Insel</p><h2>Das Dashboard</h2>
+      <p>Klick auf die Uhr: Statt des kleinen Kalenders wächst die Insel zu einem breiten Panel mit großer Uhr, Monat, Terminen und Wetter. Benachrichtigungen bleiben als zweite Spalte wählbar.</p></div>
+    <div class="desk">
+      <div class="panel dash">
+        <div>
+          <div class="clock" id="clk">12:49<small>:12</small></div>
+          <div class="date">Samstag, 21. November</div>
+          <div class="cal" id="cal"></div>
+        </div>
+        <div>
+          <div class="wx">
+            <div class="now"><span style="font-size:44px">⛅</span><div><b>7°</b><div style="color:var(--mist);font-size:13px">Leicht bewölkt · gefühlt 4°</div></div></div>
+            <div class="days"><div>Sa<b>7°</b>⛅</div><div>So<b>5°</b>🌧</div><div>Mo<b>4°</b>🌧</div><div>Di<b>6°</b>☁</div><div>Mi<b>8°</b>☀</div></div>
+          </div>
+          <div class="agenda">
+            <div><i></i><small>14:00</small><span>Zahnarzt</span></div>
+            <div><i style="background:var(--accent)"></i><small>19:30</small><span>Kino mit Ingo</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><p class="eyebrow">03 · Einstellungszentrale</p><h2>Hintergrund-Wähler aus Streifen</h2>
+      <p>Die Atmosphären als schräge Streifen. Die gewählte klappt breit auf und spielt live; Mausrad oder Pfeiltasten blättern durch. Oben filtern Farbpunkte nach Stimmung. Klick auf einen Streifen.</p></div>
+    <div class="desk picker">
+      <div class="picker">
+        <div class="filters" id="filters"></div>
+        <div class="strips" id="strips"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// music: waveform + eq
+const wave = document.getElementById('wave');
+for (let i = 0; i < 48; i++) { const s = document.createElement('s'); s.style.height = (20 + Math.abs(Math.sin(i * .7) * 60 + Math.sin(i * 2.3) * 20)) + '%'; if (i < 20) s.className = 'p'; wave.append(s); }
+const eqPresets = { Flat: [5,5,5,5,5,5,5,5], Bass: [9,8,6,5,4,4,4,4], Vocal: [3,4,6,8,8,6,4,3], Night: [6,5,4,4,4,3,3,2] };
+const eq = document.getElementById('eq');
+const bands = ['60','150','400','1k','2k','4k','8k','16k'];
+function drawEq(p) { eq.innerHTML = eqPresets[p].map((v, i) => `<div><span style="height:${v * 6}px"></span>${bands[i]}</div>`).join(''); }
+drawEq('Flat');
+document.querySelectorAll('#eqseg button').forEach(b => b.onclick = () => { document.querySelectorAll('#eqseg button').forEach(x => x.classList.remove('on')); b.classList.add('on'); drawEq(b.textContent); });
+let playing = true; document.getElementById('play').onclick = e => { playing = !playing; e.target.textContent = playing ? '❚❚' : '▶'; document.querySelector('.vinyl').style.animationPlayState = playing ? 'running' : 'paused'; };
+
+// sound: wheel ring
+let vol = 72;
+const setVol = v => { vol = Math.max(0, Math.min(100, v)); document.getElementById('vol').textContent = vol; document.getElementById('arc').setAttribute('stroke-dasharray', `${197.9 * vol / 100} 263.9`); };
+document.getElementById('ring').addEventListener('wheel', e => { e.preventDefault(); setVol(vol + (e.deltaY < 0 ? 2 : -2)); }, { passive: false });
+document.getElementById('mute').onclick = () => setVol(vol ? 0 : 72);
+document.querySelectorAll('.dev').forEach(d => d.onclick = () => { document.querySelectorAll('.dev').forEach(x => x.classList.remove('on')); d.classList.add('on'); });
+
+// dashboard: clock + calendar
+const tick = () => { const d = new Date(); const p = n => String(n).padStart(2, '0'); document.getElementById('clk').innerHTML = `${p(d.getHours())}:${p(d.getMinutes())}<small>:${p(d.getSeconds())}</small>`; };
+tick(); setInterval(tick, 1000);
+const cal = document.getElementById('cal');
+let h = ['Mo','Di','Mi','Do','Fr','Sa','So'].map(x => `<span class="h">${x}</span>`).join('');
+for (let i = 27; i <= 31; i++) h += `<span class="o">${i}</span>`;
+for (let i = 1; i <= 30; i++) h += `<span class="${i === 21 ? 't' : [4, 12, 26].includes(i) ? 'e' : ''}">${i}</span>`;
+cal.innerHTML = h;
+
+// picker
+const scenes = [
+  ['Aurora', 'Fjord in der Polarnacht', 'cool', 'linear-gradient(#0b1530, #1b3a5a 45%, #3fbf9a 52%, #10243a 60%, #0a1020)'],
+  ['Fogline', 'Bergsee im Nebel', 'cool', 'linear-gradient(#7d9bb8, #c7d3de 45%, #5b6e80 60%, #2d3a46)'],
+  ['Tide', 'Offenes Meer, Leuchtturm', 'cool', 'linear-gradient(#f0a878, #e7c3a0 40%, #2f6f8f 55%, #123247)'],
+  ['Dune', 'Dünenmeer', 'warm', 'linear-gradient(#f2b27a, #f7d3a0 50%, #d58a4e 60%, #7a4026)'],
+  ['Horizon', 'Hügel bis zum Horizont', 'warm', 'linear-gradient(#f6c08a, #e9967a 45%, #6b4a6a 62%, #231a2a)'],
+  ['Neon', 'Stadt bei Nacht', 'neon', 'linear-gradient(#1a1030, #50246a 50%, #ff4fa0 62%, #0a0a14 64%)'],
+  ['Flow', 'Farbwolken', 'neon', 'radial-gradient(circle at 30% 40%, #ff8a4c, transparent 50%), radial-gradient(circle at 70% 60%, #7a5cff, #12121c 70%)'],
+  ['Orbit', 'Ringplanet', 'cool', 'radial-gradient(circle at 50% 55%, #e0b48a 18%, #3a2a50 19%, #0c0b16 60%)'],
+];
+const tones = [['alle', 'conic-gradient(#ff8a4c, #7a5cff, #3fbf9a, #ff8a4c)'], ['warm', '#e9967a'], ['cool', '#4a8fb0'], ['neon', '#ff4fa0']];
+let active = 0, tone = 'alle';
+const strips = document.getElementById('strips'), filters = document.getElementById('filters');
+filters.innerHTML = tones.map(([n, c], i) => `<div class="sw${i ? '' : ' on'}" title="${n}" data-t="${n}" style="background:${c}"></div>`).join('');
+strips.innerHTML = scenes.map(([n, d, t, bg], i) => `<div class="strip" data-i="${i}"><div class="img" style="background:${bg}"></div><div class="lbl">${n}<small>${d}</small></div></div>`).join('');
+const render = () => strips.querySelectorAll('.strip').forEach((s, i) => { s.classList.toggle('on', i === active); s.classList.toggle('dim', tone !== 'alle' && scenes[i][2] !== tone); });
+strips.querySelectorAll('.strip').forEach(s => s.onclick = () => { active = +s.dataset.i; render(); });
+strips.addEventListener('wheel', e => { e.preventDefault(); active = (active + (e.deltaY > 0 ? 1 : -1) + scenes.length) % scenes.length; render(); }, { passive: false });
+filters.querySelectorAll('.sw').forEach(f => f.onclick = () => { filters.querySelectorAll('.sw').forEach(x => x.classList.remove('on')); f.classList.add('on'); tone = f.dataset.t; render(); });
+render();
+</script>

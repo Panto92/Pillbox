@@ -823,3 +823,30 @@ msgstr "Für das ganze System verwenden"
 
 msgid "Selections, highlights and switches in Dolphin, System Settings and every KDE app get the same colour. Switched off, the previous accent comes back."
 msgstr "Markierungen, Auswahl und Schalter in Dolphin, den Systemeinstellungen und allen KDE-Programmen bekommen dieselbe Farbe. Ausgeschaltet kommt die vorherige Akzentfarbe zurück."
+
+msgid "View"
+msgstr "Ansicht"
+
+msgid "Strips"
+msgstr "Streifen"
+
+msgid "Grid"
+msgstr "Raster"
+
+msgid "All"
+msgstr "Alle"
+
+msgid "Warm"
+msgstr "Warm"
+
+msgid "Cool"
+msgstr "Kühl"
+
+msgid "Night"
+msgstr "Nacht"
+
+msgid "Abstract"
+msgstr "Abstrakt"
+
+msgid "Scroll or use ← → to flip through"
+msgstr "Mit Mausrad oder ← → durchblättern"

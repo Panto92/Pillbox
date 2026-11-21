@@ -7,6 +7,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtQuick.Effects
 import QtQuick.Controls as QQC2
 import org.kde.plasma.core as PlasmaCore
 import org.kde.kirigami as Kirigami
@@ -213,6 +214,173 @@ Window {
 
     // ================================================================ building blocks
     // a group: small caps title + rows
+    // the atmospheres as slanted strips: the chosen one opens wide, the wheel or the arrow
+    // keys flip through, colour dots filter by mood
+    component WallStrips: FocusScope {
+        id: ws
+        readonly property var all: [
+            { v: "aurora", n: "Aurora", h: i18n("polar night"), m: "cool" },
+            { v: "fogline", n: "Fogline", h: i18n("misty lake"), m: "cool" },
+            { v: "tide", n: "Tide", h: i18n("open sea"), m: "cool" },
+            { v: "horizon", n: "Horizon", h: i18n("flat hills, one sun"), m: "warm" },
+            { v: "dune", n: "Dune", h: i18n("desert"), m: "warm" },
+            { v: "neon", n: "Neon", h: i18n("city at night"), m: "night" },
+            { v: "flow", n: "Flow", h: i18n("clouds of colour"), m: "abstract" },
+            { v: "orbit", n: "Orbit", h: i18n("planet in space"), m: "abstract" },
+            { v: "contour", n: "Contour", h: i18n("contour lines"), m: "abstract" },
+            { v: "grid", n: "Grid", h: i18n("field of dots"), m: "abstract" },
+            { v: "keep", n: i18n("Own image"), h: i18n("Plasma's wallpaper"), m: "" }
+        ]
+        property string mood: ""
+        readonly property var list: mood === "" ? all : all.filter(e => e.m === mood || e.v === panel.cfg.wallScene)
+        readonly property int cur: Math.max(0, list.findIndex(e => e.v === panel.cfg.wallScene))
+        readonly property real slant: stripsH * 0.22
+        readonly property real gap: Kirigami.Units.smallSpacing * 1.5
+        readonly property real stripsH: Kirigami.Units.gridUnit * 13
+        // the open strip takes about half, the rest share what is left
+        readonly property real openW: Math.max(Kirigami.Units.gridUnit * 10, (width - slant) * (list.length > 1 ? 0.46 : 1))
+        readonly property real narrowW: list.length > 1 ? Math.max(Kirigami.Units.gridUnit * 1.4, (width - slant - openW - gap * (list.length - 1)) / (list.length - 1)) : 0
+        implicitHeight: col.implicitHeight
+        Layout.topMargin: Kirigami.Units.smallSpacing
+        function pick(i) {
+            const e = list[(i + list.length) % list.length]
+            if (e && e.v !== panel.cfg.wallScene) { panel.cfg.wallScene = e.v; panel.orb.applyWallpaper() }
+        }
+        Keys.onLeftPressed: pick(cur - 1)
+        Keys.onRightPressed: pick(cur + 1)
+        Column {
+            id: col
+            width: parent.width
+            spacing: Kirigami.Units.gridUnit * 0.8
+            Row {                                                     // mood filter
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: Kirigami.Units.smallSpacing * 2
+                Repeater {
+                    model: [{ m: "", c: "", t: i18n("All") }, { m: "warm", c: "#e9967a", t: i18n("Warm") }, { m: "cool", c: "#4a8fb0", t: i18n("Cool") },
+                            { m: "night", c: "#d0479a", t: i18n("Night") }, { m: "abstract", c: "#8a7ae0", t: i18n("Abstract") }]
+                    delegate: QQC2.AbstractButton {
+                        id: dot
+                        required property var modelData
+                        readonly property bool on: ws.mood === modelData.m
+                        width: Kirigami.Units.gridUnit * 1.3; height: width
+                        hoverEnabled: true
+                        QQC2.ToolTip.visible: hovered; QQC2.ToolTip.text: modelData.t; QQC2.ToolTip.delay: 400
+                        onClicked: ws.mood = modelData.m
+                        background: Rectangle {
+                            radius: width / 2
+                            color: dot.modelData.c || "transparent"
+                            gradient: dot.modelData.c ? null : allGrad
+                            border.width: dot.on ? 2 : 1
+                            border.color: dot.on ? Kirigami.Theme.textColor : Qt.rgba(1, 1, 1, 0.15)
+                            scale: dot.hovered ? 1.12 : 1
+                            Behavior on scale { NumberAnimation { duration: Kirigami.Units.shortDuration } }
+                            Gradient { id: allGrad; orientation: Gradient.Horizontal
+                                GradientStop { position: 0; color: "#e9967a" } GradientStop { position: 0.5; color: "#8a7ae0" } GradientStop { position: 1; color: "#4a8fb0" } }
+                        }
+                    }
+                }
+            }
+            Item {
+                id: stage
+                width: parent.width; height: ws.stripsH
+                WheelHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    property real acc: 0
+                    onWheel: ev => { acc += ev.angleDelta.y + ev.angleDelta.x; if (Math.abs(acc) >= 120) { ws.pick(ws.cur + (acc < 0 ? 1 : -1)); acc = 0 } }
+                }
+                Repeater {
+                    model: ws.list
+                    delegate: QQC2.AbstractButton {
+                        id: strip
+                        required property var modelData
+                        required property int index
+                        readonly property bool open: index === ws.cur
+                        property real w: open ? ws.openW : ws.narrowW
+                        x: index <= ws.cur ? index * (ws.narrowW + ws.gap) : ws.openW + ws.gap + (index - 1) * (ws.narrowW + ws.gap)
+                        Behavior on x { NumberAnimation { duration: Kirigami.Units.longDuration * 1.5; easing.type: Easing.OutCubic } }
+                        width: w + ws.slant; height: stage.height
+                        Behavior on w { NumberAnimation { duration: Kirigami.Units.longDuration * 1.5; easing.type: Easing.OutCubic } }
+                        hoverEnabled: true
+                        focusPolicy: Qt.NoFocus
+                        // only the parallelogram reacts, not the empty corners of the box
+                        containmentMask: Item { function contains(p) { const s = ws.slant * (1 - p.y / strip.height); return p.x >= s && p.x <= s + strip.w && p.y >= 0 && p.y <= strip.height } }
+                        onClicked: { ws.forceActiveFocus(); ws.pick(index) }
+                        QQC2.ToolTip.visible: hovered && !open; QQC2.ToolTip.text: modelData.n; QQC2.ToolTip.delay: 300
+                        background: null
+                        contentItem: Item {
+                            Image {
+                                id: pic
+                                anchors.fill: parent
+                                visible: false
+                                source: strip.modelData.v !== "keep" ? Qt.resolvedUrl("../images/wall-" + strip.modelData.v + ".jpg") : ""
+                                fillMode: Image.PreserveAspectCrop
+                                sourceSize.width: 900
+                            }
+                            Shape {                                  // the parallelogram, used as the picture's mask
+                                id: cut
+                                anchors.fill: parent
+                                visible: false
+                                layer.enabled: true
+                                preferredRendererType: Shape.CurveRenderer
+                                ShapePath {
+                                    strokeColor: "transparent"; fillColor: "white"
+                                    startX: ws.slant; startY: 0
+                                    PathLine { x: ws.slant + strip.w; y: 0 }
+                                    PathLine { x: strip.w; y: strip.height }
+                                    PathLine { x: 0; y: strip.height }
+                                    PathLine { x: ws.slant; y: 0 }
+                                }
+                            }
+                            MultiEffect {
+                                anchors.fill: parent
+                                visible: strip.modelData.v !== "keep"
+                                source: pic
+                                maskEnabled: true; maskSource: cut
+                                maskThresholdMin: 0.5; maskSpreadAtMin: 1
+                                opacity: strip.open ? 1 : strip.hovered ? 0.9 : 0.6
+                                Behavior on opacity { NumberAnimation { duration: Kirigami.Units.shortDuration } }
+                            }
+                            Shape {                                  // outline, and a faint fill for "own image"
+                                anchors.fill: parent
+                                preferredRendererType: Shape.CurveRenderer
+                                ShapePath {
+                                    strokeWidth: strip.open ? 2 : 1
+                                    strokeColor: strip.open ? panel.accent : Qt.rgba(1, 1, 1, 0.12)
+                                    fillColor: strip.modelData.v === "keep" ? Qt.rgba(1, 1, 1, 0.05) : "transparent"
+                                    startX: ws.slant; startY: 0
+                                    PathLine { x: ws.slant + strip.w; y: 0 }
+                                    PathLine { x: strip.w; y: strip.height }
+                                    PathLine { x: 0; y: strip.height }
+                                    PathLine { x: ws.slant; y: 0 }
+                                }
+                            }
+                            Kirigami.Icon {
+                                visible: strip.modelData.v === "keep"
+                                anchors.centerIn: parent
+                                source: "preferences-desktop-wallpaper"; width: Math.min(strip.w * 0.6, Kirigami.Units.gridUnit * 2.5); height: width; opacity: 0.7
+                            }
+                            Column {
+                                visible: strip.open
+                                opacity: strip.open ? 1 : 0
+                                Behavior on opacity { NumberAnimation { duration: Kirigami.Units.longDuration } }
+                                x: ws.slant * 0.2 + Kirigami.Units.gridUnit; y: parent.height - height - Kirigami.Units.gridUnit * 0.8
+                                QQC2.Label { text: strip.modelData.n; color: "white"; font.pixelSize: Kirigami.Units.gridUnit * 1.35; font.weight: Font.DemiBold
+                                    style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5) }
+                                QQC2.Label { text: strip.modelData.h; color: "white"; opacity: 0.85; font: Kirigami.Theme.smallFont
+                                    style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.5) }
+                            }
+                        }
+                    }
+                }
+            }
+            QQC2.Label {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: i18n("Scroll or use ← → to flip through")
+                font: Kirigami.Theme.smallFont; opacity: 0.5
+            }
+        }
+    }
+
     component Group: ColumnLayout {
         property string title
         default property alias rows: body.data
@@ -723,8 +891,12 @@ GradientStop { position: 0; color: tr.at(0) }
             spacing: Kirigami.Units.gridUnit
             Group {
                 title: i18n("Atmosphere")
+                SettingRow { label: i18n("View")
+                    Segments { key: "wallPicker"; options: [["strips", i18n("Strips")], ["grid", i18n("Grid")]] } }
+                WallStrips { Layout.fillWidth: true; visible: panel.cfg.wallPicker !== "grid" }
                 Item {
                     id: tilesBox
+                    visible: panel.cfg.wallPicker === "grid"
                     Layout.fillWidth: true
                     Layout.topMargin: Kirigami.Units.smallSpacing
                     readonly property int cols: width > Kirigami.Units.gridUnit * 40 ? 4 : 3

@@ -23,6 +23,7 @@
     <entry name="shelfReflection" type="Bool"><default>true</default></entry>
     <!-- wallpaper, set from the settings centre: keep | flow | horizon | fogline -->
     <entry name="wallScene" type="String"><default>keep</default></entry>
+    <entry name="wallPicker" type="String"><default>strips</default></entry>
     <entry name="wallFollow" type="Bool"><default>true</default></entry>
     <entry name="wallReact" type="String"><default>subtle</default></entry>
     <entry name="wallMotion" type="String"><default>normal</default></entry>
