@@ -16,7 +16,8 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/tour.gif" alt="Pillbox OS in motion: the orb's ring, colours, docks and a living wallpaper" width="100%">
+  <img src="docs/images/tour.gif" alt="Pillbox OS in motion: the orb's ring, colours, docks and a living wallpaper" width="100%"><br>
+  <sub><a href="https://github.com/Panto92/Pillbox/releases/latest">Watch the full 80-second tour (1080p)</a></sub>
 </p>
 
 > **Pillbox OS is not a distribution.** It turns the Plasma 6 you already have –
