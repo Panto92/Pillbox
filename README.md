@@ -9,7 +9,9 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.9-ff8a4c?style=flat-square">
+  <a href="https://github.com/Panto92/Pillbox/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Panto92/Pillbox?style=flat-square&color=ff8a4c&label=release"></a>
+  <a href="https://github.com/Panto92/Pillbox/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/Panto92/Pillbox/total?style=flat-square&color=8fb0c2"></a>
+  <a href="https://github.com/Panto92/Pillbox/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Panto92/Pillbox?style=flat-square&color=e0bd6e"></a>
   <img alt="KDE Plasma 6" src="https://img.shields.io/badge/KDE%20Plasma-6-8fb0c2?style=flat-square">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-7fdcb0?style=flat-square">
   <img alt="Languages" src="https://img.shields.io/badge/languages-EN%20%C2%B7%20DE-b49cf0?style=flat-square">
