@@ -52,5 +52,7 @@ PlasmoidItem {
             color: Kirigami.Theme.textColor
         }
     }
-    fullRepresentation: Item {}
+    // there is no popup: whatever asks Plasma to open one gets the overlay instead
+    fullRepresentation: null
+    onExpandedChanged: if (expanded) { expanded = false; if (!overlay.visible) overlay.showNow() }
 }
