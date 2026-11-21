@@ -141,6 +141,7 @@ tint() {
     local want="${1:-}"
     if [[ "$want" == off ]]; then
         plasma-apply-colorscheme Pillbox >/dev/null 2>&1 || true
+        rm -f "$DATA/color-schemes/PillboxTinted.colors" "$DATA/color-schemes/PillboxTinted2.colors"
         echo "$(tr_ "Plain Pillbox colours." "Normale Pillbox-Farben.")"; return
     fi
     [[ "$want" =~ ^#?[0-9a-fA-F]{6}$ ]] || { echo "Usage: pillbox tint '#rrggbb' | off" >&2; exit 1; }
@@ -148,7 +149,11 @@ tint() {
     [[ -e "$src" ]] || src="/usr/share/color-schemes/Pillbox.colors"
     [[ -e "$src" ]] || { echo "Pillbox colour scheme not installed" >&2; exit 1; }
     local accent
-    accent="$(python3 -I - "$src" "$DATA/color-schemes/PillboxTinted.colors" "${want#\#}" <<'PY'
+    # Plasma ignores a scheme that is already active even if its file changed – so alternate names
+    local name=PillboxTinted
+    [[ "$(kreadconfig6 --file kdeglobals --group General --key ColorScheme)" == PillboxTinted ]] && name=PillboxTinted2
+    rm -f "$DATA/color-schemes/PillboxTinted.colors" "$DATA/color-schemes/PillboxTinted2.colors"
+    accent="$(python3 -I - "$src" "$DATA/color-schemes/$name.colors" "${want#\#}" <<'PY'
 import colorsys, re, sys
 src, out, hexv = sys.argv[1], sys.argv[2], sys.argv[3]
 r, g, b = (int(hexv[i:i+2], 16) / 255 for i in (0, 2, 4))
@@ -171,7 +176,8 @@ open(out, "w", encoding="utf-8").write(text)
 print("#" + "".join(f"{round(v * 255):02x}" for v in acc))
 PY
 )"
-    plasma-apply-colorscheme PillboxTinted >/dev/null 2>&1 || true
+    # scheme first, then the accent (given together, plasma-apply-colorscheme only sets the accent)
+    plasma-apply-colorscheme "$name" >/dev/null 2>&1 || true
     plasma-apply-colorscheme --accent-color "$accent" >/dev/null 2>&1 || true
     echo "$(tr_ "Tinted with $want, accent $accent." "Getönt mit $want, Akzent $accent.")"
 }

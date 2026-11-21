@@ -73,7 +73,7 @@ kpackagetool6 -t Plasma/Applet      -r org.pillbox.island  >/dev/null 2>&1 && sa
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.status  >/dev/null 2>&1 && say "Removed the status pill" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.search  >/dev/null 2>&1 && say "Removed the search" || true
 kwriteconfig6 --file krunnerrc --group General --key FreeFloating --delete 2>/dev/null || true
-rm -f "$DATA/color-schemes/PillboxTinted.colors"
+rm -f "$DATA/color-schemes/PillboxTinted.colors" "$DATA/color-schemes/PillboxTinted2.colors"
 rm -f "$HOME/.local/bin/pillbox" "$DATA/applications/org.pillbox.os.desktop" "$DATA"/icons/hicolor/scalable/apps/pillbox-{os,orb,line,line-symbolic}.svg "$STATE/mode"
 kpackagetool6 -t Plasma/Wallpaper   -r org.pillbox.atmosphere >/dev/null 2>&1 && say "Removed the living wallpaper" || true
 kpackagetool6 -t Plasma/Applet      -r org.pillbox.stats   >/dev/null 2>&1 && say "Removed widget: Pillbox Stats" || true
