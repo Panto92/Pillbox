@@ -34,6 +34,9 @@
     <entry name="loginScene" type="String"><default>auto</default></entry>
     <!-- the load pill (org.pillbox.stats), mirrored here and written into the widget -->
     <entry name="statsStyle" type="String"><default>rings</default></entry>
+    <!-- use the orb's colour as Plasma's accent colour for the whole system -->
+    <entry name="systemAccent" type="Bool"><default>false</default></entry>
+    <entry name="accentBefore" type="String"><default></default></entry>
     <!-- top bar arrangement: islands | bar | capsule -->
     <entry name="arrangement" type="String"><default>islands</default></entry>
     <!-- icon theme: keep (whatever was set) | Pillbox | Pillbox-Duo -->

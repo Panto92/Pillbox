@@ -963,6 +963,41 @@ PlasmoidItem {
         shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \"$(sed s/MODE/" + mode + "/ '" + file + "')\" # " + Date.now())
     }
 
+    // ---------------------------------------------------------------- system accent colour
+    // Plasma's own tool sets the accent of the colour scheme for every KDE app.
+    // accentBefore: ""  = not remembered yet, "none" = the scheme's own accent, else the old colour.
+    function accentHex() { const a = accent; return "#" + [a.r, a.g, a.b].map(v => ("0" + Math.round(v * 255).toString(16)).slice(-2)).join("") }
+    function applySystemAccent() { sysAccentTimer.restart() }
+    property Timer sysAccentTimer: Timer {
+        interval: 700                          // the whole system repaints: wait until the slider rests
+        onTriggered: {
+            const c = root.cfg
+            if (c.systemAccent) {
+                const remember = c.accentBefore ? "" : "prev=$(kreadconfig6 --file kdeglobals --group General --key AccentColor); echo PBACC=${prev:-none}; "
+                accentProbe.connectSource(remember + "plasma-apply-colorscheme --accent-color '" + root.accentHex() + "' # " + Date.now())
+            } else if (c.accentBefore === "none") {
+                // there was no own accent: drop ours and apply the scheme afresh so every colour is original again
+                shell.connectSource("s=$(kreadconfig6 --file kdeglobals --group General --key ColorScheme); "
+                    + "kwriteconfig6 --file kdeglobals --group General --key AccentColor --delete; "
+                    + "o=BreezeDark; [ \"$s\" = BreezeDark ] && o=BreezeLight; plasma-apply-colorscheme \"$o\" >/dev/null; plasma-apply-colorscheme \"$s\" # " + Date.now())
+                c.accentBefore = ""
+            } else if (c.accentBefore) {
+                const b = String(c.accentBefore)
+                const hex = b.indexOf(",") >= 0 ? "#" + b.split(",").slice(0, 3).map(v => ("0" + parseInt(v).toString(16)).slice(-2)).join("") : b.replace(/[^0-9a-fA-F#]/g, "")
+                shell.connectSource("plasma-apply-colorscheme --accent-color '" + hex + "' # " + Date.now())
+                c.accentBefore = ""
+            }
+        }
+    }
+    property P5Support.DataSource accentProbe: P5Support.DataSource {
+        engine: "executable"
+        onNewData: (source, data) => {
+            disconnectSource(source)
+            const m = String(data.stdout || "").match(/PBACC=([^\n]*)/)
+            if (m && !root.cfg.accentBefore) root.cfg.accentBefore = m[1].trim() || "none"
+        }
+    }
+
     // ---------------------------------------------------------------- login screen
     // Set up once with root (pkexec), then the choices live in a file the user owns:
     // /var/lib/pillbox-login/theme.conf.user – no password needed to change them.
@@ -1001,7 +1036,7 @@ PlasmoidItem {
         }
     }
     property Timer applyAfterSetup: Timer { interval: 800; onTriggered: root.applyLogin() }
-    onAccentChanged: if (loginState === "ready") applyLogin()
+    onAccentChanged: { if (loginState === "ready") applyLogin(); if (cfg.systemAccent) applySystemAccent() }
 
     property bool settingsOpen: false
     SettingsPanel {

@@ -554,6 +554,9 @@ GradientStop { position: 0; color: tr.at(0) }
                         }
                     }
                 }
+                SettingRow { label: i18n("Use for the whole system"); hint: i18n("Selections, highlights and switches in Dolphin, System Settings and every KDE app get the same colour. Switched off, the previous accent comes back.")
+                    PillSwitch { enabled: panel.cfg.colorMode !== "system"; checked: panel.cfg.systemAccent
+                                 onToggled: { panel.cfg.systemAccent = checked; panel.orb.applySystemAccent() } } }
                 SettingRow { label: i18n("Use the color scheme's accent"); hint: i18n("Follows System Settings → Colors.")
                     PillSwitch { checked: panel.cfg.colorMode === "system"; onToggled: panel.cfg.colorMode = checked ? "system" : "custom" } }
             }
