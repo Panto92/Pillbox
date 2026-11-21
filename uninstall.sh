@@ -80,6 +80,9 @@ case "$(kreadconfig6 --file kdeglobals --group Icons --key Theme 2>/dev/null)" i
     Pillbox|Pillbox-Duo) /usr/lib/*/libexec/plasma-changeicons breeze-dark >/dev/null 2>&1 || kwriteconfig6 --file kdeglobals --group Icons --key Theme breeze-dark ;;
 esac
 rm -rf "$DATA/icons/Pillbox" "$DATA/icons/Pillbox-Duo"
+if [[ "$(kreadconfig6 --file kscreenlockerrc --group Greeter --key WallpaperPlugin 2>/dev/null)" == "org.pillbox.atmosphere" ]]; then
+    kwriteconfig6 --file kscreenlockerrc --group Greeter --key WallpaperPlugin --delete    # back to Plasma's image
+fi
 rm -rf "$DATA/plasma/desktoptheme/Pillbox"
 rm -f  "$DATA/color-schemes/Pillbox.colors"
 rm -f  "$DATA/konsole/Pillbox.colorscheme" "$DATA/konsole/Pillbox.profile"

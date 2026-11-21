@@ -44,7 +44,7 @@ mkdir -p "$STATE/backups"
 
 backup() {
     local out="$STATE/backups/settings-$STAMP.tar.gz" files=()
-    for f in kdeglobals kwinrc plasmarc kcminputrc plasmashellrc plasma-org.kde.plasma.desktop-appletsrc plasmanotifyrc konsolerc fastfetch/config.jsonc; do
+    for f in kdeglobals kwinrc plasmarc kcminputrc plasmashellrc plasma-org.kde.plasma.desktop-appletsrc plasmanotifyrc kscreenlockerrc konsolerc fastfetch/config.jsonc; do
         [[ -e "$CONF/$f" ]] && files+=("$f")
     done
     tar -czf "$out" -C "$CONF" "${files[@]}"
@@ -145,6 +145,10 @@ if (( LAYOUT )); then
             p.alignment = t.indexOf("org.pillbox.stats") >= 0 ? "left"
                         : t.indexOf("org.kde.plasma.systemtray") >= 0 ? "right" : "center";
         });' >/dev/null
+    # the lock screen gets the same living wallpaper
+    kwriteconfig6 --file kscreenlockerrc --group Greeter --key WallpaperPlugin org.pillbox.atmosphere
+    kwriteconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.pillbox.atmosphere --group General --key Scene aurora
+    kwriteconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.pillbox.atmosphere --group General --key PauseWhenCovered false
     say "Restarting Plasma to place the pills (panels disappear for a few seconds)…"
     sleep 1
     if systemctl --user is-active --quiet plasma-plasmashell 2>/dev/null; then

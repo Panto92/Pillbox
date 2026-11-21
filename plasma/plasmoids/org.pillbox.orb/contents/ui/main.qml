@@ -938,6 +938,13 @@ PlasmoidItem {
                 root.wallPreviewPending = false
             }
             root.shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '" + js + "'")
+            // the lock screen follows the desktop's atmosphere
+            const lockScene = String(c.wallScene).replace(/[^a-z]/g, "")
+            root.shell.connectSource(lockScene === "keep"
+                ? "kwriteconfig6 --file kscreenlockerrc --group Greeter --key WallpaperPlugin --delete # " + Date.now()
+                : "kwriteconfig6 --file kscreenlockerrc --group Greeter --key WallpaperPlugin org.pillbox.atmosphere; "
+                  + "kwriteconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.pillbox.atmosphere --group General --key Scene " + lockScene + "; "
+                  + "kwriteconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.pillbox.atmosphere --group General --key PauseWhenCovered false # lock " + Date.now())
         }
     }
     property P5Support.DataSource shell: P5Support.DataSource {
