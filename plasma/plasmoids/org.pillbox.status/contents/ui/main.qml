@@ -1,5 +1,5 @@
 /*
- * Pillbox Status – music, sound and network in one calm pill, each with its own panel.
+ * Pillbox Status – music, sound, Bluetooth and network in one calm pill, each with its own panel.
  * Music appears only while a player is open. Built on Plasma's own models (MPRIS,
  * PulseAudio, NetworkManager, system sensors); nothing here talks to hardware directly.
  * SPDX-License-Identifier: MIT
@@ -18,12 +18,13 @@ import org.kde.ksysguard.sensors as Sensors
 import org.kde.plasma.private.mpris as Mpris
 import org.kde.plasma.private.volume as Vol
 import org.kde.plasma.networkmanagement as PlasmaNM
+import org.kde.bluezqt as BluezQt
 
 PlasmoidItem {
     id: root
 
     readonly property color accent: Kirigami.Theme.highlightColor
-    property string page: "sound"                     // music | sound | net
+    property string page: "sound"                     // music | sound | bt | net
 
     // ---------------------------------------------------------------- music
     Mpris.Mpris2Model { id: mpris }
@@ -48,6 +49,18 @@ PlasmoidItem {
         if (muted || volume === 0) return "audio-volume-muted"
         return volume < 34 ? "audio-volume-low" : volume < 67 ? "audio-volume-medium" : "audio-volume-high"
     }
+
+    // ---------------------------------------------------------------- bluetooth
+    readonly property var bt: BluezQt.Manager
+    readonly property bool btPresent: !quitting && bt.adapters.length > 0
+    readonly property bool btOn: btPresent && bt.bluetoothOperational
+    readonly property var btConnected: btOn ? bt.devices.filter(d => d.connected) : []
+    function setBluetooth(on) {
+        if (on && bt.bluetoothBlocked) bt.bluetoothBlocked = false
+        bt.adapters.forEach(a => a.powered = on)
+        if (!on) bt.bluetoothBlocked = true
+    }
+    function btIcon() { return !btOn ? "network-bluetooth-inactive" : btConnected.length ? "network-bluetooth-activated" : "network-bluetooth" }
 
     // ---------------------------------------------------------------- network
     PlasmaNM.NetworkStatus { id: netStatus }
@@ -119,6 +132,7 @@ PlasmoidItem {
             icon: root.volumeIcon()
             onWheel: ev => root.setVolume(root.volume + (ev.angleDelta.y > 0 ? 5 : -5))
         }
+        PillButton { visible: root.btPresent; target: "bt"; icon: root.btIcon() }
         PillButton { target: "net"; icon: netIcon.connectionIcon || "network-wired" }
     }
 
@@ -134,7 +148,7 @@ PlasmoidItem {
             y: Kirigami.Units.smallSpacing
             spacing: Kirigami.Units.smallSpacing
             Repeater {
-                model: [{ p: "music", n: i18n("Music"), show: root.hasPlayer }, { p: "sound", n: i18n("Sound"), show: true }, { p: "net", n: i18n("Network"), show: true }]
+                model: [{ p: "music", n: i18n("Music"), show: root.hasPlayer }, { p: "sound", n: i18n("Sound"), show: true }, { p: "bt", n: i18n("Bluetooth"), show: root.btPresent }, { p: "net", n: i18n("Network"), show: true }]
                 delegate: QQC2.AbstractButton {
                     id: tab
                     required property var modelData
@@ -151,7 +165,7 @@ PlasmoidItem {
         Loader {
             id: pages
             anchors { top: tabs.bottom; topMargin: Kirigami.Units.largeSpacing; left: parent.left; right: parent.right; margins: Kirigami.Units.smallSpacing }
-            sourceComponent: root.page === "music" && root.hasPlayer ? musicPage : root.page === "net" ? netPage : soundPage
+            sourceComponent: root.page === "music" && root.hasPlayer ? musicPage : root.page === "net" ? netPage : root.page === "bt" && root.btPresent ? btPage : soundPage
         }
     }
 
@@ -330,6 +344,99 @@ PlasmoidItem {
                         onMoved: st.model.PulseObject.volume = Math.round(value)
                     }
                 }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- bluetooth
+    Component {
+        id: btPage
+        ColumnLayout {
+            spacing: Kirigami.Units.largeSpacing
+            // big switch card
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: Kirigami.Units.gridUnit * 4
+                radius: Kirigami.Units.gridUnit
+                color: root.btOn ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.18) : Qt.rgba(1, 1, 1, 0.05)
+                Behavior on color { ColorAnimation { duration: Kirigami.Units.longDuration } }
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: Kirigami.Units.largeSpacing
+                    spacing: Kirigami.Units.largeSpacing
+                    Rectangle {
+                        implicitWidth: Kirigami.Units.gridUnit * 2.6; implicitHeight: implicitWidth; radius: width / 2
+                        color: root.btOn ? root.accent : Qt.rgba(1, 1, 1, 0.08)
+                        Kirigami.Icon { anchors.centerIn: parent; source: "network-bluetooth"; width: parent.width * 0.55; height: width
+                            color: root.btOn ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor; isMask: true }
+                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+                        PC3.Label { text: i18n("Bluetooth"); font.weight: Font.DemiBold; font.pixelSize: Kirigami.Units.gridUnit * 1.05 }
+                        PC3.Label { Layout.fillWidth: true; elide: Text.ElideRight; opacity: 0.65
+                            text: !root.btOn ? i18n("Off") : root.btConnected.length ? i18np("%1 device connected", "%1 devices connected", root.btConnected.length) : i18n("On, nothing connected") }
+                    }
+                    PC3.Switch { checked: root.btOn; onToggled: root.setBluetooth(checked) }
+                }
+            }
+            Caption { visible: root.btOn; text: i18n("Your devices") }
+            Repeater {
+                model: root.btOn ? root.bt.devices.filter(d => d.paired).sort((a, b) => (b.connected - a.connected) || a.name.localeCompare(b.name)) : []
+                delegate: QQC2.AbstractButton {
+                    id: bdev
+                    required property var modelData
+                    readonly property var d: modelData
+                    property bool busy: false
+                    Layout.fillWidth: true
+                    implicitHeight: Kirigami.Units.gridUnit * 2.8
+                    onClicked: {
+                        busy = true
+                        const call = d.connected ? d.disconnectFromDevice() : d.connectToDevice()
+                        if (call) call.finished.connect(() => bdev.busy = false); else busy = false
+                    }
+                    background: Rectangle { radius: Kirigami.Units.gridUnit * 0.7
+                        color: bdev.d.connected ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.14) : bdev.hovered ? Qt.rgba(1, 1, 1, 0.06) : "transparent"
+                        border.width: bdev.d.connected ? 1 : 0; border.color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.4) }
+                    contentItem: RowLayout {
+                        spacing: Kirigami.Units.largeSpacing
+                        Kirigami.Icon { Layout.leftMargin: Kirigami.Units.smallSpacing; source: bdev.d.icon || "network-bluetooth"
+                            implicitWidth: Kirigami.Units.iconSizes.smallMedium; implicitHeight: implicitWidth; opacity: bdev.d.connected ? 1 : 0.6 }
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 0
+                            PC3.Label { Layout.fillWidth: true; text: bdev.d.name; elide: Text.ElideRight; font.weight: bdev.d.connected ? Font.DemiBold : Font.Normal }
+                            PC3.Label { Layout.fillWidth: true; font: Kirigami.Theme.smallFont; opacity: 0.6
+                                text: bdev.busy ? (bdev.d.connected ? i18n("Disconnecting…") : i18n("Connecting…")) : bdev.d.connected ? i18n("Connected") : i18n("Click to connect") }
+                        }
+                        // battery as a small pill gauge
+                        Row {
+                            visible: bdev.d.connected && !!bdev.d.battery
+                            spacing: Kirigami.Units.smallSpacing
+                            Layout.rightMargin: Kirigami.Units.smallSpacing
+                            readonly property int pct: bdev.d.battery ? bdev.d.battery.percentage : 0
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: Kirigami.Units.gridUnit * 1.5; height: Kirigami.Units.gridUnit * 0.65; radius: height / 2
+                                color: Qt.rgba(1, 1, 1, 0.1)
+                                Rectangle { width: Math.max(height, parent.width * parent.parent.pct / 100); height: parent.height; radius: height / 2
+                                    color: parent.parent.pct <= 15 ? Kirigami.Theme.negativeTextColor : root.accent }
+                            }
+                            PC3.Label { text: parent.pct + " %"; font: Kirigami.Theme.smallFont; font.features: { "tnum": 1 } }
+                        }
+                        PC3.BusyIndicator { visible: bdev.busy; running: visible; implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth }
+                    }
+                }
+            }
+            PC3.Label {
+                visible: root.btOn && root.bt.devices.filter(d => d.paired).length === 0
+                Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; opacity: 0.6
+                text: i18n("No devices paired yet")
+            }
+            PC3.Button {
+                Layout.fillWidth: true
+                icon.name: "list-add"; text: i18n("Add a device…")
+                onClicked: { KCM.KCMLauncher.openSystemSettings("kcm_bluetooth"); root.expanded = false }
             }
         }
     }

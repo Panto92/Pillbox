@@ -54,3 +54,38 @@ msgstr "WLAN aus"
 
 msgid "Network settings"
 msgstr "Netzwerk-Einstellungen"
+
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+msgid "Off"
+msgstr "Aus"
+
+msgid "%1 device connected"
+msgid_plural "%1 devices connected"
+msgstr[0] "%1 Gerät verbunden"
+msgstr[1] "%1 Geräte verbunden"
+
+msgid "On, nothing connected"
+msgstr "An, nichts verbunden"
+
+msgid "Your devices"
+msgstr "Deine Geräte"
+
+msgid "Disconnecting…"
+msgstr "Trenne …"
+
+msgid "Connecting…"
+msgstr "Verbinde …"
+
+msgid "Connected"
+msgstr "Verbunden"
+
+msgid "Click to connect"
+msgstr "Klicken zum Verbinden"
+
+msgid "No devices paired yet"
+msgstr "Noch keine Geräte gekoppelt"
+
+msgid "Add a device…"
+msgstr "Gerät hinzufügen …"
