@@ -102,16 +102,22 @@ PlasmoidItem {
     toolTipSubText: (hasPlayer ? player.track + " · " : "") + i18n("Volume %1 %", volume)
 
     // ---------------------------------------------------------------- in the pill
+    // every icon in the pill as a single-colour symbol, so they read as one set
+    function sym(n) { return !n ? "" : n.endsWith("-symbolic") ? n : n + "-symbolic" }
+
     compactRepresentation: RowLayout {
-        spacing: Kirigami.Units.largeSpacing
+        id: pillRow
+        spacing: Kirigami.Units.smallSpacing
         Layout.minimumWidth: implicitWidth
+        readonly property real iconSize: Math.max(16, Math.min(22, Math.round(height * 0.52)))
         component PillButton: MouseArea {
             id: pb
             property string target
             property alias icon: ic.source
             default property alias extra: side.data
+            readonly property bool active: root.expanded && root.page === target
             Layout.fillHeight: true
-            Layout.preferredWidth: lay.implicitWidth
+            Layout.preferredWidth: Math.max(height * 1.05, lay.implicitWidth + Kirigami.Units.largeSpacing * 1.6)
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.MiddleButton
             onClicked: ev => {
@@ -119,30 +125,51 @@ PlasmoidItem {
                 if (root.expanded && root.page === target) root.expanded = false
                 else { root.page = target; root.expanded = true }
             }
+            Rectangle {                                       // soft capsule on hover / while its panel is open
+                anchors.fill: parent
+                anchors.topMargin: Math.round(parent.height * 0.12); anchors.bottomMargin: anchors.topMargin
+                radius: height / 2
+                color: Kirigami.Theme.textColor
+                opacity: pb.active ? 0.14 : pb.containsMouse ? 0.08 : 0
+                Behavior on opacity { NumberAnimation { duration: Kirigami.Units.shortDuration } }
+            }
             RowLayout {
                 id: lay
                 anchors.centerIn: parent
                 spacing: Kirigami.Units.smallSpacing
-                Kirigami.Icon { id: ic; implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth; opacity: pb.containsMouse || (root.expanded && root.page === pb.target) ? 1 : 0.85 }
-                Row { id: side; spacing: 2 }
+                Kirigami.Icon {
+                    id: ic
+                    implicitWidth: pillRow.iconSize; implicitHeight: implicitWidth
+                    isMask: true
+                    color: Kirigami.Theme.textColor
+                    opacity: pb.active || pb.containsMouse ? 1 : 0.82
+                }
+                Row { id: side; spacing: 2; visible: children.length > 0 }
+            }
+            Rectangle {                                       // which panel is open: a small accent dot
+                anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 1 }
+                width: 4; height: 4; radius: 2
+                color: root.accent
+                opacity: pb.active ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: Kirigami.Units.shortDuration } }
             }
         }
         PillButton {
             visible: root.hasPlayer
             target: "music"
-            icon: root.player && root.player.iconName ? root.player.iconName : "media-playback-start"
+            icon: root.sym(root.playing ? "media-playback-playing" : "media-playback-paused")
             // three small bars that dance while music plays
             Repeater {
-                model: 3
+                model: root.playing ? 3 : 0
                 Rectangle {
                     required property int index
                     width: 2; radius: 1
-                    anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+                    y: (pillRow.iconSize - height) / 2
                     color: root.accent
                     height: 4
                     SequentialAnimation on height {
                         running: root.playing; loops: Animation.Infinite
-                        NumberAnimation { to: 10 - index * 2; duration: 260 + index * 90 }
+                        NumberAnimation { to: 11 - index * 2; duration: 260 + index * 90 }
                         NumberAnimation { to: 3; duration: 300 + index * 70 }
                     }
                 }
@@ -150,19 +177,19 @@ PlasmoidItem {
         }
         PillButton {
             target: "sound"
-            icon: root.volumeIcon()
+            icon: root.sym(root.volumeIcon())
             onWheel: ev => root.setVolume(root.volume + (ev.angleDelta.y > 0 ? 5 : -5))
         }
-        PillButton { visible: root.btPresent; target: "bt"; icon: root.btIcon() }
-        PillButton { target: "net"; icon: netIcon.connectionIcon || "network-wired" }
+        PillButton { visible: root.btPresent; target: "bt"; icon: root.sym(root.btIcon()) }
+        PillButton { target: "net"; icon: root.sym(netIcon.connectionIcon || "network-wired") }
         PillButton {
             visible: root.hasBattery
             target: "session"
-            icon: root.batteryIcon()
+            icon: root.sym(root.batteryIcon())
             PC3.Label { text: root.batteryPct + "%"; font.pixelSize: Kirigami.Theme.smallFont.pixelSize; font.features: { "tnum": 1 }
                 color: root.batteryPct <= 15 && !root.charging ? Kirigami.Theme.negativeTextColor : Kirigami.Theme.textColor }
         }
-        PillButton { target: "session"; icon: "system-shutdown" }
+        PillButton { target: "session"; icon: root.sym("system-shutdown") }
     }
 
     // ---------------------------------------------------------------- the panels

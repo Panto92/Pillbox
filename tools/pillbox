@@ -5,6 +5,10 @@
 #   pillbox off        back to your usual desktop; the Pillbox desktop is kept for later
 #   pillbox on         back to Pillbox; your usual desktop is kept for later
 #   pillbox status     prints "on" or "off"
+#   pillbox tidy       hand sound, network, Bluetooth, battery, media and notifications over to
+#                      the Pillbox pills: removes them from the system tray (remembered) and takes
+#                      the media and logout widgets off the top bar
+#   pillbox untidy     gives the system tray its items back
 #
 # Both sides are saved on every switch, so changes you make on either side survive.
 # Only Plasma's own config files are swapped (panels, theme, colours, window manager,
@@ -89,11 +93,53 @@ settings() {
         "var done = false; panels().concat(desktops()).forEach(function(c){ c.widgets(\"org.pillbox.orb\").forEach(function(w){ if (done) return; done = true; w.currentConfigGroup = [\"General\"]; w.writeConfig(\"openSettings\", \"$(date +%s%N)\"); w.reloadConfig(); }); });" >/dev/null
 }
 
+# items the Pillbox pills replace, and where the list of removed ones is kept
+TAKEN=(org.kde.plasma.volume org.kde.plasma.networkmanagement org.kde.plasma.bluetooth org.kde.plasma.battery org.kde.plasma.mediacontroller org.kde.plasma.notifications)
+TRAY_NOTE="$STATE/tray-removed"
+tray_script() {   # $1 = take | give, $2 = items to give back; prints what was taken
+    local taken; taken="$(printf '"%s",' "${TAKEN[@]}")"
+    local back; back="$(printf '"%s",' $2)"
+    qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
+        var how = '$1', taken = [${taken%,}], back = [${back%,}], out = [];
+        panels().forEach(function(p){ p.widgets('org.kde.plasma.systemtray').forEach(function(w){
+            w.currentConfigGroup = ['General'];
+            var items = String(w.readConfig('extraItems') || '').split(',').filter(function(x){ return x; });
+            if (how === 'take') {
+                items.forEach(function(x){ if (taken.indexOf(x) >= 0 && out.indexOf(x) < 0) out.push(x); });
+                items = items.filter(function(x){ return taken.indexOf(x) < 0; });
+            } else {
+                back.forEach(function(x){ if (items.indexOf(x) < 0) items.push(x); });
+            }
+            w.writeConfig('extraItems', items.join(','));
+            w.reloadConfig();
+        }); });
+        print(out.join(' '));"
+}
+tidy() {
+    snapshot "$STATE/before-tidy.tar.gz"
+    # the media and logout widgets live on in the status pill
+    qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \
+        'panels().forEach(function(p){ if (!p.widgets("org.pillbox.status").length) return; p.widgets().forEach(function(w){ if (w.type === "org.kde.plasma.mediacontroller" || w.type === "org.kde.plasma.lock_logout") w.remove(); }); });' >/dev/null || true
+    local got; got="$(tray_script take "")"
+    mkdir -p "$STATE"
+    # keep what was taken (added to any earlier list) so untidy can give it back
+    { [[ -e "$TRAY_NOTE" ]] && cat "$TRAY_NOTE"; printf '%s\n' $got; } | sort -u | sed '/^$/d' > "$TRAY_NOTE.tmp" && mv "$TRAY_NOTE.tmp" "$TRAY_NOTE"
+    echo "$(tr_ "Tidied up: the system tray keeps only what the Pillbox pills don't show." "Aufgeräumt: Die Systemleiste zeigt nur noch, was die Pillbox-Pillen nicht schon zeigen.")"
+}
+untidy() {
+    [[ -e "$TRAY_NOTE" ]] || { echo "$(tr_ "Nothing to give back." "Nichts zurückzugeben.")"; return; }
+    tray_script give "$(cat "$TRAY_NOTE")" >/dev/null
+    rm -f "$TRAY_NOTE"
+    echo "$(tr_ "The system tray has its items back." "Die Systemleiste hat ihre Symbole zurück.")"
+}
+
 case "${1:-settings}" in
+    tidy)     tidy ;;
+    untidy)   untidy ;;
     settings) settings ;;
     off)      off ;;
     on)       on ;;
     status)   mode ;;
-    -h|--help|help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
-    *) echo "Usage: pillbox [settings|on|off|status]" >&2; exit 1 ;;
+    -h|--help|help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) echo "Usage: pillbox [settings|on|off|status|tidy|untidy]" >&2; exit 1 ;;
 esac

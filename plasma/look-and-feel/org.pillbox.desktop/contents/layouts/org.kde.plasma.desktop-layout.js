@@ -1,6 +1,6 @@
 /*
  * Pillbox desktop layout
- *   top:     three floating "pills" – menu + stats (left) · island clock (center) · media/tray/power (right)
+ *   top:     three floating "pills" – menu + stats (left) · island clock (center) · tray + status pill (right)
  *   desktop: the Pillbox Orb replaces the dock (floating, draggable, on the primary screen)
  * SPDX-License-Identifier: MIT
  */
@@ -40,6 +40,6 @@ pill("left",   ["org.kde.plasma.kickoff", "org.pillbox.stats"]);
 // the centre pill: a clock that grows into an island for notifications
 pill("center", ["org.pillbox.island"]);
 
-pill("right",  ["org.kde.plasma.mediacontroller",
-                "org.kde.plasma.systemtray",
-                "org.kde.plasma.lock_logout"]);
+// the tray for app icons, then the status pill: music, sound, Bluetooth, network, power
+pill("right",  ["org.kde.plasma.systemtray",
+                knownWidgetTypes.indexOf("org.pillbox.status") >= 0 ? "org.pillbox.status" : "org.kde.plasma.lock_logout"]);

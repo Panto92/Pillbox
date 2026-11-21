@@ -167,6 +167,8 @@ if (( LAYOUT )); then
     fi
     say "Applied Pillbox theme and layout"
     echo on > "$STATE/mode"
+    # the system tray hands sound, network, media … over to the status pill
+    (sleep 8; "$HOME/.local/bin/pillbox" tidy >/dev/null 2>&1) &
 elif (( APPLY )); then
     plasma-apply-lookandfeel -a org.pillbox.desktop
     say "Applied Pillbox theme (your panels were kept)"
