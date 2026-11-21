@@ -15,6 +15,10 @@
   <img alt="Languages" src="https://img.shields.io/badge/languages-EN%20%C2%B7%20DE-b49cf0?style=flat-square">
 </p>
 
+<p align="center">
+  <img src="docs/images/tour.gif" alt="Pillbox OS in motion: the orb's ring, colours, docks and a living wallpaper" width="100%">
+</p>
+
 > **Pillbox OS is not a distribution.** It turns the Plasma 6 you already have –
 > Kubuntu, Fedora KDE, Arch, openSUSE, KDE neon … – into its own desktop, and
 > `./uninstall.sh` brings your old one back.
