@@ -12,6 +12,7 @@ import QtQuick.Shapes
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.components as PC3
+import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
 import org.kde.ksysguard.sensors as Sensors
 import org.kde.plasma.plasma5support as P5Support
@@ -532,28 +533,71 @@ PlasmoidItem {
                         id: tr
                         property string what
                         property string label
+                        property string iconName
                         property real bytes
                         property bool armed: false
+                        readonly property bool busy: root.tidying === what
+                        readonly property bool empty: !isNaN(bytes) && bytes < 1048576
                         Layout.fillWidth: true
+                        Layout.topMargin: Kirigami.Units.smallSpacing
+                        spacing: Kirigami.Units.largeSpacing
                         Timer { id: disarm; interval: 3500; onTriggered: tr.armed = false }
+                        Rectangle {
+                            implicitWidth: Kirigami.Units.gridUnit * 2; implicitHeight: implicitWidth; radius: width / 2
+                            color: Qt.rgba(1, 1, 1, 0.06)
+                            Kirigami.Icon { anchors.centerIn: parent; source: tr.iconName; width: parent.width * 0.5; height: width; isMask: true; color: Kirigami.Theme.textColor }
+                        }
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 0
-                            PC3.Label { text: tr.label }
-                            PC3.Label { text: root.tidying === tr.what ? i18n("Emptying…") : isNaN(tr.bytes) ? "…" : tr.bytes < 1048576 ? i18n("empty") : (tr.bytes / 1048576).toLocaleString(Qt.locale(), "f", 0) + " MB"
-                                opacity: 0.6; font: Kirigami.Theme.smallFont }
+                            PC3.Label { text: tr.label; font.weight: Font.Medium }
+                            PC3.Label {
+                                text: tr.busy ? i18n("Emptying…") : isNaN(tr.bytes) ? "…" : tr.empty ? i18n("empty") : (tr.bytes / 1048576).toLocaleString(Qt.locale(), "f", 0) + " MB"
+                                opacity: 0.6; font.pixelSize: Kirigami.Theme.smallFont.pixelSize; font.features: { "tnum": 1 }
+                            }
                         }
-                        PC3.Button {
-                            enabled: !isNaN(tr.bytes) && tr.bytes >= 1048576 && root.tidying === ""
-                            text: tr.armed ? i18n("Sure?") : i18n("Empty")
+                        // empty: a quiet tick; otherwise a round button that asks once more
+                        Kirigami.Icon {
+                            visible: tr.empty && !tr.busy
+                            source: "checkmark"; isMask: true; color: Kirigami.Theme.positiveTextColor
+                            implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth
+                            Layout.rightMargin: Kirigami.Units.smallSpacing * 2
+                        }
+                        PC3.BusyIndicator { visible: tr.busy; running: visible; implicitWidth: Kirigami.Units.iconSizes.smallMedium; implicitHeight: implicitWidth }
+                        QQC2.AbstractButton {
+                            id: tb
+                            visible: !tr.empty && !tr.busy
+                            enabled: !isNaN(tr.bytes) && root.tidying === ""
+                            hoverEnabled: true
+                            implicitWidth: tbLabel.implicitWidth + Kirigami.Units.gridUnit * 1.4
+                            implicitHeight: Kirigami.Units.gridUnit * 1.6
                             onClicked: { if (!tr.armed) { tr.armed = true; disarm.restart(); return } tr.armed = false; root.tidy(tr.what) }
+                            background: Rectangle {
+                                radius: height / 2
+                                color: tr.armed ? "#ff7a6a" : tb.hovered ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(1, 1, 1, 0.08)
+                                Behavior on color { ColorAnimation { duration: Kirigami.Units.shortDuration } }
+                            }
+                            contentItem: PC3.Label {
+                                id: tbLabel
+                                text: tr.armed ? i18n("Sure?") : i18n("Empty")
+                                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                                font.weight: Font.Medium
+                                color: tr.armed ? "#1a0f0c" : Kirigami.Theme.textColor
+                            }
                         }
                     }
-                    TidyRow { what: "trash"; label: i18n("Trash"); bytes: root.trashB }
-                    TidyRow { what: "thumbs"; label: i18n("Thumbnail cache"); bytes: root.thumbsB }
-                    PC3.Label {
-                        Layout.fillWidth: true; wrapMode: Text.Wrap; opacity: 0.5; font: Kirigami.Theme.smallFont
-                        text: i18n("The memory cache needs no emptying: Linux hands it to programs the moment they need it.")
+                    TidyRow { what: "trash"; label: i18n("Trash"); iconName: "user-trash-symbolic"; bytes: root.trashB }
+                    TidyRow { what: "thumbs"; label: i18n("Thumbnail cache"); iconName: "image-x-generic-symbolic"; bytes: root.thumbsB }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Kirigami.Units.smallSpacing
+                        spacing: Kirigami.Units.smallSpacing
+                        Kirigami.Icon { source: "dialog-information-symbolic"; isMask: true; color: Kirigami.Theme.textColor; opacity: 0.45
+                            implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth; Layout.alignment: Qt.AlignTop }
+                        PC3.Label {
+                            Layout.fillWidth: true; wrapMode: Text.Wrap; opacity: 0.5; font: Kirigami.Theme.smallFont
+                            text: i18n("The memory cache needs no emptying: Linux hands it to programs the moment they need it.")
+                        }
                     }
                 }
             }
