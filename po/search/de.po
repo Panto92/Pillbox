@@ -15,3 +15,6 @@ msgstr "Apps, Dateien, Einstellungen suchen …"
 
 msgid "↑ ↓ choose · Enter opens · Esc closes"
 msgstr "↑ ↓ auswählen · Enter öffnet · Esc schließt"
+
+msgid "Nothing found for “%1”"
+msgstr "Nichts gefunden für „%1“"

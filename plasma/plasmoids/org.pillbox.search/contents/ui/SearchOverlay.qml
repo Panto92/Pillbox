@@ -63,6 +63,7 @@ PlasmaCore.Dialog {
 
             ColumnLayout {
                 id: col
+                property bool settled: false
                 width: parent.width
                 spacing: Kirigami.Units.largeSpacing
 
@@ -107,7 +108,7 @@ PlasmaCore.Dialog {
                 // ---- the results
                 Rectangle {
                     Layout.fillWidth: true
-                    visible: field.text.length > 0
+                    visible: field.text.length > 0 && list.count > 0
                     implicitHeight: Math.min(list.contentHeight, Kirigami.Units.gridUnit * 24) + Kirigami.Units.largeSpacing * 2
                     radius: Kirigami.Units.gridUnit * 1.2
                     color: Qt.rgba(0.06, 0.075, 0.1, 0.55)
@@ -168,6 +169,15 @@ PlasmaCore.Dialog {
                             }
                         }
                     }
+                }
+                // nothing (yet): wait a moment before saying so, the search services answer one by one
+                Timer { id: settle; interval: 450; onTriggered: col.settled = true }
+                Connections { target: field; function onTextChanged() { col.settled = false; settle.restart() } }
+                PC3.Label {
+                    Layout.alignment: Qt.AlignHCenter
+                    visible: field.text.length > 0 && list.count === 0 && col.settled
+                    text: i18n("Nothing found for “%1”", field.text)
+                    opacity: 0.6
                 }
                 PC3.Label {
                     Layout.alignment: Qt.AlignHCenter
