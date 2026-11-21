@@ -103,6 +103,23 @@ PlasmoidItem {
         }
     }
     function measure() { probe.connectSource(probeCmd + " # " + Date.now()) }
+    // processor name, cores and threads: read once (the sensors only offer "All" and a count of 1)
+    property string cpuModel: ""
+    property int cpuCores: 0
+    property int cpuThreads: 0
+    P5Support.DataSource {
+        engine: "executable"
+        connectedSources: ["echo PBCPU; grep -m1 'model name' /proc/cpuinfo | cut -d: -f2; grep -m1 'cpu cores' /proc/cpuinfo | cut -d: -f2; grep -c '^processor' /proc/cpuinfo"]
+        onNewData: (source, data) => {
+            const l = String(data.stdout || "").split("\n").map(x => x.trim())
+            const i = l.indexOf("PBCPU")
+            if (i < 0) return
+            root.cpuModel = (l[i + 1] || "").replace(/\(R\)|\(TM\)/g, "").replace(/ ?(\d+|Eight|Six|Four|Quad|Twelve|Sixteen|Twenty-Four|Thirty-Two)-Core Processor/i, "").replace(/ CPU @.*$/, "").trim()
+            root.cpuCores = parseInt(l[i + 2]) || 0
+            root.cpuThreads = parseInt(l[i + 3]) || 0
+            disconnectSource(source)
+        }
+    }
     Timer { interval: 30000; repeat: true; triggeredOnStart: true; running: root.expanded; onTriggered: root.measure() }
     property string tidying: ""           // what is being emptied right now
     function tidy(what) {
@@ -376,25 +393,26 @@ PlasmoidItem {
         property string bigSub
         default property alias rows: rowsCol.data
         Layout.fillWidth: true
-        Layout.fillHeight: true
         Layout.preferredWidth: 1
+        Layout.alignment: Qt.AlignTop
+        implicitHeight: cardCol.implicitHeight + Kirigami.Units.largeSpacing * 2
         radius: Kirigami.Units.gridUnit * 0.8
         color: Qt.rgba(1, 1, 1, 0.045)
         ColumnLayout {
-            anchors.fill: parent
+            id: cardCol
+            anchors { left: parent.left; right: parent.right; top: parent.top }
             anchors.margins: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.smallSpacing
             Caption { text: card.title; Layout.fillWidth: true; elide: Text.ElideRight }
             RowLayout {
                 spacing: Kirigami.Units.smallSpacing
-                PC3.Label { text: card.big; font.pixelSize: Kirigami.Units.gridUnit * 1.6; font.weight: Font.Bold; font.features: { "tnum": 1 } }
+                PC3.Label { text: card.big; font.pixelSize: Kirigami.Units.gridUnit * 1.35; font.weight: Font.Bold; font.features: { "tnum": 1 } }
                 PC3.Label { text: card.bigSub; opacity: 0.6; Layout.alignment: Qt.AlignBaseline }
             }
             Item {
                 id: bigBox
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumHeight: Kirigami.Units.gridUnit * 2.2
+                Layout.preferredHeight: Kirigami.Units.gridUnit * 2.4
                 Shape {
                     id: big
                     anchors.fill: parent
@@ -426,30 +444,28 @@ PlasmoidItem {
     // the popup can be resized: cards, curves and drives follow; when narrow they stack
     fullRepresentation: PC3.ScrollView {
         id: dashView
-        Layout.preferredWidth: Kirigami.Units.gridUnit * 40
-        Layout.preferredHeight: Kirigami.Units.gridUnit * 27
+        Layout.preferredWidth: Kirigami.Units.gridUnit * 38
+        Layout.preferredHeight: dashCol.implicitHeight + Kirigami.Units.smallSpacing * 2
         Layout.minimumWidth: Kirigami.Units.gridUnit * 18
-        Layout.minimumHeight: Kirigami.Units.gridUnit * 14
+        Layout.minimumHeight: Math.min(Layout.preferredHeight, Kirigami.Units.gridUnit * 14)
+        QQC2.ScrollBar.vertical.policy: dashCol.implicitHeight > availableHeight + 1 ? QQC2.ScrollBar.AsNeeded : QQC2.ScrollBar.AlwaysOff
         contentWidth: availableWidth
         readonly property bool wide: availableWidth > Kirigami.Units.gridUnit * 30
         ColumnLayout {
           id: dashCol
           width: dashView.availableWidth
-          height: Math.max(implicitHeight, dashView.availableHeight)
           spacing: Kirigami.Units.largeSpacing
           GridLayout {
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.minimumHeight: Kirigami.Units.gridUnit * (dashView.wide ? 11 : 30)
             columns: dashView.wide ? 3 : 1
             rowSpacing: Kirigami.Units.largeSpacing
             columnSpacing: Kirigami.Units.largeSpacing
             Card {
                 m: cpuM
-                title: "CPU" + (cpuName.value ? " · " + String(cpuName.value).replace(/ ?(\d+-Core|Eight-Core|Six-Core|Quad-Core|Twelve-Core|Sixteen-Core) Processor/, "").replace(/\(R\)|\(TM\)/g, "") : "")
+                title: "CPU" + (root.cpuModel ? " · " + root.cpuModel : "")
                 big: cpuM.text
                 Row2 { k: i18n("Clock"); v: root.ghz(root.num(cpuFreq)) }
-                Row2 { k: i18n("Cores"); v: isNaN(root.num(cores)) ? "" : i18n("%1 · %2 threads", root.num(cores), root.num(threads)) }
+                Row2 { k: i18n("Cores"); v: root.cpuCores ? i18n("%1 · %2 threads", root.cpuCores, root.cpuThreads) : "" }
                 Row2 { k: i18n("Temperature"); v: root.tempSource === "CPU" ? tempM.text.replace("°", " °C") : "" }
             }
             Card {
