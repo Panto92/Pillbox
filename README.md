@@ -49,6 +49,9 @@ cd pillbox
 ./install.sh --layout   # + the full Pillbox layout: orb, island clock, living wallpaper
 ```
 
+Or without git: download `pillbox-<version>.tar.gz` from the [latest release](https://github.com/Panto92/Pillbox/releases/latest),
+unpack it and run `./install.sh --layout` inside.
+
 Your settings are backed up to `~/.local/share/pillbox/` first. Requirements: KDE Plasma 6.0 or newer (Wayland recommended).
 
 ```bash
