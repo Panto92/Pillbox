@@ -963,6 +963,12 @@ PlasmoidItem {
         shell.connectSource("qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \"$(sed s/MODE/" + mode + "/ '" + file + "')\" # " + Date.now())
     }
 
+    // demo mode: tools/demo.sh drives the orb through its config so a screen recording needs no clicks
+    Connections {
+        target: root.cfg
+        function onDemoChanged() { if (root.cfg.demo === "ring") { if (!root.ringOpen) root.toggleRing() } else root.closeRing() }
+    }
+
     // ---------------------------------------------------------------- system accent colour
     // Plasma's own tool sets the accent of the colour scheme for every KDE app.
     // accentBefore: ""  = not remembered yet, "none" = the scheme's own accent, else the old colour.
