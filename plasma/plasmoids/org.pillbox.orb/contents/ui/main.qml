@@ -11,6 +11,7 @@
  * SPDX-License-Identifier: MIT
  */
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Shapes
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
@@ -26,7 +27,14 @@ import org.kde.notificationmanager as NotificationManager
 PlasmoidItem {
     id: root
     preferredRepresentation: compactRepresentation
-    compactRepresentation: Item { implicitWidth: 1; implicitHeight: 1 }
+    // the ball, ring and docks live in their own windows: the widget itself is only a tiny anchor,
+    // so a right-click anywhere else on the desktop gets the normal desktop menu
+    compactRepresentation: Item {
+        implicitWidth: 1; implicitHeight: 1
+        Layout.minimumWidth: 1; Layout.minimumHeight: 1
+        Layout.preferredWidth: 16; Layout.preferredHeight: 16
+        Layout.maximumWidth: 16; Layout.maximumHeight: 16
+    }
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
 
     // appearance (Orb settings page); sizes are logical pixels, so they follow the display scale

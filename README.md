@@ -65,6 +65,7 @@ Pillbox can be switched off and on again at any time – right-click the Pillbox
 ```bash
 pillbox off      # back to your usual Plasma desktop, Pillbox is kept
 pillbox on       # and back to Pillbox
+pillbox update   # the newest Pillbox (git pull + install), your settings stay
 ```
 
 ---

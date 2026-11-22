@@ -5,6 +5,8 @@
 #   pillbox off        back to your usual desktop; the Pillbox desktop is kept for later
 #   pillbox on         back to Pillbox; your usual desktop is kept for later
 #   pillbox status     prints "on" or "off"
+#   pillbox update     the newest Pillbox from where it was installed (git pull + install);
+#                      your panels and settings stay as they are
 #   pillbox tidy       hand sound, network, Bluetooth, battery, media and notifications over to
 #                      the Pillbox pills: removes them from the system tray (remembered) and takes
 #                      the media and logout widgets off the top bar
@@ -182,7 +184,27 @@ PY
     echo "$(tr_ "Tinted with $want, accent $accent." "Getönt mit $want, Akzent $accent.")"
 }
 
+update() {
+    local src; src="$(cat "$STATE/source" 2>/dev/null || true)"
+    if [[ -z "$src" || ! -x "$src/install.sh" ]]; then
+        echo "$(tr_ "Can't find the Pillbox folder it was installed from. Download the newest release and run ./install.sh in it." \
+                    "Ich finde den Pillbox-Ordner der Installation nicht. Lade das neueste Release und führe darin ./install.sh aus.")" >&2
+        exit 1
+    fi
+    if [[ -d "$src/.git" ]]; then
+        if [[ -n "$(git -C "$src" status --porcelain --untracked-files=no)" ]]; then
+            echo "$(tr_ "The Pillbox folder has local changes – not pulling. Installing what is there." "Der Pillbox-Ordner hat lokale Änderungen – kein Pull. Installiere den vorhandenen Stand.")"
+        else
+            git -C "$src" pull --ff-only || { echo "git pull failed" >&2; exit 1; }
+        fi
+    else
+        echo "$(tr_ "Installed from a download: installing that version again. For a newer one, download the newest release." "Aus einem Download installiert: installiere diese Version erneut. Für eine neuere das neueste Release laden.")"
+    fi
+    PILLBOX_RESTART=1 "$src/install.sh"
+}
+
 case "${1:-settings}" in
+    update)   update ;;
     tint)     tint "${2:-}" ;;
     tidy)     tidy ;;
     untidy)   untidy ;;
@@ -190,6 +212,6 @@ case "${1:-settings}" in
     off)      off ;;
     on)       on ;;
     status)   mode ;;
-    -h|--help|help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' ;;
-    *) echo "Usage: pillbox [settings|on|off|status|tidy|untidy]" >&2; exit 1 ;;
+    -h|--help|help) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) echo "Usage: pillbox [settings|on|off|status|update|tidy|untidy|tint]" >&2; exit 1 ;;
 esac

@@ -192,4 +192,12 @@ elif (( APPLY )); then
     say "Applied Pillbox theme (your panels were kept)"
 fi
 
+# remember where Pillbox came from, for "pillbox update"
+echo "$SRC" > "$STATE/source"
+
+# a plain install/update: let a running Plasma load the new widgets
+if (( ! LAYOUT )) && systemctl --user is-active --quiet plasma-plasmashell 2>/dev/null && [[ -n "${PILLBOX_RESTART:-}" ]]; then
+    systemctl --user restart plasma-plasmashell
+fi
+
 say "Done. Remove everything again with ./uninstall.sh"
