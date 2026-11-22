@@ -986,6 +986,11 @@ PlasmoidItem {
     }
 
     // rebuild the top panels in another arrangement (code/arrange.js), keeping each widget's settings
+    // the folder for the "Painted" atmosphere: create it, then show it
+    function openPaintedFolder() {
+        shell.connectSource("mkdir -p \"$HOME/.local/share/pillbox/painted\" && xdg-open \"$HOME/.local/share/pillbox/painted\" # " + Date.now())
+    }
+
     // the menu button in the left pill: which logo, with or without "Pillbox" beside it
     function applyMenuButton() {
         const icon = ({ pillbox: "pillbox-os", orb: "pillbox-orb", line: "pillbox-line-symbolic", original: "start-here-kde-symbolic" })[cfg.menuLogo] || "pillbox-os"

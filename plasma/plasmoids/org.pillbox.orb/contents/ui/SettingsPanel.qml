@@ -69,6 +69,7 @@ Window {
         aurora:  { name: "Aurora",  opts: [{ key: "AuroraColor", def: "mixed", label: i18n("Northern lights"), choices: [["mixed", i18n("Mixed")], ["green", i18n("Green")], ["violet", i18n("Violet")]] },
                                            { key: "AuroraHut", def: "on", label: i18n("Hut by the water"), hint: i18n("Its window lights up with the graphics card."), choices: [["on", i18n("On")], ["off", i18n("Off")]] }] },
         tide:    { name: "Tide",    opts: [{ key: "TideWaves", def: "normal", label: i18n("Sea"), choices: [["calm", i18n("Calm")], ["normal", i18n("Normal")], ["rough", i18n("Rough")]] }] },
+        painted: { name: i18n("Painted"), opts: [{ key: "PaintedEffect", def: "snow", label: i18n("Over the picture"), choices: [["snow", i18n("Snow")], ["rain", i18n("Rain")], ["stars", i18n("Stars")], ["none", i18n("Nothing")]] }] },
         yule:    { name: "Yule",    opts: [{ key: "YuleLights", def: "warm", label: i18n("Lights"), choices: [["warm", i18n("Warm")], ["colorful", i18n("Colourful")], ["cold", i18n("Icy")]] }] },
         neon:    { name: "Neon",    opts: [{ key: "NeonRain", def: "off", label: i18n("Rain"), hint: i18n("Otherwise it only rains after a new notification."), choices: [["off", i18n("After notifications")], ["on", i18n("Always")]] },
                                            { key: "NeonSigns", def: "mixed", label: i18n("Signs"), choices: [["mixed", i18n("Colourful")], ["pink", i18n("Pink")], ["cyan", i18n("Cyan")]] }] },
@@ -251,6 +252,7 @@ Window {
             { v: "dune", n: "Dune", h: i18n("desert"), m: "warm" },
             { v: "neon", n: "Neon", h: i18n("city at night"), m: "night" },
             { v: "yule", n: "Yule", h: i18n("winter village"), m: "night" },
+            { v: "painted", n: i18n("Painted"), h: i18n("your own pictures"), m: "" },
             { v: "flow", n: "Flow", h: i18n("clouds of colour"), m: "abstract" },
             { v: "orbit", n: "Orbit", h: i18n("planet in space"), m: "abstract" },
             { v: "contour", n: "Contour", h: i18n("contour lines"), m: "abstract" },
@@ -950,6 +952,7 @@ GradientStop { position: 0; color: tr.at(0) }
                                 { v: "tide", n: "Tide", h: i18n("open sea") },
                                 { v: "neon", n: "Neon", h: i18n("city at night") },
                                 { v: "yule", n: "Yule", h: i18n("winter village") },
+                                { v: "painted", n: i18n("Painted"), h: i18n("your own pictures") },
                                 { v: "orbit", n: "Orbit", h: i18n("planet in space") },
                                 { v: "contour", n: "Contour", h: i18n("contour lines") },
                                 { v: "grid", n: "Grid", h: i18n("field of dots") },
@@ -1015,6 +1018,14 @@ GradientStop { position: 0; color: tr.at(0) }
                         }
                     }
                 }
+            }
+            Group {
+                visible: panel.cfg.wallScene === "painted"
+                title: i18n("Your pictures")
+                SettingRow { label: i18n("Picture folder")
+                    hint: i18n("Put day.jpg and night.jpg here (PNG or WebP work too). With only one picture it darkens at night.")
+                    QQC2.Button { text: i18n("Open folder"); icon.name: "folder-open"
+                        onClicked: panel.orb.openPaintedFolder() } }
             }
             Group {
                 title: panel.sceneOptions.length ? i18n("%1 – own settings", panel.sceneName) : ""
