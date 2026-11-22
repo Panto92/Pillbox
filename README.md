@@ -99,7 +99,7 @@ and *smart hiding* slides them away only while a window needs the space.
 
 <p align="center"><img src="docs/images/atmospheres.jpg" alt="Aurora, Fogline, Tide and Dune" width="100%"></p>
 
-Ten **atmospheres** follow the time of day – blue hour, noon, evening glow, stars –
+Eleven **atmospheres** follow the time of day – blue hour, noon, evening glow, stars –
 and quietly show what your computer is doing, without a single number:
 
 | | | Busy CPU | Busy GPU | New notification |
@@ -111,6 +111,7 @@ and quietly show what your computer is doing, without a single number:
 | **Aurora** | a Norwegian fjord in polar night | the aurora dances | the hut lights up | snowfall |
 | **Tide** | open sea | waves grow | the sea glows | rain |
 | **Neon** | a city at night | more windows light up | signs glow | rain on a wet street |
+| **Yule** | a snowed-in village on a winter night | it snows harder | the lights glow brighter | a sleigh crosses the moon |
 | **Orbit** | a ringed planet | the belt turns faster | the atmosphere glows | a comet |
 | **Contour** | topographic lines | lines move more | valleys glow | a wave runs through |
 | **Grid** | a calm field of dots | a wave of light | the centre glows | a ping |
@@ -193,7 +194,7 @@ Pillbox is a long-term project; every idea from the sketches in [`docs/lab`](doc
 becomes an option you can switch on.
 
 - [x] Orb and three dock forms
-- [x] Ten living wallpapers with their own options
+- [x] Eleven living wallpapers with their own options
 - [x] Island clock with notification islands
 - [x] Login screen
 - [x] Load pill in four styles, own icon themes

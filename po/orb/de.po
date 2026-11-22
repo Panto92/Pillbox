@@ -955,3 +955,12 @@ msgstr "Markierungen, Hervorhebungen und Schalter in jeder KDE-App bekommen die 
 
 msgid "Only the orb and its docks."
 msgstr "Nur der Orb und seine Docks."
+
+msgid "winter village"
+msgstr "Winterdorf"
+
+msgid "Lights"
+msgstr "Lichter"
+
+msgid "Icy"
+msgstr "Eisig"
