@@ -32,9 +32,11 @@ install -d "$THEME/scenes"
 install -m 644 "$HERE"/pillbox/{Main.qml,metadata.desktop,theme.conf} "$THEME/"
 if [[ -d "$HERE/pillbox/scenes" ]]; then
     install -m 644 "$HERE"/pillbox/scenes/* "$THEME/scenes/"             # assembled copy (~/.local/share/pillbox/login)
+    [[ -d "$HERE/pillbox/images/winter" ]] && install -D -m 644 -t "$THEME/images/winter" "$HERE"/pillbox/images/winter/*
 else
     W="$(dirname "$HERE")/plasma/wallpapers/org.pillbox.atmosphere/contents/ui"   # source checkout
     install -m 644 "$W"/*Scene.qml "$W"/{palette.js,Stars.qml,Glow.qml,Meteor.qml,Precip.qml} "$THEME/scenes/"
+    install -D -m 644 -t "$THEME/images/winter" "$W"/../images/winter/*
 fi
 
 install -d -m 755 "$USERDIR"

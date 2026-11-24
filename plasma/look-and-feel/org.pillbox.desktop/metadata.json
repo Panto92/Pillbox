@@ -11,7 +11,7 @@
         "Id": "org.pillbox.desktop",
         "License": "MIT",
         "Name": "Pillbox",
-        "Version": "0.9.0"
+        "Version": "0.10.0"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }

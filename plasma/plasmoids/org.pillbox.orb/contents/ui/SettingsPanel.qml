@@ -835,6 +835,11 @@ GradientStop { position: 0; color: tr.at(0) }
                                 { v: "aurora", n: "Aurora", h: i18n("polar night"), img: "aurora" },
                                 { v: "tide", n: "Tide", h: i18n("open sea"), img: "tide" },
                                 { v: "neon", n: "Neon", h: i18n("city at night"), img: "neon" },
+                                { v: "yule", n: "Yule", h: i18n("winter village"), img: "yule" },
+                                { v: "frost", n: "Frost", h: i18n("frozen lake"), img: "frost" },
+                                { v: "market", n: "Market", h: i18n("Christmas market"), img: "market" },
+                                { v: "alpine", n: "Alpine", h: i18n("mountain village"), img: "alpine" },
+                                { v: "polar", n: "Polar", h: i18n("northern lights"), img: "polar" },
                                 { v: "orbit", n: "Orbit", h: i18n("planet in space"), img: "orbit" },
                                 { v: "contour", n: "Contour", h: i18n("contour lines"), img: "contour" },
                                 { v: "grid", n: "Grid", h: i18n("field of dots"), img: "grid" }

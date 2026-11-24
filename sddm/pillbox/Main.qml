@@ -45,20 +45,22 @@ Item {
         property real gpu: 0
         property real motion: 1
         property bool running: true
-        property var cfg: ({})
+        property var cfg: ({ Scene: root.sceneName })
         signal newNotification()
     }
     Timer { interval: 83; repeat: true; running: true; onTriggered: env.time += interval / 1000 * 0.6 }
 
     readonly property string sceneName: {
         const c = String(config.scene || "auto")
+        if (c === "painted") return "aurora"          // the photo lives in the user's home – not readable here
         if (c !== "auto") return c
         const h = hour
         return h < 6.5 || h >= 20.5 ? "aurora" : h < 10 ? "fogline" : h < 17 ? "horizon" : "dune"
     }
     readonly property var sceneFiles: ({ flow: "FlowScene.qml", horizon: "HorizonScene.qml", fogline: "FoglineScene.qml",
                                          dune: "DuneScene.qml", aurora: "AuroraScene.qml", tide: "TideScene.qml",
-                                         neon: "NeonScene.qml", orbit: "OrbitScene.qml", contour: "ContourScene.qml", grid: "GridScene.qml" })
+                                         neon: "NeonScene.qml", yule: "YuleScene.qml", orbit: "OrbitScene.qml",
+                                         frost: "PaintedScene.qml", market: "PaintedScene.qml", alpine: "PaintedScene.qml", polar: "PaintedScene.qml", contour: "ContourScene.qml", grid: "GridScene.qml" })
 
     // one background per screen; the card sits on the primary one
     Repeater {

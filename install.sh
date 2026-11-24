@@ -113,6 +113,7 @@ cp "$SRC/sddm/install-login.sh" "$LOGIN/"
 cp "$SRC"/sddm/pillbox/{Main.qml,metadata.desktop,theme.conf} "$LOGIN/pillbox/"
 W="$SRC/plasma/wallpapers/org.pillbox.atmosphere/contents/ui"
 cp "$W"/*Scene.qml "$W"/{palette.js,Stars.qml,Glow.qml,Meteor.qml,Precip.qml} "$LOGIN/pillbox/scenes/"
+mkdir -p "$LOGIN/pillbox/images" && cp -r "$W/../images/winter" "$LOGIN/pillbox/images/"   # Frost, Market, Alpine, Polar
 
 # 4. Konsole (own file names, never overwrites your profiles)
 mkdir -p "$DATA/konsole"

@@ -100,7 +100,7 @@ and *smart hiding* slides them away only while a window needs the space.
 
 <p align="center"><img src="docs/images/atmospheres.jpg" alt="Aurora, Fogline, Tide and Dune" width="100%"></p>
 
-Eleven **atmospheres** follow the time of day – blue hour, noon, evening glow, stars –
+Eleven drawn **atmospheres** follow the time of day – blue hour, noon, evening glow, stars –
 and quietly show what your computer is doing, without a single number:
 
 | | | Busy CPU | Busy GPU | New notification |
@@ -116,6 +116,12 @@ and quietly show what your computer is doing, without a single number:
 | **Orbit** | a ringed planet | the belt turns faster | the atmosphere glows | a comet |
 | **Contour** | topographic lines | lines move more | valleys glow | a wave runs through |
 | **Grid** | a calm field of dots | a wave of light | the centre glows | a ping |
+
+Four **painted winter pictures** come along as well, each slowly drifting with something alive
+over it: **Frost** (a frozen lake at sunrise), **Market** (a Christmas market in falling snow),
+**Alpine** (a mountain village under twinkling stars) and **Polar** (northern lights over a river).
+And with **Living photo** your own picture becomes the wallpaper – choose it in the settings,
+optionally a second one for the night, with snow, rain or stars on top.
 
 Each scene has its own options (colours, fog, sea, rain …), a **Try it** button and a
 time slider – follow the clock or keep it at, say, 14:30.
@@ -157,6 +163,8 @@ KRunner itself, which now floats in the middle as well.
 The clock in the middle **grows into an island** when a notification arrives – with
 reply field and actions – and shrinks back. A dot stays until you've looked.
 Plasma stays the notification server, so history, sounds and DND keep working.
+In the history they are grouped by app – the newest two, the rest one click away – and a
+click opens the notification, or at least the app that sent it.
 
 **Live activities** sit beside the time while something runs: a ring for downloads and copies,
 the cover and dancing bars for music, a timer counting down, a microphone that is in use,
@@ -195,7 +203,7 @@ Pillbox is a long-term project; every idea from the sketches in [`docs/lab`](doc
 becomes an option you can switch on.
 
 - [x] Orb and three dock forms
-- [x] Eleven living wallpapers with their own options
+- [x] Living wallpapers with their own options, painted winter pictures, your own photo
 - [x] Island clock with notification islands
 - [x] Login screen
 - [x] Load pill in four styles, own icon themes
