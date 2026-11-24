@@ -132,7 +132,7 @@ WallpaperItem {
         anchors.fill: parent
         readonly property var files: ({ flow: "FlowScene.qml", horizon: "HorizonScene.qml", fogline: "FoglineScene.qml",
                                        dune: "DuneScene.qml", aurora: "AuroraScene.qml", tide: "TideScene.qml",
-                                       neon: "NeonScene.qml", yule: "YuleScene.qml", painted: "PaintedScene.qml", orbit: "OrbitScene.qml", contour: "ContourScene.qml", grid: "GridScene.qml" })
+                                       neon: "NeonScene.qml", yule: "YuleScene.qml", painted: "PaintedScene.qml", frost: "PaintedScene.qml", market: "PaintedScene.qml", alpine: "PaintedScene.qml", polar: "PaintedScene.qml", orbit: "OrbitScene.qml", contour: "ContourScene.qml", grid: "GridScene.qml" })
         source: files[root.cfg.Scene] || "FlowScene.qml"
         onLoaded: item.env = root
     }

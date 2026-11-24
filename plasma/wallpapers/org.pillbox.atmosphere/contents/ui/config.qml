@@ -33,6 +33,10 @@ Kirigami.FormLayout {
             { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Aurora – polar night, a lone hut"), value: "aurora" },
             { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Tide – open sea"), value: "tide" },
             { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Neon – a city at night"), value: "neon" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Frost – frozen lake at sunrise"), value: "frost" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Market – Christmas market in the snow"), value: "market" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Alpine – mountain village under stars"), value: "alpine" },
+            { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Polar – northern lights over the river"), value: "polar" },
             { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Orbit – a planet in space"), value: "orbit" },
             { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Contour – topographic lines"), value: "contour" },
             { text: i18nd("plasma_wallpaper_org.pillbox.atmosphere", "Grid – a field of dots"), value: "grid" }

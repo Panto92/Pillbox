@@ -75,3 +75,15 @@ msgstr "Tide – offenes Meer"
 
 msgid "Time of day:"
 msgstr "Tageszeit:"
+
+msgid "Frost – frozen lake at sunrise"
+msgstr "Frost – zugefrorener See bei Sonnenaufgang"
+
+msgid "Market – Christmas market in the snow"
+msgstr "Market – Weihnachtsmarkt im Schnee"
+
+msgid "Alpine – mountain village under stars"
+msgstr "Alpine – Bergdorf unter Sternen"
+
+msgid "Polar – northern lights over the river"
+msgstr "Polar – Polarlicht über dem Fluss"

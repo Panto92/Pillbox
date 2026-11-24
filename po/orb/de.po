@@ -964,3 +964,68 @@ msgstr "Lichter"
 
 msgid "Icy"
 msgstr "Eisig"
+
+
+msgid "Put day.jpg and night.jpg here – or several pictures named by their hour, like 08.jpg, 17-snow.jpg, 21-stars.jpg."
+msgstr "Lege day.jpg und night.jpg hier ab – oder mehrere Bilder, benannt nach ihrer Stunde, z. B. 08.jpg, 17-snow.jpg, 21-stars.jpg."
+
+msgid "Living photo"
+msgstr "Lebendes Foto"
+
+msgid "your photo with snow or stars"
+msgstr "dein Foto mit Schnee oder Sternen"
+
+msgid "Your photo"
+msgstr "Dein Foto"
+
+msgid "Photo"
+msgstr "Foto"
+
+msgid "Any picture from your computer. At night it darkens gently."
+msgstr "Irgendein Bild von deinem Computer. Nachts wird es sanft dunkler."
+
+msgid "Choose photo…"
+msgstr "Foto auswählen…"
+
+msgid "Night photo"
+msgstr "Nachtfoto"
+
+msgid "Optional: shown instead after dark, with a soft fade."
+msgstr "Optional: wird nach Einbruch der Dunkelheit stattdessen gezeigt, mit sanftem Übergang."
+
+msgid "Remove night photo"
+msgstr "Nachtfoto entfernen"
+
+msgid "Pictures (*.jpg *.jpeg *.png *.webp)"
+msgstr "Bilder (*.jpg *.jpeg *.png *.webp)"
+
+msgid "Over the picture"
+msgstr "Über dem Bild"
+
+msgid "Snow"
+msgstr "Schnee"
+
+msgid "Stars"
+msgstr "Sterne"
+
+msgid "Nothing"
+msgstr "Nichts"
+
+
+
+
+
+
+
+
+msgid "frozen lake"
+msgstr "zugefrorener See"
+
+msgid "Christmas market"
+msgstr "Weihnachtsmarkt"
+
+msgid "mountain village"
+msgstr "Bergdorf"
+
+msgid "northern lights"
+msgstr "Polarlicht"

@@ -995,6 +995,31 @@ PlasmoidItem {
 
     // rebuild the top panels in another arrangement (code/arrange.js), keeping each widget's settings
     // the folder for the "Painted" atmosphere: create it, then show it
+    // "Living photo": copy the chosen picture to ~/.local/share/pillbox/painted/<day|night>.<ext>
+    // and nudge the wallpaper to load it again
+    function setPaintedPicture(slot, url) {
+        const path = decodeURIComponent(String(url).replace(/^file:\/\//, ""))
+        let ext = (path.split(".").pop() || "").toLowerCase()
+        if (["jpg", "jpeg", "png", "webp"].indexOf(ext) < 0) return
+        if (ext === "jpeg") ext = "jpg"
+        const name = slot === "night" ? "night" : "day"
+        const dir = "$HOME/.local/share/pillbox/painted"
+        shell.connectSource("mkdir -p \"" + dir + "\" && rm -f \"" + dir + "/" + name + ".\"{jpg,jpeg,png,webp} && cp -- '"
+                            + path.replace(/'/g, "'\\''") + "' \"" + dir + "/" + name + "." + ext + "\" # " + Date.now())
+        bumpPainted()
+    }
+    function clearPaintedPicture(slot) {
+        const name = slot === "night" ? "night" : "day"
+        shell.connectSource("rm -f \"$HOME/.local/share/pillbox/painted/" + name + ".\"{jpg,jpeg,png,webp} # " + Date.now())
+        bumpPainted()
+    }
+    function bumpPainted() {
+        const all = wallOpts()
+        all.PaintedStamp = Date.now().toString(36).replace(/[0-9]/g, d => "abcdefghij"[d])
+        cfg.wallOpts = JSON.stringify(all)
+        paintedTimer.restart()
+    }
+    property Timer paintedTimer: Timer { interval: 600; onTriggered: root.applyWallpaper() }
     function openPaintedFolder() {
         shell.connectSource("mkdir -p \"$HOME/.local/share/pillbox/painted\" && xdg-open \"$HOME/.local/share/pillbox/painted\" # " + Date.now())
     }

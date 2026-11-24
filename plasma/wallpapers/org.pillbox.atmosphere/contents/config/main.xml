@@ -23,6 +23,7 @@
     <entry name="NeonSigns" type="String"><default>mixed</default></entry>
     <entry name="YuleLights" type="String"><default>warm</default></entry>
     <entry name="PaintedEffect" type="String"><default>snow</default></entry>
+    <entry name="PaintedStamp" type="String"><default></default></entry>
     <entry name="OrbitPlanet" type="String"><default>blue</default></entry>
     <entry name="ContourDensity" type="String"><default>normal</default></entry>
     <entry name="GridGap" type="String"><default>normal</default></entry>
