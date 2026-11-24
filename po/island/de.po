@@ -104,3 +104,9 @@ msgstr "%1 min"
 
 msgid "Stop"
 msgstr "Stopp"
+
+msgid "Show less"
+msgstr "Weniger"
+
+msgid "%1 more"
+msgstr "%1 weitere"

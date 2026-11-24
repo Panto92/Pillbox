@@ -11,6 +11,7 @@ import org.kde.plasma.extras as PlasmaExtras
 import org.kde.plasma.workspace.calendar as PlasmaCalendar
 import org.kde.kirigami as Kirigami
 import org.kde.notificationmanager as NotificationManager
+import org.kde.plasma.plasma5support as P5Support
 
 Item {
     id: panel
@@ -29,10 +30,25 @@ Item {
         showJobs: false
         showExpired: true
         showDismissed: false
-        groupMode: NotificationManager.Notifications.GroupDisabled
+        groupMode: NotificationManager.Notifications.GroupApplicationsFlat
+        groupLimit: 2                       // per app: newest two, the rest behind "N more"
         sortMode: NotificationManager.Notifications.SortByDate
         sortOrder: Qt.DescendingOrder
         limit: 40
+    }
+    // A click opens the notification: its own action if the app offered one (and still listens),
+    // otherwise the app that sent it is brought up / started.
+    P5Support.DataSource { id: runner; engine: "executable"; onNewData: source => disconnectSource(source) }
+    function openNote(m, row) {
+        const idx = history.index(row, 0)
+        if (m.hasDefaultAction === true && m.expired !== true) {
+            history.invokeDefaultAction(idx, NotificationManager.Notifications.Close)
+            return
+        }
+        if (m.desktopEntry) {
+            runner.connectSource("kstart --application " + String(m.desktopEntry).replace(/[^A-Za-z0-9._-]/g, ""))
+            history.close(idx)
+        }
     }
     readonly property bool dnd: NotificationManager.Server.inhibited
     readonly property color accent: Kirigami.Theme.highlightColor
@@ -307,11 +323,51 @@ Item {
                 iconName: "checkmark"
                 text: i18n("Nothing new")
             }
-            delegate: Rectangle {
+            delegate: Item {
                 id: note
                 required property var model
                 required property int index
                 width: ListView.view.width
+                implicitHeight: note.model.isGroup ? groupRow.implicitHeight : card.implicitHeight
+                // ---- group header: app, count, expand/collapse, clear the app's notifications
+                RowLayout {
+                    id: groupRow
+                    visible: note.model.isGroup === true
+                    width: parent.width
+                    spacing: Kirigami.Units.smallSpacing
+                    Kirigami.Icon {
+                        Layout.preferredWidth: Kirigami.Units.iconSizes.small
+                        Layout.preferredHeight: Layout.preferredWidth
+                        source: note.model.applicationIconName || "preferences-desktop-notification-bell"
+                    }
+                    PC3.Label {
+                        Layout.fillWidth: true
+                        text: (note.model.applicationName || "") + "  ·  " + (note.model.groupChildrenCount || 0)
+                        font.weight: Font.DemiBold
+                        opacity: 0.75
+                        elide: Text.ElideRight
+                    }
+                    PC3.ToolButton {
+                        readonly property int hidden: (note.model.groupChildrenCount || 0) - (note.model.expandedGroupChildrenCount || 0)
+                        visible: note.model.isGroupExpanded === true || hidden > 0
+                        text: note.model.isGroupExpanded === true ? i18n("Show less") : i18n("%1 more", hidden)
+                        icon.name: note.model.isGroupExpanded === true ? "arrow-up" : "arrow-down"
+                        onClicked: history.setData(history.index(note.index, 0), note.model.isGroupExpanded !== true,
+                                                   NotificationManager.Notifications.IsGroupExpandedRole)
+                    }
+                    PC3.ToolButton {
+                        icon.name: "edit-clear-all"
+                        display: QQC2.AbstractButton.IconOnly
+                        text: i18n("Clear all")
+                        PC3.ToolTip.text: text; PC3.ToolTip.visible: hovered
+                        onClicked: history.close(history.index(note.index, 0))
+                    }
+                }
+            Rectangle {
+                id: card
+                visible: note.model.isGroup !== true
+                x: note.model.isInGroup === true ? Kirigami.Units.largeSpacing : 0
+                width: parent.width - x
                 implicitHeight: noteRow.implicitHeight + Kirigami.Units.largeSpacing * 1.5
                 radius: Kirigami.Units.gridUnit * 0.6
                 color: noteMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.04)
@@ -319,9 +375,9 @@ Item {
                     id: noteMouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    enabled: note.model.hasDefaultAction === true
+                    enabled: note.model.hasDefaultAction === true || !!note.model.desktopEntry
                     cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    onClicked: history.invokeDefaultAction(history.index(note.index, 0), NotificationManager.Notifications.Close)
+                    onClicked: panel.openNote(note.model, note.index)
                 }
                 RowLayout {
                     id: noteRow
@@ -370,6 +426,7 @@ Item {
                         onClicked: history.close(history.index(note.index, 0))
                     }
                 }
+            }
             }
         }
     }

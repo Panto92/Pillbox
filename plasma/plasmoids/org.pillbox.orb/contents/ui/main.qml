@@ -1169,7 +1169,7 @@ PlasmoidItem {
         PlasmaExtras.MenuItem {
             text: i18n("New window")
             icon: "window-new"
-            visible: !root.menuModel.launcher && root.menuModel.canNew
+            visible: !root.menuModel.launcher
             onClicked: { appsModel.requestNewInstance(appsModel.makeModelIndex(root.menuIndex)); root.closeRing() }
         }
         PlasmaExtras.MenuItem {
