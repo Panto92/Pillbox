@@ -18,6 +18,11 @@ Item {
     property bool active: false
     property bool minimized: false
     property int badge: 0
+    property bool attention: false                     // the app wants you: it hops until you look
+    property real progress: -1
+    property int appIndex: -1                          // for drag-to-reorder and the mouse wheel
+    property real stepSize: tile
+    property Item frame
     readonly property bool hovered: hover.hovered
     property real angle: -Math.PI / 2                  // direction previews open in
     property real counterTurn: 0                       // keeps the icon upright on side docks
@@ -29,7 +34,7 @@ Item {
     onWindowsChanged: if (windows > 0) launching = false
     Timer { running: slot.launching; interval: 6000; onTriggered: slot.launching = false }
     SequentialAnimation on bounceY {
-        running: slot.launching
+        running: slot.launching || (slot.attention && slot.expanded)
         loops: Animation.Infinite
         NumberAnimation { to: -slot.tile * 0.3; duration: 230; easing.type: Easing.OutQuad }
         NumberAnimation { to: 0; duration: 430; easing.type: Easing.OutBounce }
@@ -66,7 +71,8 @@ Item {
     Item {
         anchors.fill: parent
         opacity: slot.expanded ? 1 : 0
-        scale: slot.expanded ? (hover.hovered ? 1.12 : 1) : 0.2
+        scale: slot.expanded ? (mouse.dragging ? 1.2 : hover.hovered ? (slot.orb.cfg.dockZoom ? 1.4 : 1.12) : 1) : 0.2
+        transform: Translate { x: mouse.dragOffset }
         Behavior on opacity { SequentialAnimation { PauseAnimation { duration: slot.expanded ? slot.delay : 0 } NumberAnimation { duration: 260 } } }
         Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
 
@@ -110,11 +116,22 @@ Item {
         }
     }
 
+    SlotProgress {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        width: parent.width * 0.8
+        visible: slot.expanded && value >= 0
+        value: slot.progress
+        tint: slot.tint
+    }
     HoverHandler { id: hover }
-    MouseArea {
-        anchors.fill: parent
+    SlotMouse {
+        id: mouse
         enabled: slot.expanded
-        acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-        onClicked: mouse => slot.clicked(mouse)
+        orb: slot.orb
+        index: slot.appIndex
+        step: slot.stepSize
+        frame: slot.frame
+        onTapped: m => slot.clicked(m)
     }
 }

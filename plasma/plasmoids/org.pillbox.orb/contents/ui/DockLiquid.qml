@@ -24,7 +24,7 @@ PlasmaCore.Dialog {
     readonly property int pad: Math.round(tile * 0.45)
     readonly property int barH: Math.round(tile * 1.32)
     readonly property int rise: Math.round(tile * 0.55)                 // how far the drop lifts an icon
-    readonly property int fullW: (count + 1) * (tile + gap) - gap + pad * 2
+    readonly property int fullW: Math.round(orb.dockSlots * (tile + gap)) - gap + pad * 2
     readonly property int fullH: barH + rise + Math.round(tile * 0.35)
 
     // ---- edge (same scheme as the other docks)
@@ -55,7 +55,8 @@ PlasmaCore.Dialog {
     property int hoverIndex: -1
     property int activeIndex: -1
     readonly property int dropIndex: hoverIndex >= 0 ? hoverIndex : activeIndex
-    function slotCenter(i) { return pad + (i + 1) * (tile + gap) + tile / 2 }
+    function stepCenter(p) { return pad + p * (tile + gap) + tile / 2 }
+    function slotCenter(i) { return stepCenter(orb.slotPos(i)) }
 
     type: PlasmaCore.Dialog.Notification
     location: PlasmaCore.Types.Floating
@@ -201,6 +202,30 @@ PlasmaCore.Dialog {
             onClicked: dock.orb.openLauncher(liquidAllApps)
         }
 
+        // between pinned apps and apps that only run
+        Rectangle {
+            visible: dock.orb.dockGap
+            width: 2; height: dock.barH * 0.46; radius: 1
+            x: dock.stepCenter(dock.orb.gapPos) - 1
+            y: stage.barTop + (dock.barH - height) / 2
+            color: Qt.rgba(1, 1, 1, 0.22)
+        }
+
+        // the trash at the right end: drop files on it, click to open
+        LiquidIcon {
+            id: liquidTrash
+            visible: dock.orb.cfg.dockTrash !== false
+            pos: -2
+            at: dock.orb.trashPos
+            iconSource: dock.orb.trashFull ? "user-trash-full" : "user-trash"
+            onClicked: mouse => mouse.button === Qt.RightButton ? dock.orb.openDockMenu(liquidTrash, mouse.x, mouse.y) : dock.orb.openTrash()
+            DropArea {
+                anchors.fill: parent
+                onEntered: drag => drag.accepted = drag.hasUrls
+                onDropped: drop => { dock.orb.trashUrls(drop.urls); drop.accept() }
+            }
+        }
+
         Repeater {
             model: dock.orb.apps
             delegate: LiquidIcon {
@@ -214,6 +239,8 @@ PlasmaCore.Dialog {
                 active: model.IsActive === true
                 minimized: model.IsMinimized === true
                 badge: dock.orb.cfg.showBadges ? dock.orb.unreadFor(model.AppId) : 0
+                attention: model.IsDemandingAttention === true
+                progress: dock.orb.progressFor(model.AppId)
                 onActiveChanged: if (active) dock.activeIndex = index
                 Component.onCompleted: if (active) dock.activeIndex = index
                 onHoveredChanged: {
@@ -231,7 +258,10 @@ PlasmaCore.Dialog {
 
     component LiquidIcon: Item {
         id: it
-        property int pos: 0                    // slot position (-1 = "all applications")
+        property int pos: 0                    // app index (-1 = "all applications", -2 = trash)
+        property real at: dock.orb.slotPos(pos)   // where it sits, in icon steps
+        property bool attention: false         // the app wants you: it hops until you look
+        property real progress: -1
         property var iconSource
         property int windows: 0
         property bool active: false
@@ -247,7 +277,7 @@ PlasmaCore.Dialog {
         onWindowsChanged: if (windows > 0) launching = false
         Timer { running: it.launching; interval: 6000; onTriggered: it.launching = false }
         SequentialAnimation on bounceY {
-            running: it.launching
+            running: it.launching || it.attention
             loops: Animation.Infinite
             NumberAnimation { to: -dock.tile * 0.3; duration: 230; easing.type: Easing.OutQuad }
             NumberAnimation { to: 0; duration: 430; easing.type: Easing.OutBounce }
@@ -256,7 +286,7 @@ PlasmaCore.Dialog {
         }
 
         width: dock.tile; height: dock.tile
-        x: dock.slotCenter(pos) - width / 2
+        x: dock.stepCenter(at) - width / 2
         y: stage.barTop + (dock.barH - height) / 2 - (dock.hoverIndex === pos && pos >= 0 ? dock.rise : 0)
         Behavior on y { SpringAnimation { spring: 3.5; damping: 0.25 } }
 
@@ -273,8 +303,8 @@ PlasmaCore.Dialog {
             anchors.fill: parent
             rotation: -dock.turn
             source: it.iconSource
-            transform: Translate { y: it.bounceY }
-            scale: dock.hoverIndex === it.pos && it.pos >= 0 ? 1.12 : 1
+            transform: Translate { x: mouse.dragOffset; y: it.bounceY }
+            scale: mouse.dragging ? 1.2 : dock.hoverIndex === it.pos && it.pos >= 0 ? (dock.orb.cfg.dockZoom ? 1.4 : 1.12) : 1
             opacity: it.windows > 0 || it.pos < 0 ? 1 : 0.82
             Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
         }
@@ -301,11 +331,22 @@ PlasmaCore.Dialog {
             Text { id: badgeText; anchors.centerIn: parent; text: it.badge > 99 ? "99+" : it.badge; color: "#0d1013"; font.bold: true; font.pixelSize: 11 }
         }
 
+        SlotProgress {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            width: parent.width * 0.8
+            value: it.progress
+            tint: it.tint
+        }
+
         HoverHandler { id: hover }
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-            onClicked: mouse => it.clicked(mouse)
+        SlotMouse {
+            id: mouse
+            orb: dock.orb
+            index: it.pos
+            step: dock.tile + dock.gap
+            frame: stage
+            onTapped: m => it.clicked(m)
         }
     }
 }

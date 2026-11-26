@@ -56,6 +56,13 @@
     <entry name="statsGpu" type="Bool"><default>true</default></entry>
     <entry name="statsRam" type="Bool"><default>true</default></entry>
     <entry name="statsTemp" type="Bool"><default>true</default></entry>
+    <!-- dock: apps whose click always opens a new window; middle click new|close; extras -->
+    <entry name="newWindowApps" type="StringList"><default></default></entry>
+    <entry name="middleClick" type="String"><default>new</default></entry>
+    <entry name="dockZoom" type="Bool"><default>false</default></entry>
+    <entry name="dockTrash" type="Bool"><default>true</default></entry>
+    <entry name="dockSeparator" type="Bool"><default>true</default></entry>
+    <entry name="orbWithDock" type="Bool"><default>false</default></entry>
     <entry name="ballScale" type="Int"><default>100</default><min>60</min><max>200</max></entry>
     <!-- "custom": use customColor, "system": the colour scheme's accent -->
     <entry name="colorMode" type="String"><default>custom</default></entry>

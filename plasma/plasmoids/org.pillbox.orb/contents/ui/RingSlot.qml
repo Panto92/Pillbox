@@ -27,6 +27,7 @@ Item {
     property int tile: 60
     property bool useAppColor: true
     property int badge: 0
+    property bool dimmed: false           // filtered out by typing in the ring
 
     // glow colour: the icon's own dominant colour, unless it is greyish (then the orb colour)
     Kirigami.ImageColors { id: iconColors; source: slot.iconSource }
@@ -51,7 +52,7 @@ Item {
     x: centre.x - width / 2 + (open ? Math.cos(angle) * ringRadius : 0)
     y: centre.y - height / 2 + (open ? Math.sin(angle) * ringRadius : 0)
     scale: open ? (highlighted ? 1.18 : 1) : 0.3
-    opacity: open ? 1 : 0
+    opacity: open ? (dimmed ? 0.22 : 1) : 0
     Behavior on x { NumberAnimation { duration: 340 + slot.slotIndex * 18; easing.type: Easing.OutBack } }
     Behavior on y { NumberAnimation { duration: 340 + slot.slotIndex * 18; easing.type: Easing.OutBack } }
     Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }

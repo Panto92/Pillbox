@@ -19,7 +19,7 @@ PlasmaCore.Dialog {
     readonly property int pad: Math.round(tile * 0.5)
     readonly property int ledgeH: Math.round(tile * 0.42)
     readonly property int lift: Math.round(tile * 0.28)
-    readonly property int fullW: (count + 1) * (tile + gap) - gap + pad * 2
+    readonly property int fullW: Math.round(orb.dockSlots * (tile + gap)) - gap + pad * 2
     readonly property int fullH: lift + tile + ledgeH + 14
     property rect targetScreen: orb.homeScreen()             // the monitor this dock lives on
     readonly property rect screen: targetScreen
@@ -148,6 +148,30 @@ PlasmaCore.Dialog {
             onClicked: dock.orb.openLauncher(shelfAllApps)
         }
 
+        // between pinned apps and apps that only run
+        Rectangle {
+            visible: dock.orb.dockGap
+            width: 2; height: dock.tile * 0.6; radius: 1
+            x: dock.pad + dock.orb.gapPos * (dock.tile + dock.gap) + dock.tile / 2 - 1
+            y: stage.baseY - dock.tile * 0.8
+            color: Qt.rgba(1, 1, 1, 0.22)
+        }
+
+        // the trash at the right end: drop files on it, click to open
+        ShelfIcon {
+            id: shelfTrash
+            visible: dock.orb.cfg.dockTrash !== false
+            index: -2
+            iconSource: dock.orb.trashFull ? "user-trash-full" : "user-trash"
+            x: dock.pad + dock.orb.trashPos * (dock.tile + dock.gap)
+            onClicked: mouse => mouse.button === Qt.RightButton ? dock.orb.openDockMenu(shelfTrash, mouse.x, mouse.y) : dock.orb.openTrash()
+            DropArea {
+                anchors.fill: parent
+                onEntered: drag => drag.accepted = drag.hasUrls
+                onDropped: drop => { dock.orb.trashUrls(drop.urls); drop.accept() }
+            }
+        }
+
         Repeater {
             model: dock.orb.apps
             delegate: ShelfIcon {
@@ -155,12 +179,14 @@ PlasmaCore.Dialog {
                 required property int index
                 required property var model
                 visible: index < dock.count
-                x: dock.pad + (index + 1) * (dock.tile + dock.gap)
+                x: dock.pad + dock.orb.slotPos(index) * (dock.tile + dock.gap)
                 iconSource: model.decoration
                 windows: model.IsLauncher ? 0 : (model.IsGroupParent ? model.ChildCount : 1)
                 active: model.IsActive === true
                 minimized: model.IsMinimized === true
                 badge: dock.orb.cfg.showBadges ? dock.orb.unreadFor(model.AppId) : 0
+                attention: model.IsDemandingAttention === true
+                progress: dock.orb.progressFor(model.AppId)
                 onHoveredChanged: hovered ? dock.orb.slotHovered(sslot, index, model, windows) : dock.orb.slotLeft()
                 onClicked: mouse => { dock.orb.slotLeft(); dock.orb.dockClicked(index, model, mouse, sslot) }
             }
@@ -177,6 +203,8 @@ PlasmaCore.Dialog {
         property bool active: false
         property bool minimized: false
         property int badge: 0
+        property bool attention: false
+        property real progress: -1
         readonly property bool hovered: hover.hovered
         readonly property real angle: dock.slotAngle
         property point tiltAt: Qt.point(0.5, 0.5)
@@ -188,7 +216,7 @@ PlasmaCore.Dialog {
         onWindowsChanged: if (windows > 0) launching = false
         Timer { running: it.launching; interval: 6000; onTriggered: it.launching = false }
         SequentialAnimation on bounceY {
-            running: it.launching
+            running: it.launching || it.attention
             loops: Animation.Infinite
             NumberAnimation { to: -dock.tile * 0.3; duration: 230; easing.type: Easing.OutQuad }
             NumberAnimation { to: 0; duration: 430; easing.type: Easing.OutBounce }
@@ -225,10 +253,13 @@ PlasmaCore.Dialog {
             rotation: -dock.turn
             source: it.iconSource
             opacity: dock.orb.ghost && !hover.hovered ? 0.55 : 1
+            scale: mouse.dragging ? 1.15 : hover.hovered && dock.orb.cfg.dockZoom ? 1.3 : 1
+            transformOrigin: Item.Bottom
             Behavior on opacity { NumberAnimation { duration: 300 } }
+            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
             // tilt towards the pointer
             transform: [
-                Translate { y: it.bounceY },
+                Translate { x: mouse.dragOffset; y: it.bounceY },
                 Rotation { origin.x: icon.width / 2; origin.y: icon.height / 2; axis { x: 0; y: 1; z: 0 }
                            angle: hover.hovered ? (it.tiltAt.x - 0.5) * 34 : 0
                            Behavior on angle { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } } },
@@ -282,14 +313,25 @@ PlasmaCore.Dialog {
             Text { id: badgeText; anchors.centerIn: parent; text: it.badge > 99 ? "99+" : it.badge; color: "#0d1013"; font.bold: true; font.pixelSize: 11 }
         }
 
+        SlotProgress {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            width: parent.width * 0.8
+            value: it.progress
+            tint: it.tint
+        }
+
         HoverHandler {
             id: hover
             onPointChanged: if (hovered) it.tiltAt = Qt.point(point.position.x / it.width, point.position.y / it.height)
         }
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-            onClicked: mouse => it.clicked(mouse)
+        SlotMouse {
+            id: mouse
+            orb: dock.orb
+            index: it.index
+            step: dock.tile + dock.gap
+            frame: stage
+            onTapped: m => it.clicked(m)
         }
     }
 }

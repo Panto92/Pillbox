@@ -62,6 +62,99 @@ PlasmoidItem {
     readonly property var apps: appsModel                          // for the dock forms
     readonly property bool previewVisible: preview.visible
     readonly property bool orbForm: cfg.form !== "ember" && cfg.form !== "shelf" && cfg.form !== "liquid"
+    // the ball can stay next to a dock: the orb for everything, the dock for a few favourites
+    readonly property bool showOrb: orbForm || cfg.orbWithDock === true
+
+    // ---------------------------------------------------------------- dock layout helpers
+    // pinned apps come first; a little gap (and a line) separates them from apps that only run
+    property int pinnedCount: 0
+    function countPinned() {
+        let n = 0
+        for (let i = 0; i < appsModel.count; i++) {
+            const idx = appsModel.makeModelIndex(i)
+            if (appsModel.data(idx, TaskManager.AbstractTasksModel.IsLauncher) === true
+                || appsModel.data(idx, TaskManager.AbstractTasksModel.HasLauncher) === true) n++
+            else break
+        }
+        pinnedCount = n
+    }
+    Timer { id: pinTimer; interval: 100; onTriggered: root.countPinned() }
+    readonly property bool dockGap: cfg.dockSeparator !== false && pinnedCount > 0 && pinnedCount < Math.min(appsModel.count, 24)
+    // position of app i in a dock row, in icon steps (0 is "all applications")
+    function slotPos(i) { return i + 1 + (dockGap && i >= pinnedCount ? 0.5 : 0) }
+    // all positions a dock needs: apps, the gap, and the trash at the end
+    readonly property real dockSlots: slotPos(Math.min(appsModel.count, 24)) + (cfg.dockTrash !== false ? 1 : 0)
+    readonly property real trashPos: slotPos(Math.min(appsModel.count, 24))
+    readonly property real gapPos: slotPos(pinnedCount) - 0.75              // centre of the separator, in steps
+
+    // drag to reorder (the order is the launcher order Plasma keeps)
+    function moveApp(from, to) {
+        if (from === to) return
+        appsModel.move(from, to)
+        appsModel.syncLaunchers()
+    }
+    // mouse wheel on an icon: step through that app's windows
+    function cycleWindows(index, forward) {
+        const parent = appsModel.makeModelIndex(index)
+        const n = appsModel.rowCount(parent)
+        if (n === 0) { appsModel.requestActivate(parent); return }
+        let cur = -1
+        for (let i = 0; i < n; i++)
+            if (appsModel.data(appsModel.makeModelIndex(index, i), TaskManager.AbstractTasksModel.IsActive) === true) cur = i
+        const next = cur < 0 ? 0 : ((cur + (forward ? 1 : -1)) % n + n) % n
+        appsModel.requestActivate(appsModel.makeModelIndex(index, next))
+    }
+
+    // ---------------------------------------------------------------- trash at the end of the dock
+    property bool trashFull: false
+    function checkTrash() { trashProbe.connectSource("test -n \"$(ls -A \"$HOME/.local/share/Trash/files\" 2>/dev/null)\" && echo PBTRASH=full || echo PBTRASH=empty # " + Date.now()) }
+    property P5Support.DataSource trashProbe: P5Support.DataSource {
+        engine: "executable"
+        onNewData: (source, data) => { root.trashFull = String(data.stdout).indexOf("PBTRASH=full") >= 0; disconnectSource(source) }
+    }
+    Timer { interval: 4000; repeat: true; running: !root.orbForm && root.cfg.dockTrash !== false; triggeredOnStart: true; onTriggered: root.checkTrash() }
+    function openTrash() { Qt.openUrlExternally("trash:/") }
+    function emptyTrash() { shell.connectSource("ktrash6 --empty 2>/dev/null || ktrash5 --empty 2>/dev/null || gio trash --empty # " + Date.now()); trashLater.restart() }
+    function trashUrls(urls) {
+        const q = urls.map(u => "'" + String(u).replace(/'/g, "'\\''") + "'").join(" ")
+        shell.connectSource("gio trash -- " + q + " 2>/dev/null || kioclient move " + q + " trash:/ # " + Date.now())
+        trashLater.restart()
+    }
+    Timer { id: trashLater; interval: 800; onTriggered: root.checkTrash() }
+
+    // ---------------------------------------------------------------- app actions ("jump list")
+    readonly property string actionsScript: decodeURIComponent(String(Qt.resolvedUrl("../code/actions.sh")).replace(/^file:\/\//, ""))
+    property var menuActions: []                 // [{ id, name, icon }]
+    property var actionsFor: ({})                // launcher url -> actions (cached)
+    function quote(s) { return "'" + String(s).replace(/'/g, "'\\''") + "'" }
+    function loadActions(url) {
+        if (!url) { menuActions = []; return }
+        if (actionsFor[url] !== undefined) { menuActions = actionsFor[url]; return }
+        menuActions = []
+        actionsProbe.connectSource("sh " + quote(actionsScript) + " list " + quote(url) + " # " + url)
+    }
+    property P5Support.DataSource actionsProbe: P5Support.DataSource {
+        engine: "executable"
+        onNewData: (source, data) => {
+            const url = source.slice(source.lastIndexOf(" # ") + 3)
+            const list = String(data.stdout).split("\n").filter(l => l.indexOf("ACT\t") === 0).map(l => {
+                const f = l.split("\t"); return { id: f[1], name: f[2], icon: f[3] || "" }
+            })
+            const m = Object.assign({}, root.actionsFor); m[url] = list; root.actionsFor = m
+            if (root.menuModel.url === url) root.menuActions = list
+            disconnectSource(source)
+        }
+    }
+    function runAction(url, id) { shell.connectSource("sh " + quote(actionsScript) + " run " + quote(url) + " " + quote(id) + " # " + Date.now()) }
+
+    // apps whose plain click always opens a new window (terminals, for example)
+    function alwaysNew(appId) { return !!appId && (cfg.newWindowApps || []).indexOf(String(appId)) >= 0 }
+    function toggleAlwaysNew(appId) {
+        if (!appId) return
+        const l = (cfg.newWindowApps || []).slice(), i = l.indexOf(String(appId))
+        if (i >= 0) l.splice(i, 1); else l.push(String(appId))
+        Plasmoid.configuration.newWindowApps = l
+    }
 
     readonly property point orbPos: clampPos(Plasmoid.configuration.orbX, Plasmoid.configuration.orbY)
     readonly property point orbCenter: Qt.point(orbPos.x + orbSize / 2, orbPos.y + orbSize / 2)
@@ -76,6 +169,14 @@ PlasmoidItem {
 
     function appKey(s) {
         return s ? String(s).toLowerCase().replace(/\.desktop$/, "").replace(/^applications:/, "") : ""
+    }
+    property var jobsByApp: ({})                   // appKey -> percent of its running jobs
+    function progressFor(appId) {
+        const k = appKey(appId)
+        if (!k) return -1
+        for (const key in jobsByApp)
+            if (key === k || key.indexOf(k) >= 0 || k.indexOf(key) >= 0) return jobsByApp[key]
+        return -1
     }
     function unreadFor(appId) {
         const k = appKey(appId)
@@ -102,10 +203,16 @@ PlasmoidItem {
 
     function recount() {
         const N = NotificationManager.Notifications
-        const map = {}
+        const map = {}, jobs = {}
         let total = 0
         for (let i = 0; i < notifModel.rowCount(); ++i) {
             const idx = notifModel.index(i, 0)
+            if (notifModel.data(idx, N.TypeRole) === N.JobType) {
+                if (notifModel.data(idx, N.JobStateRole) === NotificationManager.Notifications.JobStateStopped) continue
+                const jk = appKey(notifModel.data(idx, N.DesktopEntryRole) || notifModel.data(idx, N.ApplicationNameRole))
+                if (jk) jobs[jk] = Math.max(jobs[jk] || 0, Number(notifModel.data(idx, N.PercentageRole)) || 0)
+                continue
+            }
             if (notifModel.data(idx, N.TypeRole) !== N.NotificationType) continue
             if (notifModel.data(idx, N.ReadRole) === true) continue
             const key = appKey(notifModel.data(idx, N.DesktopEntryRole) || notifModel.data(idx, N.ApplicationNameRole))
@@ -116,6 +223,7 @@ PlasmoidItem {
         }
         unreadByApp = map
         unreadTotal = total
+        jobsByApp = jobs
     }
     function notificationsAdded(first, last) {
         countTimer.restart()
@@ -273,6 +381,11 @@ PlasmoidItem {
         else launcherOrigin = orbForm ? orbCenter : Qt.point(homeScreen().x + homeScreen().width / 2, homeScreen().y + homeScreen().height)
         launcherOpen = true
     }
+    // typed in the ring without a matching app: hand the text to KRunner
+    function searchFor(text) {
+        DBus.SessionBus.asyncCall({ service: "org.kde.krunner", path: "/App", iface: "org.kde.krunner.App",
+                                    member: "query", arguments: [new DBus.string(String(text))] })
+    }
     function toggleOverview() { closeRing(); invokeShortcut("kwin", "Overview") }
     function showAppWindows(index) {
         // activate one window of the app, then let KWin present all windows of that class
@@ -317,7 +430,11 @@ PlasmoidItem {
         filterByVirtualDesktop: true
         virtualDesktop: vdInfo.currentDesktop
         launcherList: Plasmoid.configuration.launchers
-        onLauncherListChanged: Plasmoid.configuration.launchers = launcherList
+        onLauncherListChanged: { Plasmoid.configuration.launchers = launcherList; pinTimer.restart() }
+        onCountChanged: pinTimer.restart()
+        onDataChanged: pinTimer.restart()
+        onRowsMoved: pinTimer.restart()
+        Component.onCompleted: pinTimer.restart()
     }
 
     // satellites: every window on this desktop / activity
@@ -341,7 +458,7 @@ PlasmoidItem {
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus
         hideOnWindowDeactivate: false
         title: "Pillbox Orb"
-        visible: !root.hidden && root.orbForm
+        visible: !root.hidden && root.showOrb
         x: root.orbPos.x
         y: root.orbPos.y
 
@@ -453,7 +570,7 @@ PlasmoidItem {
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus | Qt.WindowTransparentForInput
         hideOnWindowDeactivate: false
         title: "Pillbox Orb Satellites"
-        visible: !root.dragging && !root.hidden && root.orbForm
+        visible: !root.dragging && !root.hidden && root.showOrb
         x: root.orbCenter.x - root.satSize / 2
         y: root.orbCenter.y - root.satSize / 2
 
@@ -666,7 +783,7 @@ PlasmoidItem {
         y: pos.y
 
         onVisibleChanged: {
-            if (visible) { ringItem.hovered = -1; ringItem.forceActiveFocus(); requestActivate() }
+            if (visible) { ringItem.hovered = -1; ringItem.query = ""; ringItem.forceActiveFocus(); requestActivate() }
             else if (root.ringOpen) root.closeRing()                       // lost focus
         }
 
@@ -677,7 +794,54 @@ PlasmoidItem {
             property int hovered: -1
             property string hoveredName: ""
             property string hoveredInfo: ""
-            Keys.onEscapePressed: root.closeRing()
+            Keys.onEscapePressed: { if (query !== "") query = ""; else root.closeRing() }
+
+            // ---- keyboard: arrows walk the ring, Enter opens, 1–9 open directly,
+            //      typing filters the apps (Enter on no match: search everything)
+            property string query: ""
+            function nameAt(i) { const idx = appsModel.makeModelIndex(i); return String(appsModel.data(idx, Qt.DisplayRole) || "") }
+            function matches(i) { return query === "" || nameAt(i).toLowerCase().indexOf(query.toLowerCase()) >= 0 }
+            function visibleApps() { const out = []; for (let i = 0; i < ringWin.lay.appsShown; i++) if (matches(i)) out.push(i); return out }
+            function pick(i) {
+                const d = ringRepeater.itemAt(i)
+                if (!d) return
+                hovered = i
+                hoveredName = nameAt(i)
+                const w = d.windows
+                hoveredInfo = w === 0 ? i18n("launch") : i18np("%1 window", "%1 windows", w)
+            }
+            function open(i, button) {
+                const d = ringRepeater.itemAt(i)
+                if (!d) return
+                root.slotClicked(i, d.model, { button: button || Qt.LeftButton, x: d.width / 2, y: d.height / 2 }, d)
+            }
+            onQueryChanged: {
+                const v = visibleApps()
+                if (query === "") { hovered = -1; return }
+                if (v.length) pick(v[0]); else { hovered = -1; hoveredName = query; hoveredInfo = i18n("Enter: search") }
+            }
+            Keys.onPressed: event => {
+                const v = visibleApps()
+                const k = event.key
+                if (k === Qt.Key_Right || k === Qt.Key_Down || k === Qt.Key_Tab || k === Qt.Key_Left || k === Qt.Key_Up || k === Qt.Key_Backtab) {
+                    if (!v.length) return
+                    const back = k === Qt.Key_Left || k === Qt.Key_Up || k === Qt.Key_Backtab
+                    const at = v.indexOf(hovered)
+                    pick(v[at < 0 ? (back ? v.length - 1 : 0) : (at + (back ? -1 : 1) + v.length) % v.length])
+                    event.accepted = true
+                } else if (k === Qt.Key_Return || k === Qt.Key_Enter) {
+                    if (hovered >= 0 && hovered < ringWin.lay.appsShown) open(hovered, (event.modifiers & Qt.ShiftModifier) ? Qt.MiddleButton : Qt.LeftButton)
+                    else if (query !== "") { const q = query; root.closeRing(); root.searchFor(q) }
+                    event.accepted = true
+                } else if (k === Qt.Key_Backspace) {
+                    query = query.slice(0, -1); event.accepted = true
+                } else if (query === "" && k >= Qt.Key_1 && k <= Qt.Key_9 && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier))) {
+                    if (k - Qt.Key_1 < ringWin.lay.appsShown) open(k - Qt.Key_1)
+                    event.accepted = true
+                } else if (event.text.length === 1 && event.text >= " " && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))) {
+                    query += event.text; event.accepted = true
+                }
+            }
 
             // the ball's position inside the ring (ring may be shifted at screen edges)
             readonly property point centre: Qt.point(root.orbCenter.x - ringWin.x, root.orbCenter.y - ringWin.y)
@@ -703,20 +867,22 @@ PlasmoidItem {
                     anchors.centerIn: parent
                     width: parent.width - 8
                     spacing: 2
-                    visible: ringItem.hovered >= 0
+                    visible: ringItem.hovered >= 0 || ringItem.query !== ""
                     PC3.Label { width: parent.width; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight; font.weight: Font.DemiBold; text: ringItem.hoveredName }
+                    PC3.Label { visible: ringItem.query !== ""; width: parent.width; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideLeft; color: root.accent; font: Kirigami.Theme.smallFont; text: "⌕ " + ringItem.query }
                     PC3.Label { width: parent.width; horizontalAlignment: Text.AlignHCenter; opacity: 0.7; font: Kirigami.Theme.smallFont; text: ringItem.hoveredInfo }
                 }
                 Row {
                     anchors.centerIn: parent
                     spacing: 6
-                    visible: ringItem.hovered < 0
+                    visible: ringItem.hovered < 0 && ringItem.query === ""
                     PC3.ToolButton { id: hubAllApps; icon.name: "application-menu"; display: PC3.AbstractButton.IconOnly; text: i18n("All applications"); PC3.ToolTip.text: text; PC3.ToolTip.visible: hovered; onClicked: root.openLauncher(hubAllApps) }
                     PC3.ToolButton { icon.name: "view-grid"; display: PC3.AbstractButton.IconOnly; text: i18n("Window overview"); PC3.ToolTip.text: text; PC3.ToolTip.visible: hovered; onClicked: root.toggleOverview() }
                 }
             }
 
             Repeater {
+                id: ringRepeater
                 model: appsModel
                 delegate: RingSlot {
                     id: slotDelegate
@@ -741,6 +907,7 @@ PlasmoidItem {
                     front: windows > 0 && root.frontAppId !== "" && model.AppId === root.frontAppId
                     minimized: model.IsMinimized === true
                     highlighted: ringItem.hovered === index
+                    dimmed: ringItem.query !== "" && !ringItem.matches(index)
                     badge: root.cfg.showBadges ? root.unreadFor(model.AppId) : 0
                     onEntered: {
                         ringItem.hovered = index
@@ -854,7 +1021,7 @@ PlasmoidItem {
 
     // ---------------------------------------------------------------- ring actions
     property int menuIndex: -1
-    property var menuModel: ({ launcher: false, pinned: false, windows: 0, canNew: false, url: "" })
+    property var menuModel: ({ launcher: false, pinned: false, windows: 0, canNew: false, url: "", appId: "" })
 
     function slotClicked(index, m, mouse, item) {
         const idx = appsModel.makeModelIndex(index)
@@ -862,19 +1029,25 @@ PlasmoidItem {
         if (mouse.button === Qt.RightButton) {
             menuIndex = index
             menuModel = { launcher: m.IsLauncher === true, pinned: m.IsLauncher === true || m.HasLauncher === true, windows: windows,
-                          canNew: m.CanLaunchNewInstance !== false, url: m.LauncherUrlWithoutIcon }
+                          canNew: m.CanLaunchNewInstance !== false, url: String(m.LauncherUrlWithoutIcon || ""), appId: String(m.AppId || "") }
+            loadActions(menuModel.url)
             appMenu.visualParent = item
             appMenu.open(mouse.x, mouse.y)
             return
         }
         if (mouse.button === Qt.MiddleButton) {
+            if (cfg.middleClick === "close" && windows > 0) appsModel.requestClose(idx)
+            else appsModel.requestNewInstance(idx)
+            closeRing(); return
+        }
+        if (windows > 0 && alwaysNew(m.AppId)) {                           // "a click opens a new window" for this app
             appsModel.requestNewInstance(idx)
             closeRing(); return
         }
         if (windows === 0) {                                               // launch
             appsModel.requestActivate(idx)
             if (item && item.launching !== undefined) item.launching = true   // dock icon bounces until the window is there
-            if (orbForm && cfg.notificationRipple !== false) ripple.play(m.decoration)
+            if (showOrb && cfg.notificationRipple !== false) ripple.play(m.decoration)
         }
         else if (windows > 1) {
             // several windows: show them all at once in the preview; a click on one brings exactly that one
@@ -903,6 +1076,8 @@ PlasmoidItem {
         PlasmaExtras.MenuItem { text: i18n("All applications"); icon: "application-menu"; onClicked: root.openLauncher() }
         PlasmaExtras.MenuItem { text: i18n("Window overview"); icon: "view-grid"; onClicked: root.toggleOverview() }
         PlasmaExtras.MenuItem { separator: true }
+        PlasmaExtras.MenuItem { text: i18n("Open trash"); icon: "user-trash"; visible: root.cfg.dockTrash !== false && !root.orbForm; onClicked: root.openTrash() }
+        PlasmaExtras.MenuItem { text: i18n("Empty trash"); icon: "trash-empty"; visible: root.cfg.dockTrash !== false && !root.orbForm && root.trashFull; onClicked: root.emptyTrash() }
         PlasmaExtras.MenuItem { text: i18n("Customize…"); icon: "configure"; onClicked: root.settingsOpen = true }
     }
 
@@ -1189,13 +1364,34 @@ PlasmoidItem {
         }
     }
 
+    // the app's own actions go on top of the menu
+    Instantiator {
+        model: root.menuActions
+        delegate: PlasmaExtras.MenuItem {
+            required property var modelData
+            text: modelData.name
+            icon: modelData.icon || "system-run"
+            onClicked: { root.runAction(root.menuModel.url, modelData.id); root.closeRing() }
+        }
+        onObjectAdded: (index, object) => appMenu.addMenuItem(object, appMenuFirst)
+        onObjectRemoved: (index, object) => appMenu.removeMenuItem(object)
+    }
     PlasmaExtras.Menu {
         id: appMenu
+        PlasmaExtras.MenuItem { id: appMenuFirst; separator: true; visible: root.menuActions.length > 0 }
         PlasmaExtras.MenuItem {
             text: i18n("New window")
             icon: "window-new"
             visible: !root.menuModel.launcher
             onClicked: { appsModel.requestNewInstance(appsModel.makeModelIndex(root.menuIndex)); root.closeRing() }
+        }
+        PlasmaExtras.MenuItem {
+            text: i18n("A click opens a new window")
+            icon: "window-new"
+            checkable: true
+            checked: root.alwaysNew(root.menuModel.appId)
+            visible: !root.menuModel.launcher
+            onClicked: root.toggleAlwaysNew(root.menuModel.appId)
         }
         PlasmaExtras.MenuItem {
             text: i18n("Show all windows")

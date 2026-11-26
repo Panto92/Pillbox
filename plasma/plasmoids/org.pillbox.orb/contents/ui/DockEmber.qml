@@ -19,7 +19,7 @@ PlasmaCore.Dialog {
     readonly property int gap: Math.round(tile * 0.22)
     readonly property int pad: Math.round(tile * 0.3)
     // the window is always big enough for the unfolded dock; only the seam is drawn at rest
-    readonly property int fullW: (count + 1) * (tile + gap) - gap + pad * 2
+    readonly property int fullW: Math.round(orb.dockSlots * (tile + gap)) - gap + pad * 2
     readonly property int fullH: tile + pad * 2 + 10
     property rect targetScreen: orb.homeScreen()             // the monitor this dock lives on
     readonly property rect screen: targetScreen
@@ -147,6 +147,45 @@ PlasmaCore.Dialog {
             MouseArea { anchors.fill: parent; enabled: dock.expanded; onClicked: dock.orb.openLauncher(allApps) }
         }
 
+        // between pinned apps and apps that only run (unfolded only)
+        Rectangle {
+            visible: dock.orb.dockGap
+            opacity: dock.expanded ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 250 } }
+            width: 2; height: dock.tile * 0.55; radius: 1
+            x: dock.pad + dock.orb.gapPos * (dock.tile + dock.gap) + dock.tile / 2 - 1
+            y: parent.height - dock.pad - dock.tile / 2 - height / 2
+            color: Qt.rgba(1, 1, 1, 0.22)
+        }
+        // the trash at the right end (unfolded only): drop files on it, click to open
+        Item {
+            id: emberTrash
+            visible: dock.orb.cfg.dockTrash !== false
+            x: dock.pad + dock.orb.trashPos * (dock.tile + dock.gap)
+            y: parent.height - dock.pad - dock.tile
+            width: dock.tile; height: width
+            opacity: dock.expanded ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 250 } }
+            Rectangle { anchors.fill: parent; radius: width * 0.3; color: Qt.rgba(1, 1, 1, trashMouse.containsMouse ? 0.12 : 0.06) }
+            Kirigami.Icon {
+                anchors.centerIn: parent
+                width: parent.width * 0.66; height: width
+                source: dock.orb.trashFull ? "user-trash-full" : "user-trash"
+                rotation: -dock.turn
+            }
+            MouseArea {
+                id: trashMouse
+                anchors.fill: parent; enabled: dock.expanded; hoverEnabled: true
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked: mouse => mouse.button === Qt.RightButton ? dock.orb.openDockMenu(emberTrash, mouse.x, mouse.y) : dock.orb.openTrash()
+            }
+            DropArea {
+                anchors.fill: parent
+                onEntered: drag => drag.accepted = drag.hasUrls
+                onDropped: drop => { dock.orb.trashUrls(drop.urls); drop.accept() }
+            }
+        }
+
         Repeater {
             model: dock.orb.apps
             delegate: DockSlot {
@@ -158,7 +197,7 @@ PlasmaCore.Dialog {
                 expanded: dock.expanded
                 tile: dock.tile
                 // unfolded: in a row; at rest: a dot on the seam. Unfold staggered from the centre.
-                readonly property real fullX: dock.pad + (index + 1) * (dock.tile + dock.gap)
+                readonly property real fullX: dock.pad + dock.orb.slotPos(index) * (dock.tile + dock.gap)
                 readonly property real seamX: (parent.width - pill.width) / 2 + 24 + index * 14
                 x: dock.expanded ? fullX : seamX - tile / 2 + 3
                 y: dock.expanded ? parent.height - dock.pad - dock.tile : parent.height - 8 - tile / 2
@@ -171,6 +210,11 @@ PlasmaCore.Dialog {
                 active: model.IsActive === true
                 minimized: model.IsMinimized === true
                 badge: dock.orb.cfg.showBadges ? dock.orb.unreadFor(model.AppId) : 0
+                attention: model.IsDemandingAttention === true
+                progress: dock.orb.progressFor(model.AppId)
+                appIndex: index
+                stepSize: dock.tile + dock.gap
+                frame: stage
                 onHoveredChanged: hovered ? dock.orb.slotHovered(dslot, index, model, windows) : dock.orb.slotLeft()
                 onClicked: mouse => { dock.orb.slotLeft(); dock.orb.dockClicked(index, model, mouse, dslot) }
             }

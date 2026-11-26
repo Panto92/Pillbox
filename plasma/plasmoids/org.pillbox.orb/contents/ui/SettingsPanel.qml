@@ -631,6 +631,21 @@ Window {
                     Toggle { key: "shelfReflection" } }
                 SettingRow { label: i18n("Icon size")
                     Slider { key: "ringIconSize"; from: 44; to: 80; step: 4; unit: "px" } }
+                SettingRow { visible: !panel.isOrb; label: i18n("Magnify on hover"); hint: i18n("The icon under the pointer grows noticeably.")
+                    Toggle { key: "dockZoom" } }
+                SettingRow { visible: !panel.isOrb; label: i18n("Separator"); hint: i18n("A small gap and line between pinned apps and apps that only run.")
+                    Toggle { key: "dockSeparator" } }
+                SettingRow { visible: !panel.isOrb; label: i18n("Trash"); hint: i18n("At the end of the dock: drop files on it, click to open.")
+                    Toggle { key: "dockTrash" } }
+                SettingRow { visible: !panel.isOrb; label: i18n("Orb as well"); hint: i18n("Keep the ball next to the dock – the ring for all apps, the dock for your favourites.")
+                    Toggle { key: "orbWithDock" } }
+            }
+            Group {
+                title: i18n("Clicks")
+                SettingRow { label: i18n("Middle click"); hint: i18n("On an app with windows. Right-click an app for “A click opens a new window”, handy for terminals.")
+                    Segments { key: "middleClick"; options: [["new", i18n("New window")], ["close", i18n("Close")]] } }
+                SettingRow { label: i18n("Good to know"); hint: i18n("Drag icons to reorder them. The mouse wheel steps through an app's windows. In the ring: arrow keys, Enter, 1–9, or just type.")
+                    Item { width: 1; height: 1 } }
             }
         }
     }

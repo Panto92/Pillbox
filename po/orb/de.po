@@ -1029,3 +1029,54 @@ msgstr "Bergdorf"
 
 msgid "northern lights"
 msgstr "Polarlicht"
+
+msgid "A click opens a new window"
+msgstr "Klick öffnet immer ein neues Fenster"
+
+msgid "Open trash"
+msgstr "Papierkorb öffnen"
+
+msgid "Empty trash"
+msgstr "Papierkorb leeren"
+
+msgid "Enter: search"
+msgstr "Enter: überall suchen"
+
+msgid "Magnify on hover"
+msgstr "Beim Drüberfahren vergrößern"
+
+msgid "The icon under the pointer grows noticeably."
+msgstr "Das Icon unter dem Mauszeiger wird deutlich größer."
+
+msgid "Separator"
+msgstr "Trennlinie"
+
+msgid "A small gap and line between pinned apps and apps that only run."
+msgstr "Ein kleiner Abstand mit Linie zwischen angehefteten und nur laufenden Apps."
+
+msgid "Trash"
+msgstr "Papierkorb"
+
+msgid "At the end of the dock: drop files on it, click to open."
+msgstr "Am Ende des Docks: Dateien darauf ziehen, Klick öffnet ihn."
+
+msgid "Orb as well"
+msgstr "Orb zusätzlich"
+
+msgid "Keep the ball next to the dock – the ring for all apps, the dock for your favourites."
+msgstr "Der Ball bleibt neben dem Dock – der Ring für alle Apps, das Dock für deine Favoriten."
+
+msgid "Clicks"
+msgstr "Klicks"
+
+msgid "Middle click"
+msgstr "Mittelklick"
+
+msgid "On an app with windows. Right-click an app for “A click opens a new window”, handy for terminals."
+msgstr "Auf einer App mit Fenstern. Per Rechtsklick auf eine App gibt es „Klick öffnet immer ein neues Fenster“ – praktisch für Terminals."
+
+msgid "Good to know"
+msgstr "Gut zu wissen"
+
+msgid "Drag icons to reorder them. The mouse wheel steps through an app's windows. In the ring: arrow keys, Enter, 1–9, or just type."
+msgstr "Icons per Ziehen umsortieren. Das Mausrad wechselt durch die Fenster einer App. Im Ring: Pfeiltasten, Enter, 1–9 oder einfach lostippen."
